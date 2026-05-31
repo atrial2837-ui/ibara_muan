@@ -172,14 +172,21 @@ export function renderSongs() {
     refresh();
   };
   panel.oninput = (e) => {
-    if (e.target.id !== 'setlist-theme') return;
-    state.setlist.theme = e.target.value;
-    saveSetlist();
+    if (e.target.id === 'setlist-theme') {
+      state.setlist.theme = e.target.value;
+      saveSetlist();
+    }
   };
   panel.onchange = (e) => {
     if (e.target.id !== 'setlist-copy-format') return;
     state.setlist.copyFormat = e.target.value;
     saveSetlist();
+  };
+  panel.onkeydown = (e) => {
+    if (e.key !== 'Enter') return;
+    if (!e.target.closest('.setlist-custom-add')) return;
+    e.preventDefault();
+    addCustomToSetlist();
   };
 
   refresh();
@@ -423,7 +430,34 @@ function addToSetlist(song) {
   renderSetlistPlanner('追加しました');
 }
 
+function addCustomToSetlist() {
+  const titleEl = $('#setlist-custom-title');
+  const artistEl = $('#setlist-custom-artist');
+  const keyEl = $('#setlist-custom-key');
+  const title = String(titleEl?.value || '').trim();
+  const artist = String(artistEl?.value || '').trim();
+  const displayKey = String(keyEl?.value || '').trim();
+  if (!title) {
+    renderSetlistPlanner('曲名を入力してください');
+    return;
+  }
+  state.setlist.items.push({
+    key: `custom:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
+    custom: true,
+    title,
+    artist,
+    displayKey,
+    genre: '新規',
+    moodTags: [],
+    seasonTags: [],
+    daysSinceLast: null,
+  });
+  saveSetlist();
+  renderSetlistPlanner('新しい曲を追加しました');
+}
+
 function hydrateSetlistItem(item) {
+  if (item.custom) return item;
   const song = songByKey(item.key);
   return song ? { ...item, ...song } : item;
 }
@@ -438,6 +472,14 @@ function handleSetlistAction(action) {
   }
   if (act === 'down' && index < state.setlist.items.length - 1) {
     [state.setlist.items[index + 1], state.setlist.items[index]] = [state.setlist.items[index], state.setlist.items[index + 1]];
+  }
+  if (act === 'copy-item') {
+    copySetlistItem(index);
+    return;
+  }
+  if (act === 'add-custom') {
+    addCustomToSetlist();
+    return;
   }
   if (act === 'random') addRandomToSetlist();
   if (act === 'copy') copySetlist();
@@ -503,6 +545,12 @@ function renderSetlistPlanner(message = '') {
       <div class="setlist-total">${items.length}曲 / 約${minutes}分</div>
     </div>
     <input id="setlist-theme" class="text-input setlist-theme" type="text" placeholder="歌枠テーマメモ" value="${escapeHtml(state.setlist.theme)}">
+    <div class="setlist-custom-add" aria-label="新しい曲をセトリに追加">
+      <input id="setlist-custom-title" class="text-input" type="text" placeholder="新しい曲名">
+      <input id="setlist-custom-artist" class="text-input" type="text" placeholder="アーティスト（任意）">
+      <input id="setlist-custom-key" class="text-input" type="text" placeholder="キー（任意）">
+      <button class="btn primary" type="button" data-setlist-action="add-custom">追加</button>
+    </div>
     <div class="setlist-balance">
       ${balanceChip('ジャンル', balance.genres)}
       ${balanceChip('雰囲気', balance.moods)}
@@ -536,9 +584,10 @@ function setlistItemHtml(item, index) {
       <div class="setlist-no">${index + 1}</div>
       <div class="setlist-info">
         <strong>${escapeHtml(item.title)}</strong>
-        <span>${escapeHtml(item.artist)}${item.displayKey ? ` · key ${escapeHtml(item.displayKey)}` : ''}</span>
+        <span>${item.artist ? escapeHtml(item.artist) : 'アーティスト未入力'}${item.displayKey ? ` · key ${escapeHtml(item.displayKey)}` : ''}${item.custom ? ' · 新規' : ''}</span>
       </div>
       <div class="setlist-move">
+        <button class="setlist-copy-one" type="button" data-setlist-action="copy-item" data-index="${index}" aria-label="${escapeHtml(item.title)}をコピー">⧉</button>
         <button type="button" data-setlist-action="up" data-index="${index}" aria-label="上へ">↑</button>
         <button type="button" data-setlist-action="down" data-index="${index}" aria-label="下へ">↓</button>
         <button type="button" data-setlist-action="remove" data-index="${index}" aria-label="削除">×</button>
@@ -552,13 +601,16 @@ function formatSetlistText() {
   const lines = [];
   if (state.setlist.theme) lines.push(`# ${state.setlist.theme}`, '');
   items.forEach((item) => {
-    if (state.setlist.copyFormat === 'timestamp') {
-      lines.push(`00:00 ${item.title} / ${item.artist}`);
-    } else {
-      lines.push(`${item.title} / ${item.artist}`);
-    }
+    lines.push(formatSetlistLine(item));
   });
   return lines.join('\n');
+}
+
+function formatSetlistLine(item) {
+  const title = String(item?.title || '').trim();
+  const artist = String(item?.artist || '').trim();
+  const body = artist ? `${title} / ${artist}` : title;
+  return state.setlist.copyFormat === 'timestamp' ? `00:00 ${body}` : body;
 }
 
 async function copySetlist() {
@@ -570,6 +622,20 @@ async function copySetlist() {
   try {
     await navigator.clipboard.writeText(text);
     renderSetlistPlanner('コピーしました');
+  } catch (_) {
+    renderSetlistPlanner('コピーに失敗しました');
+  }
+}
+
+async function copySetlistItem(index) {
+  const item = setlistItems()[index];
+  if (!item) {
+    renderSetlistPlanner('コピーする曲がありません');
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(formatSetlistLine(item));
+    renderSetlistPlanner('1曲コピーしました');
   } catch (_) {
     renderSetlistPlanner('コピーに失敗しました');
   }

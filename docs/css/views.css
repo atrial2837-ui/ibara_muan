@@ -275,6 +275,18 @@ body[data-audience="listener"] [data-mobile-panel-toggle="setlist"] {
   width: 100%;
   margin-bottom: 10px;
 }
+.setlist-custom-add {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(88px, 0.55fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+.setlist-custom-add .text-input {
+  min-width: 0;
+}
+.setlist-custom-add .btn {
+  white-space: nowrap;
+}
 .setlist-balance,
 .setlist-actions {
   display: flex;
@@ -364,6 +376,10 @@ body[data-audience="listener"] [data-mobile-panel-toggle="setlist"] {
 .setlist-move button:hover {
   border-color: var(--primary);
   color: var(--primary-strong);
+}
+.setlist-move .setlist-copy-one {
+  background: color-mix(in srgb, var(--accent) 16%, white);
+  color: var(--accent-strong);
 }
 .song-row {
   display: grid;
@@ -859,6 +875,15 @@ body[data-audience="listener"] [data-mobile-panel-toggle="setlist"] {
   .setlist-actions .setlist-message {
     grid-column: 1 / -1;
     justify-content: center;
+  }
+  .setlist-custom-add {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  }
+  .setlist-custom-add #setlist-custom-title {
+    grid-column: 1 / -1;
+  }
+  .setlist-custom-add .btn {
+    min-width: 72px;
   }
   .setlist-item {
     grid-template-columns: 24px 1fr;
