@@ -30,22 +30,22 @@
   transition: transform 0.1s ease, outline 0.1s ease;
   cursor: default;
 }
-.heatmap-cell.l1 { background: #ead9a7; }
-.heatmap-cell.l2 { background: #d9ad3b; }
-.heatmap-cell.l3 { background: #7f6524; }
-.heatmap-cell.l4 { background: #78a064; }
-:root[data-theme="dark"] .heatmap-cell { background: #1a2d44; }
-:root[data-theme="dark"] .heatmap-cell.l1 { background: #5a4719; }
-:root[data-theme="dark"] .heatmap-cell.l2 { background: #9c7a25; }
-:root[data-theme="dark"] .heatmap-cell.l3 { background: #d9ad3b; }
-:root[data-theme="dark"] .heatmap-cell.l4 { background: #8bb47a; }
+.heatmap-cell.l1 { background: #fff0b9; }
+.heatmap-cell.l2 { background: #f4c44a; }
+.heatmap-cell.l3 { background: #e99f2f; }
+.heatmap-cell.l4 { background: #92bf67; }
+:root[data-theme="dark"] .heatmap-cell { background: #302a1d; }
+:root[data-theme="dark"] .heatmap-cell.l1 { background: #6b5520; }
+:root[data-theme="dark"] .heatmap-cell.l2 { background: #c99624; }
+:root[data-theme="dark"] .heatmap-cell.l3 { background: #f2c84b; }
+:root[data-theme="dark"] .heatmap-cell.l4 { background: #9bc978; }
 
 @media (prefers-color-scheme: dark) {
-  :root[data-theme="auto"] .heatmap-cell { background: #1a2d44; }
-  :root[data-theme="auto"] .heatmap-cell.l1 { background: #5a4719; }
-  :root[data-theme="auto"] .heatmap-cell.l2 { background: #9c7a25; }
-  :root[data-theme="auto"] .heatmap-cell.l3 { background: #d9ad3b; }
-  :root[data-theme="auto"] .heatmap-cell.l4 { background: #8bb47a; }
+  :root[data-theme="auto"] .heatmap-cell { background: #302a1d; }
+  :root[data-theme="auto"] .heatmap-cell.l1 { background: #6b5520; }
+  :root[data-theme="auto"] .heatmap-cell.l2 { background: #c99624; }
+  :root[data-theme="auto"] .heatmap-cell.l3 { background: #f2c84b; }
+  :root[data-theme="auto"] .heatmap-cell.l4 { background: #9bc978; }
 }
 
 .heatmap-cell:hover { transform: scale(1.5); outline: 2px solid var(--ink); }
@@ -1286,11 +1286,11 @@ body[data-audience="listener"] [data-mobile-panel-toggle="setlist"] {
 .bar-list .bar-bar {
   height: 8px;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--primary), var(--primary-strong));
+  background: linear-gradient(90deg, var(--chart-primary, var(--primary)), var(--chart-primary-strong, var(--primary-strong)));
   transition: filter 0.12s ease;
 }
 .bar-list .bar-bar.accent {
-  background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+  background: linear-gradient(90deg, var(--chart-accent, var(--accent)), var(--chart-accent-strong, var(--accent-strong)));
 }
 .bar-list .bar-value {
   font-size: 13px;
