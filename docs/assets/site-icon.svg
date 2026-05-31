@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">茨むあん 歌唱データベース アイコン</title>
+  <desc id="desc">黄色の背景に、バラとマイクを組み合わせたファンメイドのサイトアイコン。</desc>
+  <defs>
+    <linearGradient id="gold" x1="22" y1="10" x2="104" y2="118" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f2c13c"/>
+      <stop offset="0.54" stop-color="#e3ad28"/>
+      <stop offset="1" stop-color="#c98c18"/>
+    </linearGradient>
+    <linearGradient id="ink" x1="30" y1="24" x2="96" y2="104" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2a261f"/>
+      <stop offset="1" stop-color="#050403"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#gold)"/>
+  <circle cx="64" cy="64" r="45" fill="#fff8de" opacity=".22"/>
+  <path fill="none" stroke="url(#ink)" stroke-linecap="round" stroke-linejoin="round" stroke-width="7" d="M83 34c-16-10-37-4-47 12-9 15-5 35 9 45 13 10 32 8 42-4 8-10 7-24-2-31-8-7-21-6-28 2-6 7-5 18 2 23 6 4 15 3 19-3 3-5 2-11-3-14-4-3-10-2-13 2"/>
+  <path fill="#18150f" d="M87 28c6 4 9 9 11 16-9 1-16-1-21-5 2-5 5-8 10-11Z"/>
+  <path fill="none" stroke="#18150f" stroke-linecap="round" stroke-width="6" d="M84 39c12 0 22-6 28-16"/>
+  <path fill="url(#ink)" d="M77 62c0-7 6-13 13-13s13 6 13 13v19c0 7-6 13-13 13s-13-6-13-13V62Z"/>
+  <path fill="#fff8de" opacity=".82" d="M84 61c0-3 3-6 6-6s6 3 6 6v20c0 3-3 6-6 6s-6-3-6-6V61Z"/>
+  <path fill="none" stroke="#18150f" stroke-linecap="round" stroke-width="6" d="M67 75c0 14 10 24 23 24s23-10 23-24M90 100v13M78 114h24"/>
+  <path fill="#78a064" d="M35 89c8-2 16 1 21 8-9 4-18 1-21-8Z"/>
+</svg>

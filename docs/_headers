@@ -1,0 +1,8 @@
+/*
+  X-Robots-Tag: index, follow
+
+/admin.html
+  X-Robots-Tag: noindex, nofollow
+
+/api/*
+  X-Robots-Tag: noindex, nofollow

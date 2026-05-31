@@ -1,0 +1,5 @@
+google-api-python-client
+fonttools
+brotli
+pyperclip
+yt-dlp
