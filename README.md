@@ -44,6 +44,29 @@ https://docs.google.com/spreadsheets/d/1supVLmIOoa3fdwvT_NHioLefjsa-ldQBQCMhZakK
 
 ## Cloudflare Pages 設定
 
+### STG (`stg-rp` ブランチ)
+
+このブランチは STG 用です。Pages の Preview / STG 環境では、本番とは別の D1 を `DB` に bind してください。
+
+管理画面から静的データ生成を起動する場合の既定値:
+
+```text
+GITHUB_STATIC_REF=stg-rp
+GITHUB_STATIC_ENV=staging
+```
+
+STG 用の GitHub repository secrets:
+
+```text
+CLOUDFLARE_API_TOKEN_STG
+CLOUDFLARE_ACCOUNT_ID_STG
+CLOUDFLARE_D1_DATABASE_ID_STG
+```
+
+STGサイトは検索除外 (`noindex,nofollow`) 設定です。
+
+### 共通
+
 D1 binding:
 
 ```text
@@ -57,8 +80,8 @@ GITHUB_ACTIONS_TOKEN
 GITHUB_OWNER
 GITHUB_REPO
 GITHUB_STATIC_WORKFLOW=update-static-data.yml
-GITHUB_STATIC_REF=main
-GITHUB_STATIC_ENV=production
+GITHUB_STATIC_REF=stg-rp
+GITHUB_STATIC_ENV=staging
 ADMIN_TOKEN
 KEY_REFERENCE_CSV_URL
 ```
