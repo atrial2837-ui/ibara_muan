@@ -60,6 +60,7 @@
 `曲マスター` の `ジャンル候補` / `判定元` / `信頼度` は補助情報です。サイトとD1に反映する正式値は、最終確認後の `ジャンル` 列だけにします。
 
 候補の再生成は `tools/suggest_genres.mjs` を使います。Spotify を使う場合は `SPOTIFY_CLIENT_ID` と `SPOTIFY_CLIENT_SECRET`、Discogs を多めに使う場合は `DISCOGS_TOKEN` または `DISCOGS_USER_TOKEN` を `.env.local` か環境変数に設定します。未設定の場合、Spotify はスキップし、Discogs は `--discogs-unauth-limit` の範囲だけ未認証で試します。
+Spotify Web API はアプリ所有アカウントに Premium が必要です。Premium 条件を満たしていない場合は `spotifyDisabledReason: "premium_required"` としてSpotify判定をスキップし、ローカル辞書とDiscogsで候補を出します。
 
 ```bash
 node tools/suggest_genres.mjs --out-tsv docs/data/genre_suggestions.tsv --discogs-unauth-limit 20 --discogs-max-requests 20

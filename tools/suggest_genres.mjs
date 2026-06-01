@@ -90,6 +90,7 @@ async function main() {
   }
 
   summary.spotifyRequests = spotify.requests;
+  summary.spotifyDisabledReason = spotify.disabledReason;
   summary.discogsRequests = discogs.requests;
   summary.discogsSkippedUnauthLimit = discogs.skippedUnauthLimit;
   summary.discogsRateLimited = discogs.rateLimited;
@@ -164,7 +165,8 @@ async function fetchJson(url, options = {}) {
   const response = await fetchWithRetry(url, options);
   if (!response.ok) {
     if (response.status === 404) return null;
-    throw new Error(`fetch failed: ${response.status} ${response.statusText} ${url}`);
+    const body = await response.text();
+    throw new Error(`fetch failed: ${response.status} ${response.statusText} ${url} ${body.slice(0, 500)}`);
   }
   return response.json();
 }
@@ -320,6 +322,7 @@ class SpotifyClient {
     this.enabled = Boolean(this.clientId && this.clientSecret);
     this.token = '';
     this.requests = 0;
+    this.disabledReason = '';
   }
 
   async suggest(row) {
@@ -332,7 +335,17 @@ class SpotifyClient {
     searchUrl.searchParams.set('market', 'JP');
     searchUrl.searchParams.set('q', query);
     this.requests += 1;
-    const result = await fetchJson(searchUrl, { headers: { Authorization: `Bearer ${token}` } });
+    let result = null;
+    try {
+      result = await fetchJson(searchUrl, { headers: { Authorization: `Bearer ${token}` } });
+    } catch (error) {
+      if (String(error.message || error).includes('Active premium subscription required')) {
+        this.enabled = false;
+        this.disabledReason = 'premium_required';
+        return null;
+      }
+      throw error;
+    }
     const track = bestSpotifyTrack(row, result?.tracks?.items || []);
     if (!track) return null;
 
