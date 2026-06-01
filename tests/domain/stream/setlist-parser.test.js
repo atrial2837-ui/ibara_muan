@@ -25,14 +25,14 @@ test('splitSongLine: 基本形 "曲名 / アーティスト" を正しく分割�
   assert.equal(result.raw, 'One Last Kiss / 宇多田ヒカル');
 });
 
-test('splitSongLine: 拡張形 SoT 04 付録実例 "ステラ / Leo/need | 原キー | ゲーム・キャラソン"', () => {
+test('splitSongLine: 拡張形 SoT 04 付録実例 "ステラ / Leo/need | 原キー | アニソン"', () => {
   // アーティスト名 'Leo/need' に '/' が含まれるため lastIndexOf で正しく分離される
-  const result = splitSongLine('ステラ / Leo/need | 原キー | ゲーム・キャラソン');
+  const result = splitSongLine('ステラ / Leo/need | 原キー | アニソン');
   assert.equal(result.title, 'ステラ');
   assert.equal(result.artist, 'Leo/need');
   assert.equal(result.displayKey, '原キー');
-  assert.equal(result.genre, 'ゲーム・キャラソン');
-  assert.equal(result.raw, 'ステラ / Leo/need | 原キー | ゲーム・キャラソン');
+  assert.equal(result.genre, 'アニソン');
+  assert.equal(result.raw, 'ステラ / Leo/need | 原キー | アニソン');
 });
 
 // ─── splitSongLine: セパレータバリエーション ──────────────────────────────────
@@ -179,7 +179,7 @@ test('splitSongLine: パイプ区切り 4 フィールド以上でも displayKey
 });
 
 test('splitSongLine: raw フィールドは trim 後の入力テキストそのまま', () => {
-  const input = 'ステラ / Leo/need | 原キー | ゲーム・キャラソン';
+  const input = 'ステラ / Leo/need | 原キー | アニソン';
   const result = splitSongLine(input);
   assert.equal(result.raw, input);
 });
