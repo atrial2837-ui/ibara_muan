@@ -87,8 +87,8 @@ import { parseDisplayKey } from '../song/display-key.js';
  * @returns {ParsedSongLine} 解析結果。
  *
  * @example
- * splitSongLine('ステラ / Leo/need | 原キー | アニソン')
- * // → { title: 'ステラ', artist: 'Leo/need', displayKey: '原キー', genre: 'アニソン', raw: 'ステラ / Leo/need | 原キー | アニソン' }
+ * splitSongLine('ステラ / Leo/need | 原キー | ゲーム・キャラソン')
+ * // → { title: 'ステラ', artist: 'Leo/need', displayKey: '原キー', genre: 'ゲーム・キャラソン', raw: 'ステラ / Leo/need | 原キー | ゲーム・キャラソン' }
  *
  * @example
  * splitSongLine('曲名 / アーティスト | invalid_key | アニソン')

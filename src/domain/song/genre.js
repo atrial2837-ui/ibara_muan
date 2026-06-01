@@ -17,11 +17,11 @@
 import { cleanMetadata } from '../shared/text.js';
 
 /**
- * @typedef {'J-POP'|'アニソン'|'ボカロ'|'アイドル'|'K-POP'|'VTuber'|'ディズニー'|'ミュージカル'|'童謡・唱歌'|'歌謡曲'|'洋楽'|'オリジナル'|'未分類'} Genre
+ * @typedef {'J-POP'|'アニソン'|'ボカロ'|'アイドル'|'K-POP'|'VTuber'|'ディズニー'|'ミュージカル'|'童謡・唱歌'|'歌謡曲'|'洋楽'|'ゲーム・キャラソン'|'オリジナル'|'未分類'} Genre
  */
 
 /**
- * 全ジャンルの固定リスト (13 値)。
+ * 全ジャンルの固定リスト (14 値)。
  * @type {Readonly<Genre[]>}
  */
 export const GENRE_LIST = Object.freeze([
@@ -36,6 +36,7 @@ export const GENRE_LIST = Object.freeze([
   '童謡・唱歌',
   '歌謡曲',
   '洋楽',
+  'ゲーム・キャラソン',
   'オリジナル',
   '未分類',
 ]);

@@ -4,7 +4,7 @@
  *   Node.js 組み込みテストランナー (node:test) を使用。
  *
  * ## カバレッジ方針
- * - GENRE_LIST: 13 値固定 / freeze / 期待値配列との完全一致
+ * - GENRE_LIST: 14 値固定 / freeze / 期待値配列との完全一致
  * - isValidGenre: 各 GENRE_LIST 要素 / 境界値 / 無効値
  * - parseGenre: 正常値 / 空白付き / NFKC 全角変換 / sentinel / 未知の値
  * - DEFAULT_GENRE / UNCATEGORIZED 定数の確認
@@ -28,8 +28,8 @@ import {
 // ---------------------------------------------------------------------------
 
 describe('GENRE_LIST', () => {
-  it('固定 13 値であること', () => {
-    assert.equal(GENRE_LIST.length, 13);
+  it('固定 14 値であること', () => {
+    assert.equal(GENRE_LIST.length, 14);
   });
 
   it('期待するジャンルをすべて含み順序も一致すること', () => {
@@ -45,6 +45,7 @@ describe('GENRE_LIST', () => {
       '童謡・唱歌',
       '歌謡曲',
       '洋楽',
+      'ゲーム・キャラソン',
       'オリジナル',
       '未分類',
     ];
@@ -106,6 +107,7 @@ describe('isValidGenre', () => {
     assert.equal(isValidGenre('ミュージカル'), true);
     assert.equal(isValidGenre('歌謡曲'), true);
     assert.equal(isValidGenre('洋楽'), true);
+    assert.equal(isValidGenre('ゲーム・キャラソン'), true);
   });
 
   it('空文字 "" → false', () => {
@@ -176,6 +178,7 @@ describe('parseGenre — 正常値 (GENRE_LIST そのまま)', () => {
     assert.equal(parseGenre('ミュージカル'), 'ミュージカル');
     assert.equal(parseGenre('歌謡曲'), '歌謡曲');
     assert.equal(parseGenre('洋楽'), '洋楽');
+    assert.equal(parseGenre('ゲーム・キャラソン'), 'ゲーム・キャラソン');
   });
 });
 
