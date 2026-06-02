@@ -17,46 +17,7 @@
  * @typedef {import('./d1-worker-client.js').D1WorkerClient} D1WorkerClient
  */
 
-const METADATA_BATCH_SIZE = 80;
-
-/**
- * @param {Array<{ id: number } & SongMetadata>} rows
- * @returns {{ sql: string, bindings: unknown[] }[]}
- */
-function metadataBatchStatements(rows) {
-  const statements = [];
-  for (let index = 0; index < rows.length; index += METADATA_BATCH_SIZE) {
-    const chunk = rows.slice(index, index + METADATA_BATCH_SIZE);
-    if (!chunk.length) continue;
-
-    const displayCases = [];
-    const genreCases = [];
-    const ids = [];
-    const bindings = [];
-
-    for (const row of chunk) {
-      displayCases.push('WHEN ? THEN COALESCE(NULLIF(?, \'\'), display_key)');
-      bindings.push(row.id, row.displayKey);
-    }
-    for (const row of chunk) {
-      genreCases.push('WHEN ? THEN COALESCE(NULLIF(?, \'\'), genre)');
-      bindings.push(row.id, row.genre);
-    }
-    for (const row of chunk) {
-      ids.push('?');
-      bindings.push(row.id);
-    }
-
-    statements.push({
-      sql: `UPDATE songs
-            SET display_key = CASE id ${displayCases.join(' ')} ELSE display_key END,
-                genre = CASE id ${genreCases.join(' ')} ELSE genre END
-            WHERE id IN (${ids.join(', ')})`,
-      bindings,
-    });
-  }
-  return statements;
-}
+const METADATA_BATCH_SIZE = 100;
 
 export class D1SongRepository {
   /** @param {D1WorkerClient} client */
@@ -167,8 +128,20 @@ export class D1SongRepository {
    * @returns {Promise<void>}
    */
   async updateMetadataBatch(rows) {
-    for (const statement of metadataBatchStatements(rows)) {
-      await this.client.run(statement.sql, ...statement.bindings);
+    const sql = `UPDATE songs
+       SET display_key = COALESCE(NULLIF(?, ''), display_key),
+           genre = COALESCE(NULLIF(?, ''), genre)
+       WHERE id = ?`;
+
+    for (let index = 0; index < rows.length; index += METADATA_BATCH_SIZE) {
+      const chunk = rows.slice(index, index + METADATA_BATCH_SIZE);
+      if (!chunk.length) continue;
+      const stmts = chunk.map((row) =>
+        this.client.db
+          .prepare(sql)
+          .bind(row.displayKey, row.genre, row.id),
+      );
+      await this.client.db.batch(stmts);
     }
   }
 

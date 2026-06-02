@@ -27,7 +27,7 @@ const SONG_SELECT = `
   LEFT JOIN artists a ON a.id = s.artist_id
 `;
 
-const METADATA_BATCH_SIZE = 80;
+const METADATA_BATCH_SIZE = 20;
 
 /**
  * @param {Array<{ id: number } & SongMetadata>} rows
