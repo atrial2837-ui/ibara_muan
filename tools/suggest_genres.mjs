@@ -27,9 +27,10 @@ async function main() {
     ? await fs.readFile(args.input, 'utf8')
     : await fetchText(sheetCsvUrl(args.spreadsheetId || DEFAULT_SPREADSHEET_ID, args.gid || DEFAULT_GID));
 
+  const dataStartRow = Number(args.dataStartRow || 3);
   const rows = csvObjects(csvText)
     .map((row, index) => ({
-      rowNumber: index + 2,
+      rowNumber: index + dataStartRow,
       title: normalize(rowValue(row, '曲名')),
       artist: normalize(rowValue(row, 'アーティスト名')),
       currentGenre: normalize(rowValue(row, 'ジャンル')),
@@ -322,7 +323,8 @@ const WESTERN_ARTISTS = [
 const ANIME_KEYWORDS = [
   '涼宮ハルヒ', '放課後ティータイム', 'けいおん', 'ランカ・リー', 'マクロス',
   'ワルキューレ', '高橋洋子', '水樹奈々', '藍井エイル', 'claris', 'egoist',
-  'reona', '中川翔子', '結束バンド', 'linked horizon',
+  'reona', '中川翔子', '結束バンド', 'linked horizon', 'ローゼンメイデン',
+  'アンパンマン',
 ];
 
 const VTUBER_ARTISTS = [
