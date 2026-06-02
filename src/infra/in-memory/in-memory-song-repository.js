@@ -163,6 +163,16 @@ export class InMemorySongRepository {
   }
 
   /**
+   * @param {Array<{ id: number } & SongMetadata>} rows
+   * @returns {Promise<void>}
+   */
+  async updateMetadataBatch(rows) {
+    for (const row of rows) {
+      await this.updateMetadata(row.id, row);
+    }
+  }
+
+  /**
    * title / artist / song_key / genre に対してクエリ文字列の部分一致検索を行う。
    * 大文字小文字・全角半角は normalizedKey で吸収する。
    * LIMIT で件数制限。

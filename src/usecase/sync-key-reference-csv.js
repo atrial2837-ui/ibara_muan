@@ -106,6 +106,21 @@ export async function syncKeyReferenceCsv(deps, input) {
         genre: genreCol ? row[genreCol] : '',
       }));
 
+  const songs = await deps.songs.findAll();
+  const songsByKey = new Map();
+  const songsByNormalizedTitle = new Map();
+
+  for (const song of songs) {
+    songsByKey.set(song.song_key, song);
+    const titleKey = song.normalized_title || normalizedKey(song.title);
+    const matches = songsByNormalizedTitle.get(titleKey) || [];
+    matches.push(song);
+    songsByNormalizedTitle.set(titleKey, matches);
+  }
+
+  /** @type {Map<number, { id: number; displayKey: string; genre: string }>} */
+  const updatesBySongId = new Map();
+
   for (const row of sourceRows) {
     const title = normalize(row.title);
     const artist = normalize(row.artist);
@@ -119,11 +134,11 @@ export async function syncKeyReferenceCsv(deps, input) {
 
     // Phase 1: exact match by song_key (artist + title)
     const exactKey = buildSongKey(title, artist);
-    let song = artist ? await deps.songs.findByKey(exactKey) : null;
+    let song = artist ? songsByKey.get(exactKey) : null;
 
     // Phase 2: normalized_title 検索 (1 件のみ採用)
     if (!song) {
-      const matches = await deps.songs.findByNormalizedTitle(normalizedKey(title));
+      const matches = songsByNormalizedTitle.get(normalizedKey(title)) || [];
       song = matches.length === 1 ? matches[0] : null;
     }
 
@@ -132,8 +147,17 @@ export async function syncKeyReferenceCsv(deps, input) {
       continue;
     }
 
-    await deps.songs.updateMetadata(song.id, { displayKey, genre });
+    updatesBySongId.set(song.id, { id: song.id, displayKey, genre });
     updated += 1;
+  }
+
+  const updates = Array.from(updatesBySongId.values());
+  if (typeof deps.songs.updateMetadataBatch === 'function') {
+    await deps.songs.updateMetadataBatch(updates);
+  } else {
+    for (const update of updates) {
+      await deps.songs.updateMetadata(update.id, update);
+    }
   }
 
   return {

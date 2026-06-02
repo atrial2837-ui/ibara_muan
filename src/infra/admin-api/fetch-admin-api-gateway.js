@@ -18,10 +18,10 @@ export class FetchAdminApiGateway {
    *   fetchImpl?: typeof fetch
    * }} [options={}]
    */
-  constructor({ baseUrl = '', tokenProvider = () => null, fetchImpl = fetch } = {}) {
+  constructor({ baseUrl = '', tokenProvider = () => null, fetchImpl = globalThis.fetch } = {}) {
     this.baseUrl = baseUrl;
     this.tokenProvider = tokenProvider;
-    this.fetch = fetchImpl;
+    this.fetch = (...args) => fetchImpl.call(globalThis, ...args);
   }
 
   /**

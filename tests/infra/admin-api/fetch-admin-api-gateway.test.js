@@ -24,7 +24,26 @@ test('constructor: accepts custom options', () => {
   });
   assert.equal(gw.baseUrl, 'https://api.example.com');
   assert.equal(gw.tokenProvider(), 'test-token');
-  assert.equal(gw.fetch, mockFetch);
+  assert(typeof gw.fetch === 'function');
+});
+
+test('request: fetch の this を壊さず呼び出す', async () => {
+  let capturedThis = null;
+  function strictFetch() {
+    capturedThis = this;
+    if (this !== globalThis) {
+      throw new TypeError('Illegal invocation: function called with incorrect this reference');
+    }
+    return {
+      ok: true,
+      json: async () => ({}),
+    };
+  }
+
+  const gw = new FetchAdminApiGateway({ fetchImpl: strictFetch });
+  await gw.previewStream({});
+
+  assert.equal(capturedThis, globalThis);
 });
 
 test('searchSongs: sends GET request with query parameter', async () => {
