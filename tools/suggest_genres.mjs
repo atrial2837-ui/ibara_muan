@@ -237,6 +237,25 @@ function suggestLocal(row) {
     return suggestion(UNCATEGORIZED, 'local:non-song', LOCAL_CONFIDENCE.exact);
   }
 
+  if (hasAny(artist, VTUBER_ARTISTS) || hasAny(text, VTUBER_KEYWORDS)) {
+    return suggestion('VTuber', 'local:vtuber-artist', LOCAL_CONFIDENCE.exact);
+  }
+
+  if (hasAnyExact(title, VOCALOID_TITLES)
+    || hasAny(text, ['初音ミク', '鏡音リン', '鏡音レン', '巡音ルカ', 'gumi', 'vocaloid', 'utau', 'cevio', '可不', 'flower', '音街ウナ'])
+    || /(^|[\s(（])[\u3040-\u30ff\u3400-\u9fff0-9]+p($|[\s)）])/i.test(artist)
+    || hasAny(artist, VOCALOID_ARTISTS)) {
+    return suggestion('ボカロ', 'local:vocaloid-rule', LOCAL_CONFIDENCE.exact);
+  }
+
+  if (hasAnyExact(title, ANIME_TITLES) || hasAny(text, ANIME_KEYWORDS)) {
+    return suggestion('アニソン', 'local:anime-tie-in', LOCAL_CONFIDENCE.exact);
+  }
+
+  if (hasAnyExact(title, GAME_CHARACTER_TITLES) || hasAny(artist, GAME_CHARACTER_ARTISTS) || hasAny(text, GAME_CHARACTER_KEYWORDS)) {
+    return suggestion('ゲーム・キャラソン', 'local:game-character-rule', LOCAL_CONFIDENCE.exact);
+  }
+
   if (hasAny(text, ['ディズニー', 'disney', 'アラジン', 'リトルマーメイド', 'リトル・マーメイド', 'アナと雪の女王', '塔の上のラプンツェル', 'モアナ', 'ライオンキング', '美女と野獣'])) {
     return suggestion('ディズニー', 'local:disney-keyword', LOCAL_CONFIDENCE.strong);
   }
@@ -245,25 +264,11 @@ function suggestLocal(row) {
     return suggestion('ミュージカル', 'local:musical-keyword', LOCAL_CONFIDENCE.strong);
   }
 
-  if (hasAny(text, ['初音ミク', '鏡音リン', '鏡音レン', '巡音ルカ', 'gumi', 'vocaloid', 'utau', 'cevio', '可不', 'flower', '音街ウナ'])
-    || /(^|[\s(（])[\wぁ-んァ-ヶ一-龠]+p($|[\s)）])/.test(artist)
-    || hasAny(artist, VOCALOID_ARTISTS)) {
-    return suggestion('ボカロ', 'local:vocaloid-artist', LOCAL_CONFIDENCE.strong);
-  }
-
-  if (hasAny(text, ['プロジェクトセカイ', 'プロセカ', 'leo/need', 'ワンダーランズ×ショウタイム', 'vivid bad squad', 'more more jump', '25時、ナイトコードで。', 'ニーゴ', 'ウマ娘', 'うまぴょい', 'idolm@ster', 'アイドルマスター', 'ラブライブ', 'バンドリ', 'bang dream'])) {
-    return suggestion('ゲーム・キャラソン', 'local:game-character-keyword', LOCAL_CONFIDENCE.strong);
-  }
-
-  if (hasAny(text, ['ホロライブ', 'hololive', 'にじさんじ', 'nijisanji', '星街すいせい', '宝鐘マリン', '湊あくあ', 'ときのそら', '月ノ美兎', '葛葉', '戌亥とこ', 'himehina', '花譜'])) {
-    return suggestion('VTuber', 'local:vtuber-artist', LOCAL_CONFIDENCE.strong);
-  }
-
   if (hasAny(artist, ['akb48', 'ske48', 'nmb48', 'hkt48', '乃木坂46', '欅坂46', '櫻坂46', '日向坂46', 'ももいろクローバー', 'モーニング娘', '＝love', '=love', 'fruits zipper'])) {
     return suggestion('アイドル', 'local:idol-artist', LOCAL_CONFIDENCE.strong);
   }
 
-  if (hasAny(artist, ['bts', 'twice', 'blackpink', 'ive', 'lesserafim', 'le sserafim', 'newjeans', 'itzy', 'stray kids', 'seventeen'])) {
+  if (hasAnyExact(artist, ['bts', 'twice', 'blackpink', 'lesserafim', 'le sserafim', 'newjeans', 'itzy', 'stray kids', 'seventeen'])) {
     return suggestion('K-POP', 'local:kpop-artist', LOCAL_CONFIDENCE.strong);
   }
 
@@ -275,11 +280,7 @@ function suggestLocal(row) {
     return suggestion('歌謡曲', 'local:kayokyoku-artist', LOCAL_CONFIDENCE.strong);
   }
 
-  if (hasAny(text, ANIME_KEYWORDS)) {
-    return suggestion('アニソン', 'local:anime-keyword', LOCAL_CONFIDENCE.medium);
-  }
-
-  if (hasAny(artist, WESTERN_ARTISTS)) {
+  if (hasAnyExact(artist, WESTERN_ARTISTS)) {
     return suggestion('洋楽', 'local:western-artist', LOCAL_CONFIDENCE.strong);
   }
 
@@ -290,15 +291,26 @@ function hasAny(text, words) {
   return words.some((word) => text.includes(normalizedKey(word)));
 }
 
+function hasAnyExact(text, words) {
+  const key = normalizedKey(text);
+  return words.some((word) => key === normalizedKey(word));
+}
+
 const VOCALOID_ARTISTS = [
   'deco*27', 'deco27', '40mp', 'みきとp', 'kanaria', 'かいりきベア', 'orangestar',
   'n-buna', 'ナブナ', 'neru', 'wowaka', 'ハチ', '米津玄師(ハチ)', 'ピノキオピー',
   'syudou', '柊キライ', 'バルーン', '須田景凪', 'kemu', 'じん', 'れるりり',
-  '蝶々p', '黒うさp', 'doriko', 'ryo', 'supercell', '八王子p', 'giga',
+  '蝶々p', '黒うさp', 'doriko', 'ryo', '八王子p', 'giga',
   'ナユタン星人', 'ぬゆり', 'ツミキ', '煮ル果実', 'すりぃ', '傘村トータ',
-  'まふまふ', 'halyosy', '164', 'keeno', 'r sound design', 'tokotoko',
+  'halyosy', '164', 'keeno', 'r sound design', 'tokotoko',
   '西沢さんp', 'ユリイ・カノン', 'メル', 'きくお', 'easy pop', 'samfree',
-  '*luna', '19\'s sound factory',
+  '*luna', '19\'s sound factory', 'adstlaxy', 'atols', 'azari', 'baker', 'buzzg',
+  'chinozo', 'crusher-p', 'dateken', 'dixie flatline', 'eight', 'heavenz',
+  'ika', 'iroha', 'junky', 'kei', 'last note.', 'mao sasagawa', 'maretu',
+  'millstones', 'n.k', 'narry', 'nem', 'niki', 'nyanyannya', 'omoi',
+  'oster project', 'otetsu', 'p.i.n.a.', 'pina', 'wotaku', 'yamada', 'ive',
+  'こんにちは谷田さん', 'キタニタツヤ', 'ゆこぴ', 'マサラダ', '原口沙輔',
+  '電ポルp', '羽生まゐご', '亜沙', '梅とら', 'アゴアニキp',
 ];
 
 const WESTERN_ARTISTS = [
@@ -309,10 +321,125 @@ const WESTERN_ARTISTS = [
 
 const ANIME_KEYWORDS = [
   '涼宮ハルヒ', '放課後ティータイム', 'けいおん', 'ランカ・リー', 'マクロス',
-  'ワルキューレ', '高橋洋子', '水樹奈々', '藍井エイル', 'lisa', 'aimer',
-  'claris', 'egoist', 'reona', '中川翔子', '結束バンド', 'supercell',
-  'unison square garden', 'flow', 'asian kung-fu generation', 'ポルノグラフィティ',
-  'ハムちゃんず', '土間うまる', '千石撫子', 'linked horizon',
+  'ワルキューレ', '高橋洋子', '水樹奈々', '藍井エイル', 'claris', 'egoist',
+  'reona', '中川翔子', '結束バンド', 'linked horizon',
+];
+
+const VTUBER_ARTISTS = [
+  '星街すいせい', 'hoshimachi suisei', '宝鐘マリン', '湊あくあ', 'ときのそら',
+  'azki', '常闇トワ', '天音かなた', '白上フブキ', '猫又おかゆ', '大神ミオ',
+  'さくらみこ', '兎田ぺこら', '沙花叉クロヱ', 'mori calliope', 'irys',
+  'himehina', 'ヒメヒナ', '花譜', 'kaf', '理芽', '春猿火', 'ヰ世界情緒',
+  '幸祜', 'キズナアイ', 'kizuna ai', 'しぐれうい', 'しゅがりり', '月ノ美兎', '樋口楓',
+  '戌亥とこ', '町田ちま', '緑仙', '葛葉', '叶', '加賀美ハヤト', '剣持刀也',
+  '不破湊', '星川サラ', 'somunia', 'kmnz', 'v.w.p',
+];
+
+const VTUBER_KEYWORDS = [
+  'ホロライブ', 'hololive', 'にじさんじ', 'nijisanji', 'ぶいすぽ', 'vspo',
+  'vsinger', 'virtual youtuber', 'vtuber',
+];
+
+const VOCALOID_TITLES = [
+  '8.32', 'マカロン', 'シニカルナイトプラン', '夜撫でるメノウ',
+  '幽霊東京', 'casino', 'd/n/a', '夏に去りし君を想フ', 'loveit?', 'しわ',
+  'ワールド・ランプシェード', 'グッバイ宣言', 'ジェラシス', 'echo',
+  '蜜月アン・ドゥ・トロワ', '会いたい', 'just be friends', 'とても素敵な六月でした',
+  'お気に召すまま', 'アウトサイダー', 'ドラマツルギー', 'ナンセンス文学',
+  '惑星ループ', 'それがあなたの幸せとしても', 'ヒロイン育成計画',
+  'ラズベリー*モンスター', 'みくみくにしてあげる♪', '炉心融解',
+  'happy halloween', 'スイートマジック', 'メランコリック', 'ラプラスショコラ',
+  'ピエロ', 'はきだす', '脳内革命ガール', 'カガリビト',
+  'このふざけた素晴らしき世界は、僕の為にある',
+  'もしも一人残されて、世界が嘘じゃないなら', 'シザーハンズ',
+  '嗚呼、素晴らしきニャン生', '夢喰い白黒バク', '-error', 'wave',
+  'ジッタードール', 'エル・タンゴ・エゴイスタ', 'オーネヘルツ', 'テオ',
+  'ゴシップ', '星屑ユートピア', 'レッド・パージ!!!', 'セツナトリップ',
+  'メルト', 'メルト 10th anniversary mix', 'ワールドイズマイン', 'ブラック★ロックシューター',
+  '恋は戦争', '罪の名前', 'ロミオとシンデレラ', '千本桜', 'シャルル',
+  '雨とペトラ', 'パメラ', '花瓶に触れた', 'メーベル', 'king', 'queen',
+  'エンヴィーベイビー', '酔いどれ知らず', 'デーモンロード', 'ベノム',
+  'ダーリンダンス', 'ロストワンの号哭', '東京テディベア', '病名は愛だった',
+  '脱法ロック', 'アンヘル', 'ロウワー', 'フィクサー', 'フラジール',
+  'フォニイ', 'ビターチョコデコレーション', 'コールボーイ', 'キュートなカノジョ',
+  '孤独の宗教', '神っぽいな', '転生林檎', '魔法少女とチョコレゐト',
+  'ボッカデラベリタ', 'ラヴィ', 'テレキャスタービーボーイ', 'エゴロック',
+  '六兆年と一夜物語', '地球最後の告白を', 'インビジブル', '拝啓ドッペルゲンガー',
+  '夜咄ディセイブ', '如月アテンション', '夕景イエスタデイ', 'サマータイムレコード',
+  'チルドレンレコード', 'カゲロウデイズ', 'アスノヨゾラ哨戒班', '回る空うさぎ',
+  'からくりピエロ', 'キリトリセン', 'ドレミファロンド', 'サリシノハラ',
+  '少女レイ', 'いーあるふぁんくらぶ', '吉原ラメント', '天ノ弱', 'からっぽのまにまに',
+  '砂の惑星', 'パンダヒーロー', 'ドーナツホール', 'マトリョシカ', 'mrs.pumpkinの滑稽な夢',
+  '強風オールバック', 'イガク', 'ム責任集合体', '抜錨', '失楽ペトリ',
+  '阿吽のビーツ', '懺悔参り', '曖昧劣情lover', '恋愛裁判', '悪ノ召使',
+  '悪ノ娘', 'このピアノでお前を8759632145回ぶん殴る', 'んっあっあっ。',
+  'ねぇ、どろどろさん', 'urusaaa愛', '十面相', '林檎売りの泡沫少女',
+  '偽物人間40号', 'アイロニ', 'マリオネットシンドローム',
+  '夏の終わり、恋の始まり', 'ヴィラン', 'ショットガン・ラヴァーズ',
+  'モノクロ∞ブルースカイ', '白い雪のプリンセスは', 'alice in n.y.',
+  'bad ∞ end ∞ night', 'おおかみは赤ずきんに恋をした', '四季折の羽',
+  'ジグソーパズル', 'ナイティナイト', 'ハローディストピア',
+  'メリーバッドエンド', '廃墟の国のアリス', '繰り返し一粒',
+  '絶え間なく藍色', 'ゆるふわ樹海ガール', '心拍数#0822',
+  'いろは唄', 'キャットラビング',
+];
+
+const ANIME_TITLES = [
+  'tot musica', 'クラクラ', '新時代', '私は最強', '逆光', '1・2・3',
+  '創聖のアクエリオン', '亡國覚醒カタルシス', '勇侠青春謳', '聖少女領域',
+  'shangri-la', '対象a', 'ちゅ、多様性。', 'alones', '千の夜をこえて',
+  '決意の朝に', 'リライト', 'アイのシナリオ', 'プライド革命', '世界は恋に落ちている',
+  '決戦スピリット', 'asphyxia', 'ムーンライト伝説', 'バクチ・ダンサー',
+  '曇天', 'ようかい体操第一', '廻廻奇譚', '青空のラプソディ', '君に届け',
+  'only my railgun', 'ファタール', '一番の宝物', 'オトノナルホウヘ→',
+  '光るなら', 'can do', 'magia', 'シルエット', '月光花', 'そばかす',
+  'おジャ魔女カーニバル', 'はなまるぴっぴはよいこだけ', 'おどるポンポコリン',
+  'アイワナムチュー', 'トウキョウ・シャンディ・ランデヴ',
+  '夢をかなえてドラえもん', 'ライオン', 'change', 'インフェルノ', 'クスシキ',
+  'jingo jungle', 'paradisus-paradoxum', 'cry baby', 'イエスタデイ',
+  'ミックスナッツ', 'オルフェンズの涙', 'すずめ', 'なんでもないや', '打上花火', 'rain', '紅蓮華',
+  '炎', '残響散歌', 'i beg you', 'brave shine', '六等星の夜', 'unlasting',
+  'adamas', 'crossing field', 'oath sign', 'unravel', '名前のない怪物',
+  'エウテルペ', 'kabaneri of the iron fortress', '英雄 運命の詩', '君の知らない物語',
+  'シュガーソングとビターステップ', 'オリオンをなぞる', 'go!!!', 'メリッサ',
+  'アゲハ蝶', 'ブルーバード', 'change', 'イマジネーション', 'ピースサイン',
+  '花になって', '晴る', '祝福', '花の塔', '平行線', 'ミカヅキ', 'ヒトリゴト',
+  'alive', 'sincerely', 'あんなに一緒だったのに',
+  'モザイクカケラ', 'god knows...', 'ハレ晴レユカイ', 'don\'t say "lazy"',
+  '魂のルフラン', 'タッチ', 'デビルマンのうた', '君じゃなきゃダメみたい',
+  'ハム太郎とっとこうた', 'バラライカ', 'かくしん的☆めたまるふぉ~ぜっ!',
+  'snow halation', 'pop in 2', 'サインはb', 'アイドル', '少女s', 'サムライハート',
+  'my dearest', 'うたかた花火', 'フリージア', '色彩', '優しい彗星',
+  '勇者', '怪物', 'rolling star', 'again', 'テルーの唄', 'もののけ姫',
+  '崖の上のポニョ', '海の幽霊', '地球儀', 'kick back', 'bow and arrow',
+  'ウィーアー!', '宇宙戦艦ヤマト', 'ようこそジャパリパークへ',
+  '風になる', 'ひまわりの約束', 'catch the moment', 'rising hope',
+  'シルシ', '残酷な夜に輝け', 'ラピスラズリ', 'realize', 'this game',
+  '白金ディスコ', 'お願いマッスル', '魂のルフラン', '青春コンプレックス',
+];
+
+const GAME_CHARACTER_TITLES = [
+  'うまぴょい伝説', '鳥の詩', 'potatoになっていく', 'ステラ', 'セカイ',
+  'needLe', 'jackpot sad girl', '限りなく灰色へ', 'アイディスマイル',
+  'トンデモワンダーズ', 'にっこり^^調査隊のテーマ', 'バグ', 'ロウワー',
+  'ビターチョコデコレーション', 'the world is all one !!', 'カルマ',
+  'アカシア', '月を見ていた',
+];
+
+const GAME_CHARACTER_ARTISTS = [
+  'leo/need', 'ワンダーランズ×ショウタイム', 'vivid bad squad',
+  'more more jump', '25時、ナイトコードで。', 'ニーゴ', '初星学園',
+  '765pro', 'シンデレラガールズ', 'millionstars', 'idolm@ster',
+  'アイドルマスター', 'ウマ娘', 'μ\'s', 'aqours', '虹ヶ咲', 'liella',
+  '蓮ノ空', 'roselia', 'afterglow', 'poppin\'party', 'raise a suilen',
+  'morfonica', 'b小町', '月島きらり', 'ハムちゃんず', '土間うまる',
+  '涼宮ハルヒ', '桜高軽音部', 'ランカ・リー',
+];
+
+const GAME_CHARACTER_KEYWORDS = [
+  'プロジェクトセカイ', 'プロセカ', 'ウマ娘', 'うまぴょい', 'idolm@ster',
+  'アイドルマスター', 'ラブライブ', 'バンドリ', 'bang dream', 'キャラクターソング',
+  'character song', 'ゲーム主題歌', 'game music',
 ];
 
 class SpotifyClient {
