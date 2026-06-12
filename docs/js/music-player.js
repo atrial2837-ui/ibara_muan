@@ -423,12 +423,11 @@ function _updateBarInfo(video) {
   if (sub) {
     if (video.sub)                       sub.textContent = video.sub;
     else if (video.type === 'cover')     sub.textContent = video.originalArtist || 'カバー曲';
-    else if (video.type === 'office')    sub.textContent = '公式';
-    else if (video.type === 'character') sub.textContent = video.character || 'キャラソン';
+    else if (video.type === 'sugariri')  sub.textContent = 'しゅがりり';
     else                                 sub.textContent = '茨むあんオリジナル';
   }
   if (badge) {
-    const labels = { original: 'オリジナル', office: '公式', character: 'キャラ', cover: 'カバー', stream: '歌枠' };
+    const labels = { original: 'オリジナル', sugariri: 'しゅがりり', cover: 'カバー', stream: '歌枠' };
     badge.textContent = labels[video.type] || 'オリジナル';
     badge.dataset.type = video.type;
   }
