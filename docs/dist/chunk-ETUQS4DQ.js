@@ -1,4 +1,4 @@
-import{d as tt,e as et,f as R,g as st,h as nt,j as it,l as k}from"./chunk-NPFNMLHP.js";import{c as q,d as _,e as K,n as j,p as Z}from"./chunk-F74N3FWX.js";import{a as W,b as B,e}from"./chunk-4VQQINBR.js";import{a as c,c as D,h as z,i as a,j as X,p as Q}from"./chunk-3CMR4JCK.js";var $,E,w,G,O,H,dt,C,pt=null,ct="ibara-setlist-v1",x=[],T=null,M=null;function Gt(){Lt(),kt(),tt(e.data?.songs||[]);let t=c("#panel-songs");t.innerHTML=`
+import{d as tt,e as et,f as R,g as st,h as nt,j as it,l as k}from"./chunk-2SVNDSRJ.js";import{c as q,d as _,e as K,n as j,p as Z}from"./chunk-2E6JXX77.js";import{a as W,b as B,e}from"./chunk-4VQQINBR.js";import{a as c,c as D,h as z,i as a,j as X,p as Q}from"./chunk-3CMR4JCK.js";var $,E,w,G,O,H,dt,C,pt=null,ct="ibara-setlist-v1",x=[],T=null,M=null;function Gt(){Lt(),kt(),tt(e.data?.songs||[]);let t=c("#panel-songs");t.innerHTML=`
     <div class="section-header">
       <h2>${e.singerMode?"\u{1F399} \u9078\u66F2\u30DC\u30FC\u30C9":"\u{1F3B5} \u5168\u66F2\u30EA\u30B9\u30C8"}</h2>
       <span class="count-pill" id="songs-count">\u2014</span>
