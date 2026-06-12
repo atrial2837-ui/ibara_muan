@@ -316,7 +316,7 @@ function _musicSearchText(video) {
 function _musicTypeLabel(video) {
   switch (video?.type) {
     case 'cover': return '歌みた';
-    case 'sugariri': return 'しゅがりり';
+    case 'sugarily': return 'しゅがりり';
     default: return 'オリ曲';
   }
 }

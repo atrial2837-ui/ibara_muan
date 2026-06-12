@@ -500,7 +500,7 @@ function _filterMusicVideos(videos) {
 function _mvBadge(video) {
   switch (video.type) {
     case 'cover':     return { label: 'カバー',    cls: 'mv-badge-cover',     sub: video.originalArtist || 'カバー曲' };
-    case 'sugariri':  return { label: 'しゅがりり', cls: 'mv-badge-sugariri',  sub: 'しゅがりり' };
+    case 'sugarily':  return { label: 'しゅがりり', cls: 'mv-badge-sugarily',  sub: 'しゅがりり' };
     default:          return { label: 'オリジナル', cls: 'mv-badge-original',  sub: '茨むあん' };
   }
 }
@@ -567,7 +567,7 @@ function _renderMusicCategory(items) {
   // カテゴリビューでは全動画リストのインデックスをそのまま使う
   const sections = [
     { key: 'original',  label: 'オリジナル曲（個人）' },
-    { key: 'sugariri',  label: 'しゅがりり' },
+    { key: 'sugarily',  label: 'しゅがりり' },
     { key: 'cover',     label: 'カバー曲（歌みた）' },
   ].map(({ key, label }) => ({
     label,

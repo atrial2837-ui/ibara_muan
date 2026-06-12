@@ -1895,7 +1895,7 @@ async function _svRenderBelowPlayerMv(stream) {
   const relatedShown = related.slice(0, 8);
 
   // ── ほかの動画: 同タイプ優先で最大12件 ──
-  const typeLabels = { original: 'オリジナル', sugariri: 'しゅがりり', cover: 'カバー' };
+  const typeLabels = { original: 'オリジナル', sugarily: 'しゅがりり', cover: 'カバー' };
   const cur = videos.find(v => v.url === stream.url);
   const others = videos
     .filter(v => v.url !== stream.url)
