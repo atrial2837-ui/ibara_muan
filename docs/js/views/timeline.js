@@ -1,13 +1,14 @@
-import { state } from '../state.js';
+import { state } from '../store.js';
 import { TIMELINE_INITIAL, TIMELINE_STEP } from '../config.js';
 import { $, $$, escapeHtml, fmtDate, streamKey } from '../utils.js';
 
 export function renderTimeline() {
   const { streams } = state.data;
   const filter = state.timelineFilter;
-  const visible = filter
+  const filtered = filter
     ? streams.filter(s => s.songs.some(sg => sg.key === filter.key))
     : streams;
+  const visible = sortTimelineStreams(filtered, state.timelineSort);
 
   const panel = $('#panel-timeline');
   panel.innerHTML = `
@@ -15,10 +16,30 @@ export function renderTimeline() {
       <h2>📅 配信タイムライン</h2>
       <span class="count-pill">${visible.length}枠</span>
     </div>
+    <div class="timeline-tools">
+      <label class="timeline-sort-field" for="timeline-sort">
+        <span>並び替え</span>
+        <select id="timeline-sort" class="select-input">
+          <option value="date-desc"${state.timelineSort === 'date-desc' ? ' selected' : ''}>配信日（新しい順）</option>
+          <option value="date-asc"${state.timelineSort === 'date-asc' ? ' selected' : ''}>配信日（古い順）</option>
+          <option value="songs-desc"${state.timelineSort === 'songs-desc' ? ' selected' : ''}>曲数（多い順）</option>
+          <option value="songs-asc"${state.timelineSort === 'songs-asc' ? ' selected' : ''}>曲数（少ない順）</option>
+          <option value="index-desc"${state.timelineSort === 'index-desc' ? ' selected' : ''}>枠番号（大きい順）</option>
+          <option value="index-asc"${state.timelineSort === 'index-asc' ? ' selected' : ''}>枠番号（小さい順）</option>
+          <option value="title"${state.timelineSort === 'title' ? ' selected' : ''}>タイトル順</option>
+        </select>
+      </label>
+    </div>
     <div id="timeline-filter-banner"></div>
     <div id="timeline" class="timeline"></div>
     <div class="timeline-controls" id="timeline-controls"></div>
   `;
+
+  $('#timeline-sort')?.addEventListener('change', (event) => {
+    state.timelineSort = event.target.value || 'date-desc';
+    state.timelineLimit = TIMELINE_INITIAL;
+    renderTimeline();
+  });
 
   const banner = $('#timeline-filter-banner');
   if (filter) {
@@ -83,7 +104,7 @@ export function renderTimeline() {
 }
 
 function renderItem(s, idx, filter) {
-  const recentClass = !filter && idx < 3 ? 'recent' : '';
+  const recentClass = !filter && state.timelineSort === 'date-desc' && idx < 3 ? 'recent' : '';
   const setlistHtml = s.songs.map((song, i) => {
     const hit = filter && song.key === filter.key ? ' hit' : '';
     const title = hit ? 'クリックで絞り込み解除' : 'クリックで絞り込み';
@@ -93,11 +114,10 @@ function renderItem(s, idx, filter) {
     ? `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener">${escapeHtml(s.title || '配信')}</a>`
     : escapeHtml(s.title || '配信');
   const watchHtml = s.url
-    ? `<a class="watch-link" href="${escapeHtml(s.url)}" target="_blank" rel="noopener">▶ YouTube</a>`
+    ? `<span class="watch-actions"><button class="watch-link" type="button" data-stream-play="${escapeHtml(streamKey(s))}" data-inline-youtube="${escapeHtml(s.url)}">▶ 再生</button><a class="watch-open-link" href="${escapeHtml(s.url)}" target="_blank" rel="noopener">↗ 開く</a></span>`
     : '';
-  const copyHtml = state.singerMode
-    ? `<button class="timeline-copy-btn" type="button" data-copy-stream="${idx}">セトリコピー</button>`
-    : '';
+  const saveHtml = `<button class="timeline-save-btn" type="button" data-playlist-add="${escapeHtml(streamKey(s))}" data-stream-title="${escapeHtml(s.title || '配信')}" title="プレイリストに保存">☆</button>`;
+  const copyHtml = `<button class="timeline-copy-btn" type="button" data-copy-stream="${idx}">セトリコピー</button>`;
   return `
     <article class="timeline-item ${recentClass}">
       <span class="stream-anchor" data-streamkey="${escapeHtml(streamKey(s))}"></span>
@@ -105,6 +125,7 @@ function renderItem(s, idx, filter) {
         <span class="timeline-date">${fmtDate(s.date)}</span>
         <span class="timeline-stream-no">第${s.index}枠</span>
         <span class="timeline-songcount">🎤 ${s.songs.length}曲</span>
+        ${saveHtml}
         ${copyHtml}
         ${watchHtml}
       </header>
@@ -114,8 +135,49 @@ function renderItem(s, idx, filter) {
   `;
 }
 
+function sortTimelineStreams(streams, sort) {
+  const list = [...streams];
+  const dateTime = (stream) => stream.date instanceof Date
+    ? stream.date.getTime()
+    : new Date(stream.date || 0).getTime();
+  const streamIndex = (stream) => Number(stream.index) || 0;
+  const songCount = (stream) => stream.songs?.length || 0;
+  const byDateDesc = (a, b) => dateTime(b) - dateTime(a) || streamIndex(b) - streamIndex(a);
+
+  switch (sort) {
+    case 'date-asc':
+      list.sort((a, b) => dateTime(a) - dateTime(b) || streamIndex(a) - streamIndex(b));
+      break;
+    case 'songs-desc':
+      list.sort((a, b) => songCount(b) - songCount(a) || byDateDesc(a, b));
+      break;
+    case 'songs-asc':
+      list.sort((a, b) => songCount(a) - songCount(b) || byDateDesc(a, b));
+      break;
+    case 'index-desc':
+      list.sort((a, b) => streamIndex(b) - streamIndex(a) || byDateDesc(a, b));
+      break;
+    case 'index-asc':
+      list.sort((a, b) => streamIndex(a) - streamIndex(b) || byDateDesc(a, b));
+      break;
+    case 'title':
+      list.sort((a, b) => String(a.title || '').localeCompare(String(b.title || ''), 'ja') || byDateDesc(a, b));
+      break;
+    case 'date-desc':
+    default:
+      list.sort(byDateDesc);
+      break;
+  }
+  return list;
+}
+
 function formatStreamSetlist(stream) {
   return (stream.songs || [])
-    .map((song) => `00:00 ${song.title} / ${song.artist}`)
+    .map((song) => {
+      const title = String(song?.title || '').trim();
+      const artist = String(song?.artist || '').trim();
+      return artist ? `${title} / ${artist}` : title;
+    })
+    .filter(Boolean)
     .join('\n');
 }
