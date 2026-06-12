@@ -81,6 +81,27 @@ export const formatNumber = (n) => Number(n || 0).toLocaleString();
 
 export const isLink = (el) => !!(el && el.closest && el.closest('a, button'));
 
+export function youtubeVideoId(url) {
+  const text = String(url || '');
+  const patterns = [
+    /youtu\.be\/([A-Za-z0-9_-]{11})/,
+    /youtube\.com\/watch\?[^#]*v=([A-Za-z0-9_-]{11})/,
+    /youtube\.com\/live\/([A-Za-z0-9_-]{11})/,
+    /youtube\.com\/shorts\/([A-Za-z0-9_-]{11})/,
+    /youtube\.com\/embed\/([A-Za-z0-9_-]{11})/,
+  ];
+  for (const pattern of patterns) {
+    const m = text.match(pattern);
+    if (m) return m[1];
+  }
+  return '';
+}
+
+export const youtubeThumb         = (url) => { const id = youtubeVideoId(url); return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg`  : ''; };
+export const youtubeThumbFallback = (url) => { const id = youtubeVideoId(url); return id ? `https://i.ytimg.com/vi/${id}/mqdefault.jpg`  : ''; };
+
+export const streamKeySv = (stream) => `${stream?.channel || ''}:${stream?.index || ''}:${stream?.url || ''}`;
+
 export function highlightText(text, queries) {
   if (!queries || !queries.length) return escapeHtml(text);
   const escaped = escapeHtml(text);

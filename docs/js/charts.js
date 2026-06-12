@@ -34,6 +34,7 @@ function readCssVars() {
     accentStrong: cs.getPropertyValue('--accent-strong').trim(),
     border: cs.getPropertyValue('--border').trim(),
     borderSoft: cs.getPropertyValue('--border-soft').trim(),
+    borderStrong: cs.getPropertyValue('--border-strong').trim(),
     surface: cs.getPropertyValue('--surface').trim(),
     gold: cs.getPropertyValue('--gold').trim(),
   };
@@ -57,8 +58,8 @@ function defaults() {
       tooltip: {
         backgroundColor: c.surface,
         titleColor: c.ink,
-        bodyColor: c.inkSoft,
-        borderColor: c.border,
+        bodyColor: c.ink,
+        borderColor: c.borderStrong,
         borderWidth: 1,
         padding: 10,
         boxPadding: 4,
@@ -69,12 +70,12 @@ function defaults() {
     },
     scales: {
       x: {
-        ticks: { color: c.inkMute, font: { size: 10 } },
-        grid: { color: c.borderSoft, drawBorder: false },
+        ticks: { color: c.inkSoft, font: { size: 10 } },
+        grid: { color: c.border, drawBorder: false },
       },
       y: {
-        ticks: { color: c.inkMute, font: { size: 10 } },
-        grid: { color: c.borderSoft, drawBorder: false },
+        ticks: { color: c.inkSoft, font: { size: 10 } },
+        grid: { color: c.border, drawBorder: false },
         beginAtZero: true,
       },
     },
@@ -117,13 +118,6 @@ export function createChart(id, type, data, options = {}) {
   return null;
 }
 
-export function destroyChart(id) {
-  if (charts.has(id)) {
-    charts.get(id).destroy();
-    charts.delete(id);
-  }
-}
-
 export function destroyAllCharts() {
   for (const c of charts.values()) c.destroy();
   charts.clear();
@@ -140,4 +134,86 @@ onThemeChange(() => {
 export function chartCanvas(id, opts = {}) {
   const cls = opts.class || '';
   return `<div class="chart-wrap ${cls}"><canvas id="${id}"></canvas></div>`;
+}
+
+// ─── ヘルパー関数 ─────────────────────────────────────────────────────────────
+
+/**
+ * 折れ線グラフを作成
+ * @param {string} ctx - canvas 要素の ID
+ * @param {string[]} labels - X軸ラベル
+ * @param {number[]} data - データ
+ * @param {string} label - データセットラベル
+ */
+export function createLineChart(ctx, labels, data, label) {
+  return createChart(ctx, 'line', {
+    labels,
+    datasets: [{
+      label,
+      data,
+      borderColor: getColors().primaryStrong,
+      backgroundColor: getColors().primary + '33',
+      tension: 0.3,
+      fill: true,
+      pointRadius: 3,
+      borderWidth: 2,
+    }],
+  });
+}
+
+/**
+ * ドーナツグラフを作成
+ * @param {string} ctx - canvas 要素の ID
+ * @param {string[]} labels - ラベル
+ * @param {number[]} data - データ
+ */
+export function createDoughnutChart(ctx, labels, data) {
+  const c = getColors();
+  const colors = [c.primary, c.accent, c.gold, c.primaryStrong, c.accentStrong, '#6cc6ec', '#ff9eb5', '#f4c44a'];
+  return createChart(ctx, 'doughnut', {
+    labels,
+    datasets: [{
+      data,
+      backgroundColor: labels.map((_, i) => colors[i % colors.length] + 'cc'),
+      borderColor: labels.map((_, i) => colors[i % colors.length]),
+      borderWidth: 1,
+    }],
+  }, {
+    plugins: {
+      legend: { position: 'right', labels: { color: c.inkSoft, font: { size: 10 }, padding: 8 } },
+    },
+  });
+}
+
+/**
+ * 棒グラフを作成
+ * @param {string} ctx - canvas 要素の ID
+ * @param {string[]} labels - X軸ラベル
+ * @param {number[]} data - データ
+ * @param {string} label - データセットラベル
+ */
+export function createBarChart(ctx, labels, data, label) {
+  const c = getColors();
+  return createChart(ctx, 'bar', {
+    labels,
+    datasets: [{
+      label,
+      data,
+      backgroundColor: c.primary + 'cc',
+      borderColor: c.primaryStrong,
+      borderWidth: 1,
+      borderRadius: 6,
+    }],
+  });
+}
+
+/**
+ * グラフを破棄
+ * @param {string} id - canvas 要素の ID
+ */
+export function destroyChart(id) {
+  if (charts.has(id)) {
+    charts.get(id).destroy();
+    charts.delete(id);
+  }
 }

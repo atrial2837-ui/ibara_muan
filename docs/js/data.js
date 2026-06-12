@@ -324,22 +324,48 @@ function combinedStatsFromMeta(meta) {
   return withGeneratedAt(item.stats || item, meta.generatedAt);
 }
 
-async function loadStaticSplit(metaPayload = null) {
+async function loadStaticSplit(metaPayload = null, onSongsReady = null) {
   let meta = metaPayload;
-  let songs;
-  let streams;
-  if (meta) {
-    [songs, streams] = await Promise.all([
-      fetchJson(STATIC_URLS.songs),
-      fetchJson(STATIC_URLS.streams),
-    ]);
-  } else {
-    [meta, songs, streams] = await Promise.all([
-      fetchJson(STATIC_URLS.meta),
-      fetchJson(STATIC_URLS.songs),
-      fetchJson(STATIC_URLS.streams),
-    ]);
+
+  // songs と streams を並行取得（streams が大きいので songs の方が先に届く）
+  const songsPromise   = fetchJson(STATIC_URLS.songs);
+  const streamsPromise = fetchJson(STATIC_URLS.streams);
+
+  if (!meta) {
+    meta = await fetchJson(STATIC_URLS.meta);
   }
+
+  const songs = await songsPromise;
+
+  // songs が届いた時点で部分データをコールバック通知（streams はまだ待機中）
+  if (onSongsReady) {
+    const partialChannels = {};
+    for (const [code, channelSongs] of Object.entries(songs.channels || {})) {
+      const mapped = channelSongs.map(s => {
+        if (!Array.isArray(s.channels)) s.channels = [code];
+        return s;
+      });
+      partialChannels[code] = {
+        stats: channelStatsFromMeta(meta, code),
+        songs: mapped,
+        streams: [],
+        orphans: [],
+        artists: [],
+      };
+    }
+    const partial = hydratePayload({
+      channels: partialChannels,
+      combined: { stats: combinedStatsFromMeta(meta) },
+      generatedAt: meta.generatedAt || null,
+      dataGeneratedDate: parseGeneratedAt(meta.generatedAt),
+    });
+    partial.fullLoaded = false;
+    partial.partialLoaded = true;
+    try { onSongsReady(partial); } catch (_) {}
+  }
+
+  const streams = await streamsPromise;
+
   const channels = {};
   const codes = new Set([
     ...Object.keys(meta.channels || {}),
@@ -412,7 +438,7 @@ async function loadFallbackApi() {
 
 export async function loadAll(options = {}) {
   try {
-    return await loadStaticSplit(options.meta || null);
+    return await loadStaticSplit(options.meta || null, options.onSongsReady || null);
   } catch (staticError) {
     try {
       return await loadFallbackApi();
