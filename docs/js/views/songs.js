@@ -86,6 +86,7 @@ export function renderSongs() {
       ` : ''}
     </div>
     ${state.singerMode ? '<div id="setlist-planner" class="setlist-planner mobile-panel mobile-panel-setlist"></div>' : ''}
+    <div id="recommend-box" class="todays-song-box" hidden></div>
     <div id="todays-song-box" class="todays-song-box" hidden></div>
     <div class="genre-strip" id="songs-genre-chips">${genreChipsHtml()}</div>
     <div id="songs-list" class="song-list"></div>

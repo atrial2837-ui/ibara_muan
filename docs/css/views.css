@@ -249,24 +249,20 @@
   transition: transform 0.1s ease, outline 0.1s ease;
   cursor: default;
 }
-.heatmap-cell.l1 { background: #c2ecff; }
-.heatmap-cell.l2 { background: #6cc6ec; }
-.heatmap-cell.l3 { background: #2d8fb9; }
-.heatmap-cell.l4 { background: #ff9eb5; }
-:root[data-theme="dark"] .heatmap-cell,
-:root[data-theme="auto"] .heatmap-cell { background: #1a2d44; }
-:root[data-theme="dark"] .heatmap-cell.l1,
-:root[data-theme="auto"] .heatmap-cell.l1 { background: #2d5a85; }
-:root[data-theme="dark"] .heatmap-cell.l2,
-:root[data-theme="auto"] .heatmap-cell.l2 { background: #4a8fbf; }
-:root[data-theme="dark"] .heatmap-cell.l3,
-:root[data-theme="auto"] .heatmap-cell.l3 { background: #6cc6ec; }
-:root[data-theme="dark"] .heatmap-cell.l4,
-:root[data-theme="auto"] .heatmap-cell.l4 { background: #ff9eb5; }
+.heatmap-cell.l1 { background: #f4e7c0; }
+.heatmap-cell.l2 { background: #e6c878; }
+.heatmap-cell.l3 { background: #d9ad3b; }
+.heatmap-cell.l4 { background: #936715; }
+:root[data-theme="dark"] .heatmap-cell.l1 { background: #4a3c1c; }
+:root[data-theme="dark"] .heatmap-cell.l2 { background: #6f5a24; }
+:root[data-theme="dark"] .heatmap-cell.l3 { background: #a9842d; }
+:root[data-theme="dark"] .heatmap-cell.l4 { background: #f0d27a; }
 
 @media (prefers-color-scheme: dark) {
-  :root[data-theme="auto"] .heatmap-cell { background: #1a2d44; }
-  :root[data-theme="auto"] .heatmap-cell.l1 { background: #2d5a85; }
+  :root[data-theme="auto"] .heatmap-cell.l1 { background: #4a3c1c; }
+  :root[data-theme="auto"] .heatmap-cell.l2 { background: #6f5a24; }
+  :root[data-theme="auto"] .heatmap-cell.l3 { background: #a9842d; }
+  :root[data-theme="auto"] .heatmap-cell.l4 { background: #f0d27a; }
 }
 
 .heatmap-cell:hover { transform: scale(1.5); outline: 2px solid var(--ink); }

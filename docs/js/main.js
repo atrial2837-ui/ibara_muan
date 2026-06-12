@@ -4,7 +4,7 @@ import { buildIndex } from './search.js';
 import { initTheme, onThemeChange, cycleTheme } from './theme.js';
 import { onRerenderNeeded, destroyAllCharts } from './charts.js';
 import { $, $$, escapeHtml, fmtDate, daysSince, isLink, formatNumber, streamKey } from './utils.js';
-import { DEFAULT_CHANNEL } from './config.js';
+import { DEFAULT_CHANNEL, VOLUME_STORAGE_KEY } from './config.js';
 import { readUrlState, writeUrlState } from './url-state.js';
 import { initSearchPalette, openSearchPalette, closeSearchPalette, isSearchPaletteOpen } from './views/search-palette.js';
 
@@ -958,7 +958,7 @@ async function _maybeOpenSharedVideo() {
 
   // MV（music.json）から探す
   try {
-    const res = await fetch('data/music.json');
+    const res = await fetch('/data/music.json');
     const music = await res.json();
     const mv = (music?.videos || []).find(m => youtubeVideoId(m.url) === v);
     if (mv) { openStreamViewer({ url: mv.url, title: mv.title, isMv: true }, t); return true; }
@@ -1180,8 +1180,8 @@ function _onYtReady(fn) {
 
 // ─── Stream Viewer ────────────────────────────────────────────────────────────
 
-const _storedVol = () => Math.max(0, Math.min(100, parseInt(localStorage.getItem('ibaraVol') ?? '100') || 100));
-const _saveVol   = v  => localStorage.setItem('ibaraVol', String(v));
+const _storedVol = () => Math.max(0, Math.min(100, parseInt(localStorage.getItem(VOLUME_STORAGE_KEY) ?? '100') || 100));
+const _saveVol   = v  => localStorage.setItem(VOLUME_STORAGE_KEY, String(v));
 const _volIcon   = v  => v === 0 ? '🔇' : v < 50 ? '🔉' : '🔊';
 
 function _applyVol(slider, btn, player, v) {
@@ -1851,7 +1851,7 @@ let _mvVideosCache = null; // music.json の動画リストキャッシュ
 async function _mvFetchVideos() {
   if (_mvVideosCache) return _mvVideosCache;
   try {
-    const res = await fetch('data/music.json');
+    const res = await fetch('/data/music.json');
     _mvVideosCache = (await res.json())?.videos || [];
   } catch (_) {
     _mvVideosCache = [];

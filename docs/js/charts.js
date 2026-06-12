@@ -40,10 +40,8 @@ function readCssVars() {
     gold: css('--gold'),
     chartPrimary: css('--chart-primary') || css('--primary'),
     chartPrimaryStrong: css('--chart-primary-strong') || css('--primary-strong'),
-    chartPrimarySoft: css('--chart-primary-soft') || css('--primary-soft'),
     chartAccent: css('--chart-accent') || css('--accent'),
     chartAccentStrong: css('--chart-accent-strong') || css('--accent-strong'),
-    chartAccentSoft: css('--chart-accent-soft') || css('--accent-soft'),
   };
 }
 

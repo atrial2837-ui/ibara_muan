@@ -1,4 +1,4 @@
-const KEY = 'yumegawa-theme';
+const KEY = 'ibara-muan-theme';
 const ORDER = ['auto', 'light', 'dark'];
 const ICONS = { auto: '🌗', light: '☀️', dark: '🌙' };
 const LABELS = { auto: 'auto', light: 'light', dark: 'dark' };
