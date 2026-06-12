@@ -1,7 +1,7 @@
 {
   "name": "茨むあん 歌唱データベース",
   "short_name": "茨むあんDB",
-  "description": "茨むあんさんの歌った曲リスト・ランキング・歌枠タイムラインをまとめたファンメイドデータベース",
+  "description": "茨むあんさんの歌った曲リスト・ランキング・歌枠タイムライン・歌みた/オリ曲・プレイリストをまとめたファンメイドデータベース",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f7f4ec",

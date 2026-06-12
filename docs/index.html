@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>茨むあん 歌唱データベース｜歌った曲リスト・ランキング・検索</title>
-<meta name="description" content="茨むあんさんの歌った曲リスト、歌唱回数ランキング、歌枠タイムライン、キー・ジャンル検索をまとめたファンメイド歌唱データベース。">
+<meta name="description" content="茨むあんさんの歌った曲リスト、ランキング、歌枠タイムライン、歌みた・オリ曲、プレイリスト、キー・ジャンル検索をまとめたファンメイド歌唱データベース。">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="theme-color" content="#e4b129">
 <link rel="canonical" href="https://ibara-muan-songlist.pages.dev/">
@@ -12,12 +12,12 @@
 <meta property="og:locale" content="ja_JP">
 <meta property="og:site_name" content="茨むあん 歌唱データベース">
 <meta property="og:title" content="茨むあん 歌唱データベース">
-<meta property="og:description" content="茨むあんさんの歌った曲リスト、ランキング、歌枠タイムライン、キー・ジャンル検索をまとめたファンメイドデータベース。">
+<meta property="og:description" content="茨むあんさんの歌った曲リスト、ランキング、歌枠タイムライン、歌みた・オリ曲、プレイリスト、キー・ジャンル検索をまとめたファンメイドデータベース。">
 <meta property="og:url" content="https://ibara-muan-songlist.pages.dev/">
 <meta property="og:image" content="https://ibara-muan-songlist.pages.dev/assets/site-icon.svg">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="茨むあん 歌唱データベース">
-<meta name="twitter:description" content="茨むあんさんの歌った曲リスト、ランキング、歌枠タイムライン、キー・ジャンル検索をまとめたファンメイドデータベース。">
+<meta name="twitter:description" content="茨むあんさんの歌った曲リスト、ランキング、歌枠タイムライン、歌みた・オリ曲、プレイリスト、キー・ジャンル検索をまとめたファンメイドデータベース。">
 <meta name="twitter:image" content="https://ibara-muan-songlist.pages.dev/assets/site-icon.svg">
 <link rel="icon" type="image/svg+xml" href="assets/site-icon.svg">
 <link rel="manifest" href="manifest.webmanifest">
@@ -56,7 +56,7 @@
   "inLanguage": "ja",
   "applicationCategory": "EntertainmentApplication",
   "operatingSystem": "Any",
-  "description": "茨むあんさんの歌った曲リスト、歌唱回数ランキング、歌枠タイムライン、キー・ジャンル検索をまとめたファンメイド歌唱データベース。",
+  "description": "茨むあんさんの歌った曲リスト、歌唱回数ランキング、歌枠タイムライン、歌みた・オリ曲、プレイリスト、キー・ジャンル検索をまとめたファンメイド歌唱データベース。",
   "isAccessibleForFree": true
 }
 </script>
@@ -117,7 +117,7 @@
   <section class="hero" id="hero">
     <h1 id="page-title" class="hero-title"><img class="hero-title-icon" src="assets/hero-rose.svg" alt="" width="32" height="32" fetchpriority="high" decoding="sync">茨むあん 歌唱データベース</h1>
     <p class="hero-sub">~ Singing Stream Analytics ~</p>
-    <p class="hero-description">茨むあんさんの歌枠で歌われた楽曲を、曲名・アーティスト・ランキング・配信タイムラインから探せる歌唱データベースサイトです。</p>
+    <p class="hero-description">茨むあんさんの歌枠で歌われた楽曲や歌みた・オリ曲を、曲名・アーティスト・ランキング・配信タイムライン・プレイリストから探せる歌唱データベースサイトです。</p>
     <p class="hero-updated" id="updated-info">読み込み中…</p>
     <div class="stats-grid" id="stats-grid">
       <div class="stat-card placeholder"></div>
@@ -166,7 +166,7 @@
   <p>
     Made with <span class="heart">♡</span> for 茨むあん ファン &nbsp;·&nbsp;
     <a href="https://docs.google.com/spreadsheets/d/1supVLmIOoa3fdwvT_NHioLefjsa-ldQBQCMhZakKD-o/edit" target="_blank" rel="noopener">データソース</a> &nbsp;·&nbsp;
-    <a href="https://x.com/ibaramuan" target="_blank" rel="noopener">公式X</a>
+    <a href="https://forms.gle/8tvDXGxq8KdNJbf98" target="_blank" rel="noopener">お問い合わせ</a>
   </p>
 </footer>
 
@@ -176,7 +176,7 @@
       <div>
         <p class="help-kicker">Guide</p>
         <h2 id="help-title">使い方</h2>
-        <p class="help-lead">曲を探す、歌枠をたどる、配信用の選曲を作るための歌唱データベースです。</p>
+        <p class="help-lead">曲を探す、歌枠をたどる、歌みた・オリ曲を聴く、配信用の選曲を作るための歌唱データベースです。</p>
       </div>
       <button class="icon-btn help-close" id="help-close" type="button" aria-label="閉じる">×</button>
     </div>
@@ -196,6 +196,11 @@
         <strong>歌枠を見る</strong>
         <p>タイムラインから歌枠を選んで、その場で動画を再生できます。</p>
       </div>
+      <div class="guide-step">
+        <span>4</span>
+        <strong>保存・共有する</strong>
+        <p>プレイリストやセトリ共有で、見たい枠や選曲候補を残せます。</p>
+      </div>
     </div>
     <div class="guide-sections">
       <section class="guide-section">
@@ -204,13 +209,15 @@
           <li>ヘッダーの茨むあん表示は、このサイトの対象チャンネルです。</li>
           <li>リスナーモードは閲覧向け、配信者モードは選曲・セトリ作成向けです。</li>
           <li>Official は公式YouTube・Xへの外部リンクです。</li>
+          <li>スマホではホーム画面に追加して、PWA風に開けます。</li>
         </ul>
       </section>
       <section class="guide-section">
         <h3>曲を探す</h3>
         <ul>
           <li><kbd>/</kbd> または <kbd>Ctrl+K</kbd> でサイト内全検索を開き、曲・アーティスト・配信を横断検索できます。</li>
-          <li>全曲リストではジャンル・タグ・並び替えで詳細な絞り込みができます。</li>
+          <li>全曲リストでは「チルな曲」「ボカロ 定番」などの自然語検索、ジャンル・タグ・並び替えで詳細に絞り込めます。</li>
+          <li>検索履歴・おすすめ・今日の一曲・お気に入りを使って、候補をすばやく戻せます。</li>
           <li>曲を押すと <strong>歌唱回数・キー・初披露日・歌枠履歴</strong> を確認できます。</li>
         </ul>
       </section>
@@ -221,7 +228,7 @@
           <li>セットリストの <strong>⏱ メモ</strong> で現在の再生位置をタイムスタンプ記録、バッジをタップするとその箇所へジャンプします。</li>
           <li><strong>👥 バッジ</strong> はコミュニティが提案・審査済みのタイムスタンプです。「+ 提案」で自分のタイムスタンプを投稿できます。</li>
           <li>プレイヤー下の <strong>連続再生</strong> をONにすると、動画終了後に自動で次の配信へ移動します。</li>
-          <li>戻るボタンを押すとミニプレイヤーで再生を継続。ミニプレイヤーのタイトルをタップすると配信ビューワーへ戻れます。</li>
+          <li>戻るボタンを押すとミニプレイヤーで再生を継続。ダッシュボードの「続きから見る」からも再開できます。</li>
         </ul>
       </section>
       <section class="guide-section">
@@ -229,13 +236,17 @@
         <ul>
           <li>プレイリストタブでマイリストを作成し、好きな歌枠を自由に追加・管理できます。</li>
           <li>タイムラインの各歌枠の <strong>＋</strong> ボタンや、歌枠ビューワー下部からもプレイリストへ追加できます。</li>
+          <li>歌みた・オリ曲の音楽ライブラリも検索でき、プレイリストへ追加できます。</li>
+          <li>作ったプレイリストは共有リンクをコピーしたり、YouTubeで連続再生できます。</li>
         </ul>
       </section>
       <section class="guide-section">
         <h3>ランキング・配信者モード</h3>
         <ul>
           <li>ランキングは今月・先月・直近7日・月別に切り替えられ、前月比も確認できます。</li>
-          <li>配信者モードでは選曲候補をセトリに追加して並び替え・コピーができます。</li>
+          <li>ダッシュボードでは月別歌唱数、ジャンル分布、ヒートマップ、久しぶり候補を確認できます。</li>
+          <li>配信者モードでは曲検索からセトリへ追加し、ドラッグ並び替え・1曲コピー・共有リンク作成ができます。</li>
+          <li>データにない新しい曲も、曲名・アーティスト・キーを入力して一時的にセトリへ追加できます。</li>
         </ul>
       </section>
       <section class="guide-section">
@@ -252,7 +263,7 @@
         <ul>
           <li>データ更新直後は数分待ってから再読み込みしてください。</li>
           <li>古い表示が残る場合はブラウザのハードリロードを試してください。</li>
-          <li>曲名やキーの誤り・不具合はお問い合わせから連絡できます。</li>
+          <li>曲名・キー・ジャンルの誤りや不具合はフッターの「お問い合わせ」から連絡できます。</li>
         </ul>
       </section>
     </div>
@@ -262,7 +273,7 @@
 <div class="welcome-tip" id="welcome-tip" hidden>
   <div>
     <strong>表示モードを選べます</strong>
-    <span>閲覧はリスナー、選曲やセトリ作成は配信者モード。詳しい使い方はヘッダーの「?」から見られます。</span>
+    <span>閲覧はリスナー、選曲やセトリ作成は配信者モード。プレイリストや続きから見る機能も使えます。</span>
   </div>
   <button class="icon-btn help-close" id="welcome-close" type="button" aria-label="閉じる">×</button>
 </div>
