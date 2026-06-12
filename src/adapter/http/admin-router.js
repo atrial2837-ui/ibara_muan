@@ -18,6 +18,8 @@ import { saveSongMetadata } from '../../usecase/save-song-metadata.js';
 import { syncKeyReferenceCsv } from '../../usecase/sync-key-reference-csv.js';
 import { syncKeyReferenceUrl } from '../../usecase/sync-key-reference-url.js';
 import { loadAdminStatus } from '../../usecase/load-admin-status.js';
+import { listTimestampSubmissions } from '../../usecase/timestamp/list-timestamp-submissions.js';
+import { reviewTimestamp } from '../../usecase/timestamp/review-timestamp.js';
 
 /**
  * @typedef {import('./router.js').RouteContext} RouteContext
@@ -115,6 +117,49 @@ export function buildAdminRouter(options) {
 
   router.post(p('/static-data/generate'), auth(staticDataHandler));
 
+  // ─── コミュニティタイムスタンプ管理 ──────────────────────────────────────
+
+  /** 一覧取得 (status クエリ: pending|approved|rejected|省略=全件) */
+  router.get(p('/timestamps'), auth(async (ctx) => {
+    const deps = getDeps(ctx);
+    const status = ctx.query.get('status') || null;
+    const page   = Number(ctx.query.get('page'))  || 1;
+    const limit  = Number(ctx.query.get('limit'))  || 50;
+    const result = await listTimestampSubmissions(deps, { status, page, limit });
+    return jsonResponse({
+      items: result.items.map(tsToJson),
+      total: result.total,
+      page:  result.page,
+      limit: result.limit,
+    });
+  }));
+
+  /** 承認 / 却下 — path は Pages Function により書き換え済み: /timestamps/:id/approve */
+  router.post(/^(?:.*\/)?timestamps\/(\d+)\/(approve|reject)$/, auth(async (ctx) => {
+    const deps = getDeps(ctx);
+    const url = new URL(ctx.request.url);
+    const m = url.pathname.match(/\/timestamps\/(\d+)\/(approve|reject)$/);
+    const id     = Number(m[1]);
+    const action = m[2] === 'approve' ? 'approved' : 'rejected';
+    const body   = (await readJsonBody(ctx.request)) || {};
+    const updated = await reviewTimestamp(deps, {
+      id,
+      action,
+      reviewerNote: body.reviewerNote ?? null,
+    });
+    return jsonResponse({ ok: true, item: tsToJson(updated) });
+  }));
+
+  /** 削除 — path は Pages Function により書き換え済み: /timestamps/:id */
+  router.delete(/^(?:.*\/)?timestamps\/(\d+)$/, auth(async (ctx) => {
+    const deps = getDeps(ctx);
+    const url = new URL(ctx.request.url);
+    const m = url.pathname.match(/\/timestamps\/(\d+)$/);
+    const id = Number(m[1]);
+    await deps.timestamps.delete(id);
+    return jsonResponse({ ok: true });
+  }));
+
   if (includeIndexPage && renderIndexPage) {
     router.get('/', async () =>
       new Response(renderIndexPage(), {
@@ -128,4 +173,22 @@ export function buildAdminRouter(options) {
   }
 
   return router;
+}
+
+/**
+ * @param {import('../../domain/timestamp/timestamp-submission.js').TimestampSubmission} ts
+ */
+function tsToJson(ts) {
+  return {
+    id:            ts.id,
+    channelCode:   ts.channelCode,
+    streamIndex:   ts.streamIndex,
+    songIndex:     ts.songIndex,
+    timeSeconds:   ts.timeSeconds,
+    status:        ts.status,
+    submitterNote: ts.submitterNote,
+    createdAt:     ts.createdAt,
+    reviewedAt:    ts.reviewedAt,
+    reviewerNote:  ts.reviewerNote,
+  };
 }

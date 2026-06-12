@@ -29,6 +29,8 @@ export function matchReasons(song, query) {
     if (contains(song.artist)) reasons.push('アーティスト');
     if (contains(song.genreText || song.genre)) reasons.push('ジャンル');
     if (contains(song.tagText)) reasons.push('タグ');
+    if (contains(song.moodText)) reasons.push('雰囲気');
+    if (contains(song.seasonText)) reasons.push('季節');
     if (contains(song.keyText)) reasons.push('キー');
   }
   return Array.from(new Set(reasons)).slice(0, 4);

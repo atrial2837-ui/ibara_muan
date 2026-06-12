@@ -36,7 +36,14 @@ async function setup() {
     createdAt: '2026-01-01T00:00:00.000Z',
   });
 
-  return { deps: { songs }, songId };
+  return {
+    deps: {
+      songs,
+      artists,
+      clock: { now: () => new Date('2026-01-01T00:00:00.000Z') },
+    },
+    songId,
+  };
 }
 
 describe('saveSongMetadata', () => {
@@ -111,5 +118,61 @@ describe('saveSongMetadata', () => {
     await saveSongMetadata(deps, { songId, displayKey: '', genre: 'ボカロ' });
     const updated = await deps.songs.findById(songId);
     assert.equal(updated?.genre, 'ボカロ');
+  });
+
+  test('曲名とアーティスト名を更新できる', async () => {
+    const { deps, songId } = await setup();
+    await saveSongMetadata(deps, {
+      songId,
+      title: '新しい曲名',
+      artist: '新しいアーティスト',
+      displayKey: '+1',
+      genre: 'J-POP',
+    });
+
+    const updated = await deps.songs.findById(songId);
+    assert.equal(updated?.title, '新しい曲名');
+    assert.equal(updated?.artist, '新しいアーティスト');
+    assert.equal(updated?.normalized_title, '新しい曲名');
+    assert.equal(updated?.song_key, '新しい曲名__新しいアーティスト');
+    assert.equal(updated?.display_key, '+1');
+    assert.equal(updated?.genre, 'J-POP');
+  });
+
+  test('曲名が空なら ValidationError', async () => {
+    const { deps, songId } = await setup();
+    await assert.rejects(
+      () => saveSongMetadata(deps, { songId, title: '', artist: 'A', displayKey: '', genre: '' }),
+      ValidationError,
+    );
+  });
+
+  test('同じ曲名とアーティスト名の別曲があれば ValidationError', async () => {
+    const { deps, songId } = await setup();
+    const { id: artistId } = await deps.artists.insert({
+      name: '既存アーティスト',
+      normalizedName: '既存アーティスト',
+      createdAt: '2026-01-01T00:00:00.000Z',
+    });
+    await deps.songs.insert({
+      title: '既存曲',
+      normalizedTitle: '既存曲',
+      artistId,
+      songKey: '既存曲__既存アーティスト',
+      displayKey: '',
+      genre: '',
+      createdAt: '2026-01-01T00:00:00.000Z',
+    });
+
+    await assert.rejects(
+      () => saveSongMetadata(deps, {
+        songId,
+        title: '既存曲',
+        artist: '既存アーティスト',
+        displayKey: '',
+        genre: '',
+      }),
+      ValidationError,
+    );
   });
 });

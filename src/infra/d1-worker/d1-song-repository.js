@@ -110,9 +110,17 @@ export class D1SongRepository {
   async updateMetadata(id, metadata) {
     await this.client.run(
       `UPDATE songs
-       SET display_key = COALESCE(NULLIF(?, ''), display_key),
+       SET title       = COALESCE(?, title),
+           normalized_title = COALESCE(?, normalized_title),
+           artist_id   = COALESCE(?, artist_id),
+           song_key    = COALESCE(?, song_key),
+           display_key = COALESCE(NULLIF(?, ''), display_key),
            genre = COALESCE(NULLIF(?, ''), genre)
        WHERE id = ?`,
+      metadata.title ?? null,
+      metadata.normalizedTitle ?? null,
+      metadata.artistId ?? null,
+      metadata.songKey ?? null,
       metadata.displayKey,
       metadata.genre,
       id,
