@@ -1,1 +1,0 @@
-var o="1supVLmIOoa3fdwvT_NHioLefjsa-ldQBQCMhZakKD-o",t={main:{id:"main",label:"\u8328\u3080\u3042\u3093",listGid:"0",setlistGid:"0"}},s="main",e=t.main.listGid,I=t.main.setlistGid,T=12,n=12,c=50,i=20;var p=`https://docs.google.com/spreadsheets/d/${o}/edit`;export{s as a,T as b,n as c,c as d,i as e};

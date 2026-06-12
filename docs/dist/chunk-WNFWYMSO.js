@@ -1,4 +1,4 @@
-import{d as h}from"./chunk-FCOJKAWC.js";import{e as d}from"./chunk-4VQQINBR.js";import{a as w,c as f,h as y,i as c}from"./chunk-3CMR4JCK.js";function b(){let{songs:t,streams:l=[]}=d.data,a=d.rankingPeriod||"all",s=w("#panel-ranking");if(!s)return;let n=a==="all"?null:S(l,a),i=n?C(t,n):[...t].sort(($,o)=>o.count-$.count||$.title.localeCompare(o.title,"ja")),e=d.rankingLimit,u=i.slice(0,e),p=!!d.channelData?.fullLoaded;s.innerHTML=`
+import{e as d}from"./chunk-4VQQINBR.js";import{d as h}from"./chunk-HDKS545O.js";import{a as w,c as f,h as y,i as c}from"./chunk-3CMR4JCK.js";function b(){let{songs:t,streams:l=[]}=d.data,a=d.rankingPeriod||"all",s=w("#panel-ranking");if(!s)return;let n=a==="all"?null:S(l,a),i=n?C(t,n):[...t].sort(($,o)=>o.count-$.count||$.title.localeCompare(o.title,"ja")),e=d.rankingLimit,u=i.slice(0,e),p=!!d.channelData?.fullLoaded;s.innerHTML=`
     <div class="section-header">
       <h2>\u{1F3C6} \u6B4C\u5531\u56DE\u6570\u30E9\u30F3\u30AD\u30F3\u30B0</h2>
       <span class="count-pill">${t.length}\u66F2\u4E2D</span>

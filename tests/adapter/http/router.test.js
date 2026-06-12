@@ -167,8 +167,8 @@ describe('Router', () => {
       return new Response('ok');
     });
 
-    await router.dispatch(makeRequest('GET', 'http://localhost/api/search?q=kanau'));
-    assert.equal(receivedQ, 'kanau');
+    await router.dispatch(makeRequest('GET', 'http://localhost/api/search?q=ibara'));
+    assert.equal(receivedQ, 'ibara');
   });
 
   it('ctx.env が dispatch に渡した env オブジェクトと同じ', async () => {

@@ -175,6 +175,23 @@
 
   <section class="admin-panel">
     <div class="section-header">
+      <h2>コミュニティタイムスタンプ申請</h2>
+      <span class="badge" id="ts-count">—</span>
+    </div>
+    <div class="admin-actions" style="margin-bottom:8px">
+      <button class="btn ghost ts-filter-btn active" data-ts-filter="pending"  type="button">審査待ち</button>
+      <button class="btn ghost ts-filter-btn"        data-ts-filter="approved" type="button">承認済み</button>
+      <button class="btn ghost ts-filter-btn"        data-ts-filter="rejected" type="button">却下済み</button>
+      <button class="btn primary" id="ts-approve-all" type="button" disabled>表示中を一括承認</button>
+    </div>
+    <p class="admin-note" id="ts-status"></p>
+    <div class="admin-table-wrap" id="ts-table-wrap">
+      <p class="admin-note">読み込み中…</p>
+    </div>
+  </section>
+
+  <section class="admin-panel">
+    <div class="section-header">
       <h2>更新手順</h2>
     </div>
     <ol class="admin-steps">

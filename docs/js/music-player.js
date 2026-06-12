@@ -9,6 +9,7 @@
  */
 
 import { $, escapeHtml, youtubeVideoId, youtubeThumb } from './utils.js';
+import { VOLUME_STORAGE_KEY } from './config.js';
 
 /* ── 状態 ────────────────────────────────────────────────────────────────── */
 
@@ -26,8 +27,8 @@ let _ytReady = false;
 const _ytQ   = [];
 let _apiLoader = null;
 
-const _storedVol = () => Math.max(0, Math.min(100, parseInt(localStorage.getItem('ibaraVol') ?? '100') || 100));
-const _saveVol   = v  => localStorage.setItem('ibaraVol', String(v));
+const _storedVol = () => Math.max(0, Math.min(100, parseInt(localStorage.getItem(VOLUME_STORAGE_KEY) ?? '100') || 100));
+const _saveVol   = v  => localStorage.setItem(VOLUME_STORAGE_KEY, String(v));
 const _volIcon   = v  => v === 0 ? '🔇' : v < 50 ? '🔉' : '🔊';
 
 /* ── YT API 連携 ─────────────────────────────────────────────────────────── */

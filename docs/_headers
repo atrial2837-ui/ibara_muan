@@ -1,5 +1,5 @@
 /*
-  X-Robots-Tag: noindex, nofollow
+  X-Robots-Tag: index, follow
 
 /data/*
   Cache-Control: public, max-age=300, stale-while-revalidate=86400
