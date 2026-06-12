@@ -11,6 +11,7 @@ export const state = {
   timelineLimit: 12,
   timelineFilter: null,
   timelineFocus: null,
+  timelineSort: 'date-desc',
 
   // songs
   songsQuery: '',

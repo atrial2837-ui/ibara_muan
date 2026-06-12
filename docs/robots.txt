@@ -1,6 +1,2 @@
 User-agent: *
-Allow: /
-Disallow: /admin.html
-Disallow: /api/
-
-Sitemap: https://ibara-muan-songlist.pages.dev/sitemap.xml
+Disallow: /

@@ -92,6 +92,31 @@ test('dispatchWorkflow: sends ref in body', async () => {
   assert.deepEqual(capturedBody.inputs, { environment: 'staging' });
 });
 
+test('dispatchWorkflow: fetch の this を壊さず呼び出す', async () => {
+  let capturedThis = null;
+  function strictFetch() {
+    capturedThis = this;
+    if (this !== globalThis) {
+      throw new TypeError('Illegal invocation: function called with incorrect this reference');
+    }
+    return { ok: true };
+  }
+
+  const gw = new FetchGitHubActionsGateway({
+    token: 'ghp_test123',
+    fetchImpl: strictFetch,
+  });
+
+  await gw.dispatchWorkflow({
+    owner: 'org',
+    repo: 'repo',
+    workflow: 'test.yml',
+    ref: 'main',
+  });
+
+  assert.equal(capturedThis, globalThis);
+});
+
 test('dispatchWorkflow: throws on HTTP error', async () => {
   const mockFetch = async () => ({
     ok: false,

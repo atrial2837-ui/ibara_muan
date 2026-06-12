@@ -6,6 +6,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { saveSongMetadata } from '../../src/usecase/save-song-metadata.js';
+import { GENRE_LIST } from '../../src/domain/song/genre.js';
 import { ValidationError } from '../../src/domain/error/validation-error.js';
 import { NotFoundError } from '../../src/domain/error/not-found-error.js';
 import {
@@ -113,11 +114,13 @@ describe('saveSongMetadata', () => {
     );
   });
 
-  test('全ジャンルの代表値が受け入れられる', async () => {
-    const { deps, songId } = await setup();
-    await saveSongMetadata(deps, { songId, displayKey: '', genre: 'ボカロ' });
-    const updated = await deps.songs.findById(songId);
-    assert.equal(updated?.genre, 'ボカロ');
+  test('全ジャンルが受け入れられる', async () => {
+    for (const genre of GENRE_LIST) {
+      const { deps, songId } = await setup();
+      await saveSongMetadata(deps, { songId, displayKey: '', genre });
+      const updated = await deps.songs.findById(songId);
+      assert.equal(updated?.genre, genre);
+    }
   });
 
   test('曲名とアーティスト名を更新できる', async () => {

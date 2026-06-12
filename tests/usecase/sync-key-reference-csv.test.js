@@ -33,6 +33,52 @@ async function insertSong(repo, opts) {
   });
 }
 
+class CountingSongRepository extends InMemorySongRepository {
+  constructor() {
+    super();
+    this.calls = {
+      findAll: 0,
+      findByKey: 0,
+      findByNormalizedTitle: 0,
+      updateMetadata: 0,
+      updateMetadataBatch: 0,
+    };
+  }
+
+  async findAll() {
+    this.calls.findAll += 1;
+    return super.findAll();
+  }
+
+  async findByKey(songKey) {
+    this.calls.findByKey += 1;
+    return super.findByKey(songKey);
+  }
+
+  async findByNormalizedTitle(normalizedTitle) {
+    this.calls.findByNormalizedTitle += 1;
+    return super.findByNormalizedTitle(normalizedTitle);
+  }
+
+  async updateMetadata(id, metadata) {
+    this.calls.updateMetadata += 1;
+    return super.updateMetadata(id, metadata);
+  }
+
+  async updateMetadataBatch(rows) {
+    this.calls.updateMetadataBatch += 1;
+    for (const row of rows) {
+      const current = this._store.get(row.id);
+      if (!current) continue;
+      this._store.set(row.id, {
+        ...current,
+        display_key: row.displayKey,
+        genre: row.genre,
+      });
+    }
+  }
+}
+
 // ─── 基本ケース ───────────────────────────────────────────────────────────────
 
 test('syncKeyReferenceCsv: exact match で displayKey を更新する', async () => {
@@ -148,6 +194,25 @@ test('syncKeyReferenceCsv: 複数行を処理する', async () => {
   assert.equal(result.updated, 2);
   assert.equal(result.skipped, 0);
   assert.equal(result.total, 2);
+});
+
+test('syncKeyReferenceCsv: 大量CSVでも曲一覧取得1回と一括更新で同期する', async () => {
+  const songs = new CountingSongRepository();
+  const lines = ['title,artist,key,genre'];
+  for (let i = 0; i < 120; i++) {
+    await insertSong(songs, { title: `曲${i}`, artist: `歌手${i}` });
+    lines.push(`曲${i},歌手${i},+${i % 12},ボカロ`);
+  }
+
+  const result = await syncKeyReferenceCsv({ songs }, { csvText: lines.join('\n') });
+
+  assert.equal(result.updated, 120);
+  assert.equal(result.skipped, 0);
+  assert.equal(songs.calls.findAll, 1);
+  assert.equal(songs.calls.findByKey, 0);
+  assert.equal(songs.calls.findByNormalizedTitle, 0);
+  assert.equal(songs.calls.updateMetadata, 0);
+  assert.equal(songs.calls.updateMetadataBatch, 1);
 });
 
 // ─── CSV が空 ─────────────────────────────────────────────────────────────────

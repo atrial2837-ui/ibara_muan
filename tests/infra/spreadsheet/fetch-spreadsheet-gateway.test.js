@@ -49,6 +49,26 @@ test('fetchCsv: uses default fetch if not provided', async () => {
   assert(typeof gw.fetch === 'function', 'should have fetch method');
 });
 
+test('fetchCsv: fetch の this を壊さず呼び出す', async () => {
+  let capturedThis = null;
+  function strictFetch() {
+    capturedThis = this;
+    if (this !== globalThis) {
+      throw new TypeError('Illegal invocation: function called with incorrect this reference');
+    }
+    return {
+      ok: true,
+      text: async () => 'ok',
+    };
+  }
+
+  const gw = new FetchSpreadsheetGateway(strictFetch);
+  const csv = await gw.fetchCsv('https://example.com/data.csv');
+
+  assert.equal(csv, 'ok');
+  assert.equal(capturedThis, globalThis);
+});
+
 test('fetchCsv: returns empty CSV on success', async () => {
   const mockFetch = async () => ({
     ok: true,

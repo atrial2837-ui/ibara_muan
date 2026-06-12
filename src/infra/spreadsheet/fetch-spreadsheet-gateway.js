@@ -12,8 +12,8 @@ export class FetchSpreadsheetGateway {
   /**
    * @param {typeof fetch} [fetchImpl=fetch] DI 用 fetch 実装 (テスト時は mock)
    */
-  constructor(fetchImpl = fetch) {
-    this.fetch = fetchImpl;
+  constructor(fetchImpl = globalThis.fetch) {
+    this.fetch = (...args) => fetchImpl.call(globalThis, ...args);
   }
 
   /**

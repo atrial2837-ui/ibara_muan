@@ -23,20 +23,27 @@ function ensureChartJs() {
 
 function readCssVars() {
   const cs = getComputedStyle(document.documentElement);
+  const css = (name) => cs.getPropertyValue(name).trim();
   cssVars = {
-    ink: cs.getPropertyValue('--ink').trim(),
-    inkSoft: cs.getPropertyValue('--ink-soft').trim(),
-    inkMute: cs.getPropertyValue('--ink-mute').trim(),
-    primary: cs.getPropertyValue('--primary').trim(),
-    primaryStrong: cs.getPropertyValue('--primary-strong').trim(),
-    primarySoft: cs.getPropertyValue('--primary-soft').trim(),
-    accent: cs.getPropertyValue('--accent').trim(),
-    accentStrong: cs.getPropertyValue('--accent-strong').trim(),
-    border: cs.getPropertyValue('--border').trim(),
-    borderSoft: cs.getPropertyValue('--border-soft').trim(),
-    borderStrong: cs.getPropertyValue('--border-strong').trim(),
-    surface: cs.getPropertyValue('--surface').trim(),
-    gold: cs.getPropertyValue('--gold').trim(),
+    ink: css('--ink'),
+    inkSoft: css('--ink-soft'),
+    inkMute: css('--ink-mute'),
+    primary: css('--primary'),
+    primaryStrong: css('--primary-strong'),
+    primarySoft: css('--primary-soft'),
+    accent: css('--accent'),
+    accentStrong: css('--accent-strong'),
+    border: css('--border'),
+    borderSoft: css('--border-soft'),
+    borderStrong: css('--border-strong'),
+    surface: css('--surface'),
+    gold: css('--gold'),
+    chartPrimary: css('--chart-primary') || css('--primary'),
+    chartPrimaryStrong: css('--chart-primary-strong') || css('--primary-strong'),
+    chartPrimarySoft: css('--chart-primary-soft') || css('--primary-soft'),
+    chartAccent: css('--chart-accent') || css('--accent'),
+    chartAccentStrong: css('--chart-accent-strong') || css('--accent-strong'),
+    chartAccentSoft: css('--chart-accent-soft') || css('--accent-soft'),
   };
 }
 
@@ -146,13 +153,14 @@ export function chartCanvas(id, opts = {}) {
  * @param {string} label - データセットラベル
  */
 export function createLineChart(ctx, labels, data, label) {
+  const c = getColors();
   return createChart(ctx, 'line', {
     labels,
     datasets: [{
       label,
       data,
-      borderColor: getColors().primaryStrong,
-      backgroundColor: getColors().primary + '33',
+      borderColor: c.chartPrimaryStrong,
+      backgroundColor: c.chartPrimary + '33',
       tension: 0.3,
       fill: true,
       pointRadius: 3,
@@ -169,7 +177,7 @@ export function createLineChart(ctx, labels, data, label) {
  */
 export function createDoughnutChart(ctx, labels, data) {
   const c = getColors();
-  const colors = [c.primary, c.accent, c.gold, c.primaryStrong, c.accentStrong, '#6cc6ec', '#ff9eb5', '#f4c44a'];
+  const colors = [c.chartPrimary, c.chartAccent, c.gold, c.chartPrimaryStrong, c.chartAccentStrong, '#6cc6ec', '#ff9eb5', '#f4c44a'];
   return createChart(ctx, 'doughnut', {
     labels,
     datasets: [{
@@ -199,8 +207,8 @@ export function createBarChart(ctx, labels, data, label) {
     datasets: [{
       label,
       data,
-      backgroundColor: c.primary + 'cc',
-      borderColor: c.primaryStrong,
+      backgroundColor: c.chartPrimary + 'cc',
+      borderColor: c.chartPrimaryStrong,
       borderWidth: 1,
       borderRadius: 6,
     }],

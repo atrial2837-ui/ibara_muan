@@ -79,6 +79,8 @@
  * @property {(id: number, metadata: SongMetadata) => Promise<void>} updateMetadata
  *   - 根拠: admin:240-241 `UPDATE songs SET display_key=?, genre=? WHERE id=?`
  *   - saveSongMetadata / importKeyReferenceCsv が呼び出し
+ * @property {(rows: Array<{ id: number } & SongMetadata>) => Promise<void>} [updateMetadataBatch]
+ *   - CSV同期の大量更新用。実装があれば複数曲を少数のDBリクエストへまとめる
  * @property {(query: string, limit: number) => Promise<Song[]>} search
  *   - 根拠: admin:329-339 searchSongs — title/artist/song_key/genre で LIKE 検索, 最大 80 件
  *   - SoT 20 §4 にも明記 (SoT 02 §5-1 案には未記載のため追加)

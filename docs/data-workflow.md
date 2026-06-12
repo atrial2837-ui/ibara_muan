@@ -34,6 +34,45 @@
 
 迷ったものは `表記ゆれ候補` に置き、後でまとめて判断します。
 
+## ジャンル分類
+
+`曲マスター` の `ジャンル` 列を正式値として扱います。D1投入時に弾かれないよう、スプレッドシートの `ジャンル一覧` とアプリ側の固定ジャンルは同じ14種類に揃えます。
+
+使用ジャンル:
+
+- J-POP
+- アニソン
+- ボカロ
+- アイドル
+- K-POP
+- VTuber
+- ディズニー
+- ミュージカル
+- 童謡・唱歌
+- 歌謡曲
+- 洋楽
+- ゲーム・キャラソン
+- オリジナル
+- 未分類
+
+分類は `Spotify + Discogs + ローカル辞書 + 最終手修正` の順で補助します。Spotify はアーティスト傾向、Discogs はリリースの genre/style、ローカル辞書はボカロ・アニソン・ゲーム・ディズニー・茨むあんオリジナルの確定寄り判定に使います。
+
+ローカル辞書の優先ルール:
+
+- VTuber: 歌唱者がVTuberの場合は、曲調やタイアップより最優先で `VTuber` にします。
+- ボカロ: 音声合成ソフトが歌唱している曲、または元がボカロ曲として有名なセルフカバーは `ボカロ` にします。
+- アニソン: アニメOP/ED/挿入歌として明確な曲は、J-POPアーティストの曲でも `アニソン` を優先します。
+- ゲーム・キャラソン: アニメではなくゲームBGM・主題歌、またはキャラクター名義の曲は `ゲーム・キャラソン` にします。
+
+`曲マスター` の `ジャンル候補` / `判定元` / `信頼度` は補助情報です。サイトとD1に反映する正式値は、最終確認後の `ジャンル` 列だけにします。
+
+候補の再生成は `tools/suggest_genres.mjs` を使います。Spotify を使う場合は `SPOTIFY_CLIENT_ID` と `SPOTIFY_CLIENT_SECRET`、Discogs を多めに使う場合は `DISCOGS_TOKEN` または `DISCOGS_USER_TOKEN` を `.env.local` か環境変数に設定します。未設定の場合、Spotify はスキップし、Discogs は `--discogs-unauth-limit` の範囲だけ未認証で試します。
+Spotify Web API はアプリ所有アカウントに Premium が必要です。Premium 条件を満たしていない場合は `spotifyDisabledReason: "premium_required"` としてSpotify判定をスキップし、ローカル辞書とDiscogsで候補を出します。
+
+```bash
+node tools/suggest_genres.mjs --out-tsv docs/data/genre_suggestions.tsv --discogs-unauth-limit 20 --discogs-max-requests 20
+```
+
 ## D1投入
 
 集計がある程度まとまったら、`docs/admin.html` の歌枠追加から配信単位で登録します。

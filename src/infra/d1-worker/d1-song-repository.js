@@ -17,6 +17,8 @@
  * @typedef {import('./d1-worker-client.js').D1WorkerClient} D1WorkerClient
  */
 
+const METADATA_BATCH_SIZE = 100;
+
 export class D1SongRepository {
   /** @param {D1WorkerClient} client */
   constructor(client) {
@@ -125,6 +127,30 @@ export class D1SongRepository {
       metadata.genre,
       id,
     );
+  }
+
+  /**
+   * CSV同期などの大量更新を少数のD1リクエストにまとめる。
+   *
+   * @param {Array<{ id: number } & SongMetadata>} rows
+   * @returns {Promise<void>}
+   */
+  async updateMetadataBatch(rows) {
+    const sql = `UPDATE songs
+       SET display_key = COALESCE(NULLIF(?, ''), display_key),
+           genre = COALESCE(NULLIF(?, ''), genre)
+       WHERE id = ?`;
+
+    for (let index = 0; index < rows.length; index += METADATA_BATCH_SIZE) {
+      const chunk = rows.slice(index, index + METADATA_BATCH_SIZE);
+      if (!chunk.length) continue;
+      const stmts = chunk.map((row) =>
+        this.client.db
+          .prepare(sql)
+          .bind(row.displayKey, row.genre, row.id),
+      );
+      await this.client.db.batch(stmts);
+    }
   }
 
   /**
