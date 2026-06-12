@@ -4997,6 +4997,7 @@ body.has-music-bar { padding-bottom: 72px; }
   pointer-events: none;
 }
 .mv-badge-original  { background: var(--primary);      color: #fff; }
+.mv-badge-sugariri  { background: #be185d;              color: #fff; }
 .mv-badge-office    { background: #d97706;              color: #fff; }
 .mv-badge-character { background: #7c3aed;              color: #fff; }
 .mv-badge-cover     { background: var(--accent-strong); color: #fff; }
@@ -5114,6 +5115,7 @@ body.has-music-bar { padding-bottom: 72px; }
   vertical-align: middle;
 }
 .mv-badge-inline.mv-type-original  { background: var(--primary-soft); color: var(--primary-strong); }
+.mv-badge-inline.mv-type-sugariri  { background: #fce7f3;              color: #9d174d; }
 .mv-badge-inline.mv-type-office    { background: #fef3c7;              color: #92400e; }
 .mv-badge-inline.mv-type-character { background: #ede9fe;              color: #5b21b6; }
 .mv-badge-inline.mv-type-cover     { background: var(--accent-soft);   color: var(--accent-strong);  }

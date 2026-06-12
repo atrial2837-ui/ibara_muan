@@ -1895,7 +1895,7 @@ async function _svRenderBelowPlayerMv(stream) {
   const relatedShown = related.slice(0, 8);
 
   // ── ほかの動画: 同タイプ優先で最大12件 ──
-  const typeLabels = { original: 'オリジナル', office: '公式', character: 'キャラソン', cover: 'カバー' };
+  const typeLabels = { original: 'オリジナル', sugariri: 'しゅがりり', cover: 'カバー' };
   const cur = videos.find(v => v.url === stream.url);
   const others = videos
     .filter(v => v.url !== stream.url)
@@ -2662,6 +2662,105 @@ function updatePageTitle(_mode) {
   document.title = '茨むあん 歌唱データベース';
 }
 
+// ─── チャンネル情報モーダル ────────────────────────────────────────────────────
+
+const CH_INFO = {
+  main: {
+    name: '茨むあん - Ibara Muan',
+    handle: '@ibaramuan',
+    url: 'https://www.youtube.com/@ibaramuan',
+    label: 'Muan ch.',
+    desc: '沢山寝て、沢山笑って、沢山歌うよ\n個人勢Vsinger 茨むあん(Ibara Muan)です！\n2021/5/2 デビュー🎉 #vtuber #歌枠 #karaoke',
+    links: [
+      { icon: '𝕏', label: 'X (Twitter)', url: 'https://x.com/ibaramuan' },
+      { icon: '🦋', label: 'Bluesky',     url: 'https://bsky.app/profile/ibaramuan.bsky.social' },
+      { icon: '🛍', label: 'BOOTH',       url: 'https://ibaramuan.booth.pm' },
+    ],
+    avatarUrl: 'assets/avatar.jpg',
+    bannerUrl: 'assets/banner.jpg',
+  },
+};
+
+function _buildChCard(key) {
+  const info = CH_INFO[key];
+  if (!info) return '';
+
+  // バナー部分（画像URL があれば img、なければグラデーション）
+  const bannerInner = info.bannerUrl
+    ? `<img class="ch-card-banner-img" src="${escapeHtml(info.bannerUrl)}" alt="" loading="lazy">
+       <span class="ch-card-banner-label ch-card-banner-label--over">${escapeHtml(info.label)}</span>`
+    : `<span class="ch-card-banner-label">${escapeHtml(info.label)}</span>`;
+
+  // アバター部分（画像URL があれば img、なければ文字）
+  const avatarInner = info.avatarUrl
+    ? `<img class="ch-card-avatar-img" src="${escapeHtml(info.avatarUrl)}" alt="${escapeHtml(info.name)}" loading="lazy">`
+    : '茨';
+
+  // 説明文（改行対応）
+  const descHtml = info.desc
+    ? `<p class="ch-card-desc">${info.desc.split('\n').map(l => escapeHtml(l)).join('<br>')}</p>`
+    : '';
+
+  // リンク一覧
+  const linksHtml = info.links?.length ? `
+    <div class="ch-card-links">
+      ${info.links.map(l => `
+        <a class="ch-card-link" href="${escapeHtml(l.url)}" target="_blank" rel="noopener">
+          <span class="ch-card-link-icon" aria-hidden="true">${l.icon}</span>
+          <span>${escapeHtml(l.label)}</span>
+        </a>`).join('')}
+    </div>` : '';
+
+  return `
+    <div class="ch-card ch-card--${key}">
+      <div class="ch-card-banner ch-card-banner--${key}${info.bannerUrl ? ' ch-card-banner--img' : ''}">
+        ${bannerInner}
+      </div>
+      <div class="ch-card-body">
+        <div class="ch-card-header">
+          <div class="ch-card-avatar ch-card-avatar--${key}${info.avatarUrl ? ' ch-card-avatar--img' : ''}">${avatarInner}</div>
+          <div class="ch-card-meta">
+            <div class="ch-card-name">${escapeHtml(info.name)}</div>
+            <div class="ch-card-handle">${escapeHtml(info.handle)}</div>
+          </div>
+        </div>
+        ${descHtml}
+        ${linksHtml}
+        <div class="ch-card-actions">
+          <a class="ch-card-yt-btn" href="${escapeHtml(info.url)}" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg>
+            YouTubeチャンネルへ
+          </a>
+        </div>
+      </div>
+    </div>`;
+}
+
+function openChannelModal(chKey) {
+  const modal = $('#ch-modal');
+  const body  = $('#ch-modal-body');
+  if (!modal || !body) return;
+
+  body.innerHTML = _buildChCard('main');
+  modal.hidden = false;
+  $('#ch-modal-close')?.focus();
+}
+
+function initChannelModal() {
+  const modal    = $('#ch-modal');
+  const closeBtn = $('#ch-modal-close');
+  if (!modal || !closeBtn) return;
+
+  const close = () => { modal.hidden = true; };
+  closeBtn.addEventListener('click', close);
+  modal.addEventListener('click', e => { if (e.target === modal) close(); });
+
+  // Official Channel ボタン
+  document.querySelectorAll('[data-ch-modal]').forEach(btn => {
+    btn.addEventListener('click', () => openChannelModal(btn.dataset.chModal));
+  });
+}
+
 function initHelpModal() {
   const modal = $('#help-modal');
   const openBtn = $('#help-btn');
@@ -2841,6 +2940,7 @@ document.body.addEventListener('click', (e) => {
 $('#retry-btn').addEventListener('click', init);
 $('#reload-btn').addEventListener('click', init);
 initHelpModal();
+initChannelModal();
 initYouTubePlayer();
 initStreamViewer();
 initSongModal();
