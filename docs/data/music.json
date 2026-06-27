@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-12T10:57:27.428Z",
+  "updatedAt": "2026-06-27T00:00:00.000Z",
   "videos": [
     {
       "title": "IRIS OUT / Kenshi Yonezu -Cover- Ibara Muan",
@@ -480,6 +480,17 @@
       "duration": 204,
       "thumbnail": "https://i.ytimg.com/vi/3ZVm_kJsSX8/hqdefault.jpg",
       "originalArtist": "HIMEHINA"
+    },
+    {
+      "title": "AIZO / King Gnu Covered 茨むあん",
+      "url": "https://www.youtube.com/watch?v=K_rKjDegoHc",
+      "type": "cover",
+      "category": "歌みた",
+      "playlistId": "PLdAno8EXhmVbyr0Cw-1uby8iBxzoaP6QG",
+      "playlistTitle": "𝐂𝐨𝐯𝐞𝐫 𝐒𝐨𝐧𝐠",
+      "playlistIndex": 46,
+      "thumbnail": "https://i.ytimg.com/vi/K_rKjDegoHc/hqdefault.jpg",
+      "originalArtist": "King Gnu"
     },
     {
       "title": "眠り姫 / 茨むあん -Official Music Video-",
