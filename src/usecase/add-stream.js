@@ -10,7 +10,9 @@
  */
 
 import { normalize } from '../domain/shared/text.js';
+import { isDateIso } from '../domain/shared/date.js';
 import { splitSongLine } from '../domain/stream/setlist-parser.js';
+import { buildUrlKey } from '../domain/stream/url-key.js';
 import { ValidationError } from '../domain/error/validation-error.js';
 import { upsertSong } from './upsert-song.js';
 
@@ -52,26 +54,10 @@ import { upsertSong } from './upsert-song.js';
  */
 function validateStreamedOn(streamedOn) {
   const normalized = normalize(streamedOn);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
+  if (!isDateIso(normalized)) {
     throw new ValidationError('配信日は YYYY-MM-DD で入力してください');
   }
   return normalized;
-}
-
-/**
- * URL キーを生成する。
- *
- * URL が指定されていればそれを使い、なければ "channelCode:streamedOn:title" を使う。
- * 既存実装 (admin:266) の inline ロジック。
- *
- * @param {string} url         - 正規化済み URL (空文字の場合あり)
- * @param {string} channelCode - チャンネルコード
- * @param {string} streamedOn  - YYYY-MM-DD
- * @param {string} title       - 正規化済みタイトル
- * @returns {string}
- */
-function buildUrlKey(url, channelCode, streamedOn, title) {
-  return url || `${channelCode}:${streamedOn}:${title}`;
 }
 
 /**

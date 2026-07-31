@@ -64,6 +64,23 @@
 
   <section class="admin-panel">
     <div class="section-header">
+      <h2>歌枠の日付修正</h2>
+      <span class="badge" id="stream-list-count">—</span>
+    </div>
+    <p class="admin-note">登録済みの歌枠の配信日を修正できます。D1を直接更新するので、修正後は「静的データ生成」も実行してください。</p>
+    <div class="admin-form-grid">
+      <label>チャンネル<select id="stream-list-channel"></select></label>
+      <label>表示件数<input id="stream-list-limit" type="number" min="1" max="500" value="50"></label>
+    </div>
+    <div class="admin-actions">
+      <button class="btn ghost" id="reload-streams" type="button">歌枠一覧を読み込む</button>
+    </div>
+    <p class="admin-note" id="stream-list-status"></p>
+    <div id="stream-list-box"></div>
+  </section>
+
+  <section class="admin-panel">
+    <div class="section-header">
       <h2>キー・ジャンル管理</h2>
       <span class="badge" id="meta-badge">待機中</span>
     </div>

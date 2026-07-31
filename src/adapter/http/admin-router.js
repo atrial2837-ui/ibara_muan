@@ -13,6 +13,8 @@ import { readJsonBody } from './read-json-body.js';
 
 import { previewStream } from '../../usecase/preview-stream.js';
 import { addStream } from '../../usecase/add-stream.js';
+import { listStreams } from '../../usecase/list-streams.js';
+import { updateStreamDate } from '../../usecase/update-stream-date.js';
 import { searchSongs } from '../../usecase/search-songs.js';
 import { saveSongMetadata } from '../../usecase/save-song-metadata.js';
 import { syncKeyReferenceCsv } from '../../usecase/sync-key-reference-csv.js';
@@ -90,10 +92,30 @@ export function buildAdminRouter(options) {
     return jsonResponse(result);
   }));
 
+  router.get(p('/streams'), auth(async (ctx) => {
+    const result = await listStreams(getDeps(ctx), {
+      channelCode: ctx.query.get('channel') || '',
+      limit: Number(ctx.query.get('limit')) || 100,
+    });
+    return jsonResponse(result);
+  }));
+
   router.post(p('/streams'), auth(async (ctx) => {
     const body = (await readJsonBody(ctx.request)) || {};
     const result = await addStream(getDeps(ctx), body);
     return jsonResponse(result);
+  }));
+
+  /** 配信日の変更 — path は Pages Function により書き換え済み: /streams/:id/date */
+  router.post(/^(?:.*\/)?streams\/(\d+)\/date$/, auth(async (ctx) => {
+    const url = new URL(ctx.request.url);
+    const m = url.pathname.match(/\/streams\/(\d+)\/date$/);
+    const body = (await readJsonBody(ctx.request)) || {};
+    const result = await updateStreamDate(getDeps(ctx), {
+      streamId: Number(m[1]),
+      streamedOn: body.streamedOn,
+    });
+    return jsonResponse({ ok: true, ...result });
   }));
 
   router.post(p('/songs/metadata'), auth(async (ctx) => {

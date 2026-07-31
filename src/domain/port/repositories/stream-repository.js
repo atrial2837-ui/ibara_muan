@@ -54,6 +54,17 @@
  */
 
 /**
+ * 配信日変更に使う DTO (updateDate メソッド用)。
+ *
+ * url_key は配信日を含みうる (URL 未登録時は "channelCode:streamedOn:title") ため、
+ * 配信日と同時に更新する必要がある。
+ *
+ * @typedef {object} StreamDatePatch
+ * @property {string} streamedOn - 新しい配信日 YYYY-MM-DD
+ * @property {string} urlKey     - 新しい配信日で再計算した url_key
+ */
+
+/**
  * 歌枠の永続化 Port interface。
  *
  * @typedef {object} StreamRepository
@@ -62,8 +73,13 @@
  *   - addStream の重複チェック・既存取得に使用
  * @property {(input: NewStream) => Promise<{ id: number }>} insert
  *   - 根拠: admin:292-298 `INSERT INTO streams (...)`
+ * @property {(id: number) => Promise<Stream|null>} findById
+ *   - 管理画面から既存歌枠を 1 件指定して編集するために使用 (updateStreamDate)
  * @property {(id: number, patch: StreamPatch) => Promise<void>} update
  *   - 根拠: admin:276-284 旧 stream の song_count を更新 (デクリメント後の補正)
+ * @property {(id: number, patch: StreamDatePatch) => Promise<void>} updateDate
+ *   - 配信日 (streamed_on) と url_key を同時更新する
+ *   - update() は source_index/title/url/song_count を丸ごと上書きする実装のため分離している
  * @property {(channelId: number) => Promise<Stream[]>} findAllByChannel
  *   - 根拠: admin-server (generate_static_data) で channel 別に歌枠を取得
  *   - SoT 02 §5-3 に明記

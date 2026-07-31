@@ -13,6 +13,7 @@
  * @typedef {import('../../domain/port/repositories/stream-repository.js').Stream} Stream
  * @typedef {import('../../domain/port/repositories/stream-repository.js').NewStream} NewStream
  * @typedef {import('../../domain/port/repositories/stream-repository.js').StreamPatch} StreamPatch
+ * @typedef {import('../../domain/port/repositories/stream-repository.js').StreamDatePatch} StreamDatePatch
  * @typedef {import('./d1-rest-client.js').D1RestClient} D1RestClient
  */
 
@@ -38,6 +39,22 @@ export class D1RestStreamRepository {
         channelId,
         streamedOn,
         urlKey,
+      )
+    );
+  }
+
+  /**
+   * id で歌枠を 1 件取得する (なければ null)。
+   * 管理画面からの配信日修正 (updateStreamDate) で使用する。
+   *
+   * @param {number} id
+   * @returns {Promise<Stream|null>}
+   */
+  async findById(id) {
+    return /** @type {Stream|null} */ (
+      await this.client.queryFirst(
+        'SELECT id, channel_id, source_index, streamed_on, title, url, url_key, song_count, created_at FROM streams WHERE id = ?',
+        id,
       )
     );
   }
@@ -81,6 +98,22 @@ export class D1RestStreamRepository {
       patch.title ?? null,
       patch.url ?? null,
       patch.song_count ?? 0,
+      id,
+    );
+  }
+
+  /**
+   * 配信日 (streamed_on) と url_key を更新する。
+   *
+   * @param {number} id
+   * @param {StreamDatePatch} patch
+   * @returns {Promise<void>}
+   */
+  async updateDate(id, patch) {
+    await this.client.run(
+      'UPDATE streams SET streamed_on = ?, url_key = ? WHERE id = ?',
+      patch.streamedOn,
+      patch.urlKey,
       id,
     );
   }
