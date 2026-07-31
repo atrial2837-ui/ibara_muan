@@ -107,6 +107,73 @@ export function runStreamRepositoryContract(label, factory) {
     }
   });
 
+  test(`${label}: findById - 存在しない場合は null を返す`, async () => {
+    const { repo, cleanup } = await factory();
+    try {
+      assert.equal(await repo.findById(9999), null);
+    } finally {
+      await cleanup?.();
+    }
+  });
+
+  test(`${label}: findById - 登録済みの歌枠を取得できる`, async () => {
+    const { repo, cleanup } = await factory();
+    try {
+      const stream = makeStream();
+      const { id } = await repo.insert(stream);
+      const found = await repo.findById(id);
+      assert.ok(found !== null);
+      assert.equal(found.id, id);
+      assert.equal(found.streamed_on, stream.streamedOn);
+      assert.equal(found.url_key, stream.urlKey);
+    } finally {
+      await cleanup?.();
+    }
+  });
+
+  test(`${label}: updateDate - streamed_on と url_key が更新される`, async () => {
+    const { repo, cleanup } = await factory();
+    try {
+      const { id } = await repo.insert(makeStream({ streamedOn: '2026-01-01', urlKey: 'k' }));
+      await repo.updateDate(id, { streamedOn: '2026-02-02', urlKey: 'k2' });
+      const found = await repo.findById(id);
+      assert.equal(found.streamed_on, '2026-02-02');
+      assert.equal(found.url_key, 'k2');
+    } finally {
+      await cleanup?.();
+    }
+  });
+
+  test(`${label}: updateDate - 他の列は変化しない`, async () => {
+    const { repo, cleanup } = await factory();
+    try {
+      const stream = makeStream({ sourceIndex: 4, songCount: 9 });
+      const { id } = await repo.insert(stream);
+      await repo.updateDate(id, { streamedOn: '2026-03-03', urlKey: stream.urlKey });
+      const found = await repo.findById(id);
+      assert.equal(found.source_index, 4);
+      assert.equal(found.song_count, 9);
+      assert.equal(found.title, stream.title);
+      assert.equal(found.url, stream.url);
+    } finally {
+      await cleanup?.();
+    }
+  });
+
+  test(`${label}: updateDate - UNIQUE(channel_id, streamed_on, url_key) 違反は Error`, async () => {
+    const { repo, cleanup } = await factory();
+    try {
+      await repo.insert(makeStream({ streamedOn: '2026-01-01', urlKey: 'dup' }));
+      const { id } = await repo.insert(makeStream({ streamedOn: '2026-05-05', urlKey: 'dup' }));
+      await assert.rejects(
+        () => repo.updateDate(id, { streamedOn: '2026-01-01', urlKey: 'dup' }),
+        Error,
+      );
+    } finally {
+      await cleanup?.();
+    }
+  });
+
   test(`${label}: findAllByChannel - 指定チャンネルの歌枠のみ返す`, async () => {
     const { repo, cleanup } = await factory();
     try {

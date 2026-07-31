@@ -60,6 +60,22 @@ export function parseDateIso(text) {
   return d;
 }
 
+// ─── isDateIso ────────────────────────────────────────────────────────────────
+
+/**
+ * 文字列が YYYY-MM-DD 形式かどうかを判定する。
+ *
+ * SoT §3-5 のバリデーション正規表現と同一。配信日 (streams.streamed_on) の
+ * 入力検証に使う。書式のみを見るため、2026-02-31 のような存在しない日付は通す
+ * (既存実装 admin:259-260 と同じ振る舞い)。
+ *
+ * @param {unknown} value - 判定対象
+ * @returns {boolean}
+ */
+export function isDateIso(value) {
+  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
 // ─── monthKey ─────────────────────────────────────────────────────────────────
 
 /**

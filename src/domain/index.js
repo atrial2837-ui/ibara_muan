@@ -22,6 +22,7 @@ export * from './song/genre.js';
 // stream
 export * from './stream/setlist-parser.js';
 export * from './stream/song-resolver.js';
+export * from './stream/url-key.js';
 
 // analytics
 export * from './analytics/rank.js';

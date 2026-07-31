@@ -1,4 +1,4 @@
-import{g as $,h as M,i as S,j as x,k as H,l as k,m as j}from"./chunk-2E6JXX77.js";import{d as h,e as m}from"./chunk-4VQQINBR.js";import{a as v,c as y,d as b,g as f,i as n,n as w}from"./chunk-3CMR4JCK.js";function K(){let{songs:t,streams:s}=m.data,r=[...t].sort((o,u)=>u.count-o.count).slice(0,5),a=r[0]?.count||1,e=s.slice(0,5),l=h(),d=x(t,l),c=v("#panel-dashboard"),D=j(s,l),g=H(s).slice(-12),L=Math.max(1,...g.map(o=>o.songs)),R=`
+import{g as $,h as M,i as S,j as x,k as H,l as k,m as j}from"./chunk-LP3AFVMO.js";import{d as h,e as m}from"./chunk-4VQQINBR.js";import{a as v,c as y,d as b,g as f,i as n,n as w}from"./chunk-3CMR4JCK.js";function K(){let{songs:t,streams:s}=m.data,r=[...t].sort((o,u)=>u.count-o.count).slice(0,5),a=r[0]?.count||1,e=s.slice(0,5),l=h(),d=x(t,l),c=v("#panel-dashboard"),D=j(s,l),g=H(s).slice(-12),L=Math.max(1,...g.map(o=>o.songs)),R=`
     <div class="card dashboard-card dashboard-activity-card">
       <div class="card-title">\u{1F4C8} \u4ECA\u6708\u306E\u6D3B\u52D5</div>
       <div class="dashboard-metric-list">

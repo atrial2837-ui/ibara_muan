@@ -15,7 +15,7 @@ Port (interface) を実装するすべての Repository / Gateway が満たす�
 |---------|-----------|---------|
 | `song-repository.contract.js` | SongRepository | 13 |
 | `artist-repository.contract.js` | ArtistRepository | 9 |
-| `stream-repository.contract.js` | StreamRepository | 10 |
+| `stream-repository.contract.js` | StreamRepository | 15 |
 | `stream-song-repository.contract.js` | StreamSongRepository | 9 |
 | `song-channel-stats-repository.contract.js` | SongChannelStatsRepository | 11 |
 | `channel-repository.contract.js` | ChannelRepository | 8 |

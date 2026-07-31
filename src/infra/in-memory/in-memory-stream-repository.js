@@ -12,6 +12,7 @@
  * @typedef {import('../../domain/port/repositories/stream-repository.js').Stream} Stream
  * @typedef {import('../../domain/port/repositories/stream-repository.js').NewStream} NewStream
  * @typedef {import('../../domain/port/repositories/stream-repository.js').StreamPatch} StreamPatch
+ * @typedef {import('../../domain/port/repositories/stream-repository.js').StreamDatePatch} StreamDatePatch
  * @typedef {import('../../domain/port/repositories/stream-repository.js').StreamRepository} StreamRepository
  */
 
@@ -45,6 +46,15 @@ export class InMemoryStreamRepository {
       }
     }
     return null;
+  }
+
+  /**
+   * @param {number} id
+   * @returns {Promise<Stream|null>}
+   */
+  async findById(id) {
+    const row = this._store.get(id);
+    return row ? { ...row } : null;
   }
 
   /**
@@ -90,6 +100,32 @@ export class InMemoryStreamRepository {
     const row = this._store.get(id);
     if (!row) return;
     this._store.set(id, { ...row, ...patch });
+  }
+
+  /**
+   * 配信日 (streamed_on) と url_key を更新する。
+   * UNIQUE(channel_id, streamed_on, url_key) 制約を守る。
+   *
+   * @param {number} id
+   * @param {StreamDatePatch} patch
+   * @returns {Promise<void>}
+   */
+  async updateDate(id, patch) {
+    const row = this._store.get(id);
+    if (!row) return;
+    for (const other of this._store.values()) {
+      if (
+        other.id !== id &&
+        other.channel_id === row.channel_id &&
+        other.streamed_on === patch.streamedOn &&
+        other.url_key === patch.urlKey
+      ) {
+        throw new Error(
+          `UNIQUE constraint failed: streams.(channel_id, streamed_on, url_key)`
+        );
+      }
+    }
+    this._store.set(id, { ...row, streamed_on: patch.streamedOn, url_key: patch.urlKey });
   }
 
   /**

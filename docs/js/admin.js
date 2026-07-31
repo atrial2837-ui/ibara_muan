@@ -122,6 +122,95 @@ function renderSongMeta(rows) {
   `;
 }
 
+function renderStreamList(streams) {
+  $('#stream-list-count').textContent = `${streams.length}件`;
+  if (!streams.length) {
+    $('#stream-list-box').innerHTML = '<p class="admin-note">歌枠がありません</p>';
+    return;
+  }
+  $('#stream-list-box').innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>配信日</th><th>ch</th><th>枠</th><th>タイトル</th><th>曲数</th><th></th></tr></thead>
+        <tbody>
+          ${streams.map((stream) => `
+            <tr data-stream-id="${stream.id}" data-streamed-on="${escapeHtml(stream.streamedOn)}">
+              <td><input class="admin-compact-input" type="date" data-field="streamedOn" value="${escapeHtml(stream.streamedOn)}"></td>
+              <td>${escapeHtml(stream.channelCode)}</td>
+              <td>${stream.sourceIndex ?? '—'}</td>
+              <td title="${escapeHtml(stream.title)}">${escapeHtml(stream.title.length > 40 ? `${stream.title.slice(0, 40)}…` : stream.title) || '—'}</td>
+              <td>${formatNumber(stream.songCount)}</td>
+              <td><button class="btn ghost" type="button" data-save-stream-date>保存</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+async function loadStreamList() {
+  $('#stream-list-status').textContent = '読み込み中...';
+  try {
+    const channel = $('#stream-list-channel').value;
+    const limit = Number($('#stream-list-limit').value) || 50;
+    const query = new URLSearchParams({ limit: String(limit) });
+    if (channel) query.set('channel', channel);
+    const data = await adminApi(`streams?${query.toString()}`);
+    renderStreamList(data.streams || []);
+    $('#stream-list-status').textContent = `全${formatNumber(data.total)}件中 ${data.streams.length}件を表示しています。`;
+  } catch (error) {
+    $('#stream-list-status').textContent = error.message || String(error);
+    $('#stream-list-box').innerHTML = '';
+    $('#stream-list-count').textContent = '—';
+  }
+}
+
+function initStreamList() {
+  const channelSelect = $('#stream-list-channel');
+  if (!channelSelect) return;
+  const channels = Object.values(CHANNELS);
+  channelSelect.innerHTML = [
+    '<option value="">すべて</option>',
+    ...channels.map((channel) => (
+      `<option value="${escapeHtml(channel.id)}">${escapeHtml(channel.label)}</option>`
+    )),
+  ].join('');
+
+  $('#reload-streams')?.addEventListener('click', loadStreamList);
+  channelSelect.addEventListener('change', loadStreamList);
+
+  $('#stream-list-box')?.addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-save-stream-date]');
+    if (!button) return;
+    const row = button.closest('[data-stream-id]');
+    const input = row.querySelector('[data-field="streamedOn"]');
+    const streamedOn = input.value;
+    if (!streamedOn) {
+      $('#stream-list-status').textContent = '配信日を入力してください';
+      return;
+    }
+    if (streamedOn === row.dataset.streamedOn) {
+      $('#stream-list-status').textContent = '配信日が変更されていません';
+      return;
+    }
+    if (!confirm(`配信日を ${row.dataset.streamedOn} → ${streamedOn} に変更します。よろしいですか？`)) return;
+
+    button.disabled = true;
+    $('#stream-list-status').textContent = '更新中...';
+    try {
+      await adminApi(`streams/${row.dataset.streamId}/date`, { streamedOn });
+      row.dataset.streamedOn = streamedOn;
+      $('#stream-list-status').textContent = '配信日を更新しました。公開サイトへの反映には静的データ生成が必要です。';
+    } catch (error) {
+      input.value = row.dataset.streamedOn;
+      $('#stream-list-status').textContent = error.message || String(error);
+    } finally {
+      button.disabled = false;
+    }
+  });
+}
+
 function collectIssues(data) {
   const issues = [];
   const datasets = [
@@ -534,5 +623,6 @@ async function initTimestamps() {
 
 $('#refresh-status').addEventListener('click', loadStatus);
 initManagement();
+initStreamList();
 loadStatus();
 initTimestamps();
