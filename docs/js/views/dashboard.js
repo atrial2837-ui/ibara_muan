@@ -239,9 +239,9 @@ function genreTopRows(songs) {
     genreCounts.set(genre, (genreCounts.get(genre) || 0) + 1);
   }
   const rows = Array.from(genreCounts.entries()).sort((a, b) => b[1] - a[1]);
-  if (rows.length <= 6) return rows;
-  const top = rows.slice(0, 5);
-  const rest = rows.slice(5).reduce((sum, [, count]) => sum + count, 0);
+  if (rows.length <= 9) return rows;
+  const top = rows.slice(0, 8);
+  const rest = rows.slice(8).reduce((sum, [, count]) => sum + count, 0);
   return [...top, ['その他', rest]];
 }
 

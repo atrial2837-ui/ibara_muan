@@ -143,7 +143,7 @@ import{c as v,d as b,g}from"./chunk-7QL3IJ6J.js";import{a as C,b as q,l as B,o a
       </div>
       <div class="bar-value">${a.count}</div>
     </div>
-  `}function nt(a){let e=new Map;for(let r of a){let i=r.genre||r.genreText||"\u672A\u5206\u985E";!i||i==="\u672A\u5206\u985E"||e.set(i,(e.get(i)||0)+1)}let t=Array.from(e.entries()).sort((r,i)=>i[1]-r[1]);if(t.length<=6)return t;let n=t.slice(0,5),s=t.slice(5).reduce((r,[,i])=>r+i,0);return[...n,["\u305D\u306E\u4ED6",s]]}function _(){let a=v();return[a.primary,a.accent,a.gold,a.primaryStrong,a.accentStrong,"#9b7ed9"]}function it(a){if(!a.length)return'<div class="empty-state">\u30B8\u30E3\u30F3\u30EB\u30C7\u30FC\u30BF\u306A\u3057</div>';let e=a.reduce((n,[,s])=>n+s,0),t=_();return`
+  `}function nt(a){let e=new Map;for(let r of a){let i=r.genre||r.genreText||"\u672A\u5206\u985E";!i||i==="\u672A\u5206\u985E"||e.set(i,(e.get(i)||0)+1)}let t=Array.from(e.entries()).sort((r,i)=>i[1]-r[1]);if(t.length<=9)return t;let n=t.slice(0,8),s=t.slice(8).reduce((r,[,i])=>r+i,0);return[...n,["\u305D\u306E\u4ED6",s]]}function _(){let a=v();return[a.primary,a.accent,a.gold,a.primaryStrong,a.accentStrong,"#9b7ed9"]}function it(a){if(!a.length)return'<div class="empty-state">\u30B8\u30E3\u30F3\u30EB\u30C7\u30FC\u30BF\u306A\u3057</div>';let e=a.reduce((n,[,s])=>n+s,0),t=_();return`
     <div class="genre-doughnut" aria-label="\u30B8\u30E3\u30F3\u30EB\u5206\u5E03">
       ${g("chart-genre",{class:"genre-chart"})}
       <div class="genre-table">
