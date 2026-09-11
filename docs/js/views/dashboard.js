@@ -247,8 +247,10 @@ function genreTopRows(songs) {
 
 /** ドーナツと凡例で共有するパレット（テーマ連動＋予備色） */
 function genrePalette() {
-  const c = getColors();
-  return [c.primary, c.accent, c.gold, c.primaryStrong, c.accentStrong, '#9b7ed9'];
+  // テーマ変数だけだと茶・金系に寄って見分けがつかないため、
+  // 旧サイトのグラフ配色を基にした固定パレットを使う(ライト/ダーク共通で判読可能)。
+  // 末尾は「その他」用のグレー。
+  return ['#d9a514', '#5f8f45', '#7ab8d9', '#c97f9e', '#8d86c9', '#6fbfb0', '#b98b52', '#d49a6a', '#9aa3ad'];
 }
 
 function renderGenreChart(rows) {
