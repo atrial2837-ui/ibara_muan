@@ -1,0 +1,159 @@
+name: Auto update from YouTube
+
+on:
+  schedule:
+    # 毎週日曜 18:00 JST (09:00 UTC)。新着歌枠の定期巡回
+    - cron: '0 9 * * 0'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 実行モード
+        required: false
+        default: full
+        type: choice
+        options:
+          - full
+          - scan-only
+      min_timestamps:
+        description: セトリ自動採用に必要なタイムスタンプ数
+        required: false
+        default: '8'
+      environment:
+        description: Target data environment
+        required: false
+        default: production
+        type: choice
+        options:
+          - production
+          - staging
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: auto-update-${{ github.event.inputs.environment || 'production' }}
+  cancel-in-progress: false
+
+env:
+  YOUTUBE_CHANNEL_ID: UC9zLKU6WiRdcKtAh-6o_zmA # Muan ch.茨むあん(@ibaramuan)
+  TITLE_FILTER: 歌枠
+
+jobs:
+  auto-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Select Cloudflare D1 credentials
+        env:
+          TARGET_ENV: ${{ github.event.inputs.environment || 'production' }}
+          CLOUDFLARE_API_TOKEN_PRODUCTION: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID_PRODUCTION: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_D1_DATABASE_ID_PRODUCTION: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+          CLOUDFLARE_API_TOKEN_STAGING: ${{ secrets.CLOUDFLARE_API_TOKEN_STG }}
+          CLOUDFLARE_ACCOUNT_ID_STAGING: ${{ secrets.CLOUDFLARE_ACCOUNT_ID_STG }}
+          CLOUDFLARE_D1_DATABASE_ID_STAGING: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID_STG }}
+        run: |
+          if [ "$TARGET_ENV" = "staging" ]; then
+            if [ -z "$CLOUDFLARE_API_TOKEN_STAGING" ] || [ -z "$CLOUDFLARE_D1_DATABASE_ID_STAGING" ]; then
+              echo "Missing staging secrets: CLOUDFLARE_API_TOKEN_STG and CLOUDFLARE_D1_DATABASE_ID_STG are required." >&2
+              exit 1
+            fi
+            echo "CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN_STAGING" >> "$GITHUB_ENV"
+            echo "CLOUDFLARE_ACCOUNT_ID=${CLOUDFLARE_ACCOUNT_ID_STAGING:-$CLOUDFLARE_ACCOUNT_ID_PRODUCTION}" >> "$GITHUB_ENV"
+            echo "CLOUDFLARE_D1_DATABASE_ID=$CLOUDFLARE_D1_DATABASE_ID_STAGING" >> "$GITHUB_ENV"
+          else
+            if [ -z "$CLOUDFLARE_API_TOKEN_PRODUCTION" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID_PRODUCTION" ] || [ -z "$CLOUDFLARE_D1_DATABASE_ID_PRODUCTION" ]; then
+              echo "Missing production secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, and CLOUDFLARE_D1_DATABASE_ID are required." >&2
+              exit 1
+            fi
+            echo "CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN_PRODUCTION" >> "$GITHUB_ENV"
+            echo "CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID_PRODUCTION" >> "$GITHUB_ENV"
+            echo "CLOUDFLARE_D1_DATABASE_ID=$CLOUDFLARE_D1_DATABASE_ID_PRODUCTION" >> "$GITHUB_ENV"
+          fi
+          if [ -z "${{ secrets.YOUTUBE_API_KEY }}" ]; then
+            echo "Missing secret: YOUTUBE_API_KEY is required." >&2
+            exit 1
+          fi
+          echo "YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}" >> "$GITHUB_ENV"
+
+      - name: Collect new videos
+        run: >
+          node tools/collect_new_videos.mjs
+          --channel-id "$YOUTUBE_CHANNEL_ID"
+          --title-filter "$TITLE_FILTER"
+          --source d1
+          --out-dir tmp/auto-update
+
+      - name: Scan comments for setlists
+        run: >
+          node tools/scan_utawaku.mjs
+          --input tmp/auto-update/candidates.json
+          --out tmp/auto-update/scan-result.json
+          --min 3
+
+      - name: Apply with confidence gate
+        id: apply
+        run: >
+          node tools/apply_scan_results.mjs
+          --candidates tmp/auto-update/candidates.json
+          --scan tmp/auto-update/scan-result.json
+          --out-dir tmp/auto-update
+          --min-timestamps "${{ github.event.inputs.min_timestamps || '8' }}"
+          ${{ github.event.inputs.mode != 'scan-only' && '--apply' || '' }}
+        continue-on-error: false
+
+      - name: Generate docs/data JSON
+        if: ${{ github.event.inputs.mode != 'scan-only' }}
+        run: node tools/generate_static_data.mjs
+
+      - name: Commit and push static data
+        if: ${{ github.event.inputs.mode != 'scan-only' }}
+        env:
+          TARGET_ENV: ${{ github.event.inputs.environment || 'production' }}
+          TARGET_REF: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data/meta.json docs/data/songs.json docs/data/streams.json
+          if git diff --cached --quiet; then
+            echo "No static data changes."
+          else
+            git commit -m "Update ${TARGET_ENV} static data (auto-update)"
+            git push origin "HEAD:${TARGET_REF}"
+          fi
+
+      - name: Upload scan artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auto-update-${{ github.run_id }}
+          path: |
+            tmp/auto-update/candidates.json
+            tmp/auto-update/videos.txt
+            tmp/auto-update/scan-result.json
+            tmp/auto-update/review-queue.json
+          if-no-files-found: warn
+
+      - name: Open review issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          COUNT=$(node -e "console.log(JSON.parse(require('fs').readFileSync('tmp/auto-update/review-queue.json','utf-8')).length)" 2>/dev/null || echo 0)
+          if [ "$COUNT" -gt 0 ]; then
+            gh issue create \
+              --title "[auto-update] 要確認 ${COUNT}件 ($(date +%F))" \
+              --body-file tmp/auto-update/issue-body.md
+          else
+            echo "No review items."
+          fi
