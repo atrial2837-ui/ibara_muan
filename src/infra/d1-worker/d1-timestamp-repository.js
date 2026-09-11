@@ -30,6 +30,60 @@ export class D1TimestampRepository {
   }
 
   /**
+   * チャンネル内の枠ごとに、承認済みタイムスタンプが何曲ぶん入っているかを返す。
+   *
+   * @param {string} channelCode
+   * @returns {Promise<{ streamIndex: number, count: number }[]>}
+   */
+  async countApprovedByChannel(channelCode) {
+    const rows = await this.client.query(
+      `SELECT stream_index, COUNT(*) AS n
+         FROM community_timestamps
+        WHERE channel_code = ? AND status = 'approved'
+        GROUP BY stream_index`,
+      channelCode,
+    );
+    return rows.map((row) => ({
+      streamIndex: Number(row.stream_index),
+      count: Number(row.n),
+    }));
+  }
+
+  /**
+   * 特定の配信枠の承認済みタイムスタンプを、渡された内容で置き換える(管理者用)。
+   * pending / rejected の投稿には触れない。
+   *
+   * @param {string} channelCode
+   * @param {number} streamIndex
+   * @param {{songIndex:number, timeSeconds:number}[]} items
+   * @param {string} reviewedAt - ISO 8601
+   * @param {string|null} [reviewerNote]
+   * @returns {Promise<number>} 登録した件数
+   */
+  async replaceApproved(channelCode, streamIndex, items, reviewedAt, reviewerNote = null) {
+    await this.client.run(
+      `DELETE FROM community_timestamps
+       WHERE channel_code = ? AND stream_index = ? AND status = 'approved'`,
+      channelCode,
+      streamIndex,
+    );
+    for (const item of items) {
+      await this.client.run(
+        `INSERT INTO community_timestamps
+           (channel_code, stream_index, song_index, time_seconds, status, reviewed_at, reviewer_note)
+         VALUES (?, ?, ?, ?, 'approved', ?, ?)`,
+        channelCode,
+        streamIndex,
+        item.songIndex,
+        item.timeSeconds,
+        reviewedAt,
+        reviewerNote,
+      );
+    }
+    return items.length;
+  }
+
+  /**
    * 投稿一覧を取得する（管理者用）。
    *
    * @param {object} [opts]

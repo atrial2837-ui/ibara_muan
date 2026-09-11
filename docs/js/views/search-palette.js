@@ -7,6 +7,7 @@
 import { state } from '../store.js';
 import { escapeHtml, fmtDate } from '../utils.js';
 import { search as searchSongs } from '../search.js';
+import { icon } from '../icons.js';
 
 let _active = -1;   // 現在ハイライトされている行インデックス
 let _flat   = [];   // キーボード選択用フラット配列
@@ -30,7 +31,7 @@ export function initSearchPalette(handlers) {
   el.innerHTML = `
     <div id="omni-box">
       <div class="omni-input-row">
-        <span class="omni-search-icon" aria-hidden="true">🔍</span>
+        <span class="omni-search-icon" aria-hidden="true">${icon('search')}</span>
         <input
           id="omni-input"
           class="omni-input"
@@ -157,7 +158,7 @@ function _render(rawQuery) {
   if (!q) {
     const tops = songs.slice(0, 8);
     if (tops.length) {
-      html += _sectionLabel('🏆 よく歌われる曲');
+      html += _sectionLabel('rank', 'よく歌われる曲');
       for (const song of tops) {
         _flat.push({ type: 'song', song });
         html += _songItem(song, idx++, '');
@@ -176,7 +177,7 @@ function _render(rawQuery) {
   }
 
   if (matchedSongs.length) {
-    html += _sectionLabel('🎵 曲');
+    html += _sectionLabel('music', '曲');
     for (const song of matchedSongs) {
       _flat.push({ type: 'song', song });
       html += _songItem(song, idx++, q);
@@ -187,7 +188,7 @@ function _render(rawQuery) {
   if (videos.length) {
     const matchedVideos = videos.filter(v => _musicMatches(v, rawQuery)).slice(0, 6);
     if (matchedVideos.length) {
-      html += _sectionLabel('🎬 歌みた・オリ曲');
+      html += _sectionLabel('video', '歌みた・オリ曲');
       for (const video of matchedVideos) {
         _flat.push({ type: 'music-video', video });
         html += _musicVideoItem(video, idx++, rawQuery);
@@ -206,12 +207,12 @@ function _render(rawQuery) {
     }
   }
   if (artistMatches.length) {
-    html += _sectionLabel('🎤 アーティスト');
+    html += _sectionLabel('artist', 'アーティスト');
     for (const artist of artistMatches) {
       const cnt = songs.filter(s => s.artist === artist).length;
       _flat.push({ type: 'artist', artist });
       html += `<div class="omni-item" role="option" aria-selected="false" data-omni-idx="${idx++}">
-        <span class="omni-item-icon">🎤</span>
+        <span class="omni-item-icon">${icon('artist')}</span>
         <div class="omni-item-body">
           <span class="omni-item-title">${_hl(escapeHtml(artist), q)}</span>
           <span class="omni-item-meta">${cnt}曲 · アーティスト絞り込み</span>
@@ -229,12 +230,12 @@ function _render(rawQuery) {
     }).slice(0, 5);
 
     if (matchedStreams.length) {
-      html += _sectionLabel('📅 配信枠');
+      html += _sectionLabel('calendar', '配信枠');
       for (const stream of matchedStreams) {
         _flat.push({ type: 'stream', stream });
-        const chLabel = '';
+        const chLabel = stream.channel === 'main' ? '茨むあん' : (stream.channel || '');
         html += `<div class="omni-item" role="option" aria-selected="false" data-omni-idx="${idx++}">
-          <span class="omni-item-icon">📅</span>
+          <span class="omni-item-icon">${icon('calendar')}</span>
           <div class="omni-item-body">
             <span class="omni-item-title">${_hl(escapeHtml(stream.title || '配信'), q)}</span>
             <span class="omni-item-meta">${fmtDate(stream.date)}${chLabel ? ' · ' + chLabel : ''} · ${stream.songs?.length || 0}曲 · クリックで再生</span>
@@ -250,13 +251,13 @@ function _render(rawQuery) {
   listbox.innerHTML = html;
 }
 
-function _sectionLabel(text) {
-  return `<div class="omni-section-label" role="presentation">${text}</div>`;
+function _sectionLabel(iconName, text) {
+  return `<div class="omni-section-label" role="presentation">${icon(iconName)} ${text}</div>`;
 }
 
 function _songItem(song, idx, q) {
   return `<div class="omni-item" role="option" aria-selected="false" data-omni-idx="${idx}">
-    <span class="omni-item-icon">🎵</span>
+    <span class="omni-item-icon">${icon('music')}</span>
     <div class="omni-item-body">
       <span class="omni-item-title">${_hl(escapeHtml(song.title), q)}</span>
       <span class="omni-item-meta">${_hl(escapeHtml(song.artist || ''), q)} · ${song.count}回歌唱</span>
@@ -269,7 +270,7 @@ function _musicVideoItem(video, idx, q) {
   const badge = _musicTypeLabel(video);
   const sub = video.originalArtist || video.character || badge;
   return `<div class="omni-item" role="option" aria-selected="false" data-omni-idx="${idx}">
-    <span class="omni-item-icon">🎬</span>
+    <span class="omni-item-icon">${icon('video')}</span>
     <div class="omni-item-body">
       <span class="omni-item-title">${_hl(escapeHtml(video.title || '動画'), q)}</span>
       <span class="omni-item-meta">${escapeHtml(badge)}${sub ? ' · ' + escapeHtml(sub) : ''} · 動画で見る</span>
@@ -316,7 +317,8 @@ function _musicSearchText(video) {
 function _musicTypeLabel(video) {
   switch (video?.type) {
     case 'cover': return '歌みた';
-    case 'sugarily': return 'しゅがりり';
+    case 'office': return 'Re:AcTオリ曲';
+    case 'character': return 'キャラソン';
     default: return 'オリ曲';
   }
 }

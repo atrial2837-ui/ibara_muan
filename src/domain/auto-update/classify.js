@@ -11,6 +11,8 @@
  */
 
 import { DEFAULT_EXCLUDE_LABELS } from './timestamps.js';
+import { cleanCommentLabel, stripTrackNumber } from './comment-label.js';
+import { splitSongLine } from '../stream/setlist-parser.js';
 
 /** 対象タイトルの既定フィルタ(@ibaramuan の歌枠のみ) */
 export const DEFAULT_TITLE_FILTER = '歌枠';
@@ -58,7 +60,10 @@ export function toStreamedOn(publishedAt) {
 
 /**
  * scanner/scan_utawaku の timestamps から addStream 用の songsText を作る。
- * 空ラベルは曲にならないので落とす。先頭の「01. 」のような連番も冗長なので落とす。
+ * 採用するのは「曲名 / アーティスト」の形の行のみ。
+ * 空ラベル・アーティスト無し・区切り無しは曲にならないので落とす。
+ * 先頭の「01. 」のような連番も冗長なので落とす。
+ * 各ラベルは cleanCommentLabel でサイト表記に寄せてから使う。
  *
  * @param {Array<{ label?: string }>} timestamps
  * @returns {{ text: string, lines: number, skipped: number }}
@@ -68,14 +73,21 @@ export function buildSongsText(timestamps) {
   let skipped = 0;
   const lines = [];
   for (const ts of list) {
-    const label = String(ts?.label ?? '')
-      .trim()
-      .replace(/^\d{1,3}\.\s*/, '');
-    if (!label) {
+    const cleaned = cleanCommentLabel(stripTrackNumber(String(ts?.label ?? '').trim()));
+    if (!cleaned) {
       skipped += 1;
       continue;
     }
-    lines.push(label);
+    if (/^https?:\/\//i.test(cleaned) || cleaned.includes('://')) {
+      skipped += 1;
+      continue;
+    }
+    const parsed = splitSongLine(cleaned);
+    if (!parsed.title || !parsed.artist) {
+      skipped += 1;
+      continue;
+    }
+    lines.push(cleaned);
   }
   return { text: lines.join('\n'), lines: lines.length, skipped };
 }

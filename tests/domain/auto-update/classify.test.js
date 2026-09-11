@@ -48,11 +48,11 @@ test('buildSongsText: 空ラベルを落として改行テキスト化する', (
   const built = buildSongsText([
     { raw: '8:21', label: 'HOT LIMIT / T.M.Revolution' },
     { raw: '16:53', label: '' },
-    { raw: '27:10', label: 'Happiness' },
+    { raw: '27:10', label: 'Happiness / 阿部真央' },
   ]);
   assert.equal(built.lines, 2);
   assert.equal(built.skipped, 1);
-  assert.equal(built.text, 'HOT LIMIT / T.M.Revolution\nHappiness');
+  assert.equal(built.text, 'HOT LIMIT / T.M.Revolution\nHappiness / 阿部真央');
 });
 
 test('buildSongsText: 先頭の連番「01. 」を落とす', () => {
@@ -73,7 +73,7 @@ test('classifyScanEntry: found かつ件数十分・候補単一なら auto', ()
       matches: [{ commentId: 'a' }],
       timestamps: [
         { raw: '8:21', label: 'HOT LIMIT / T.M.Revolution' },
-        { raw: '27:10', label: 'Happiness' },
+        { raw: '27:10', label: 'Happiness / 阿部真央' },
       ],
     },
     { minTimestamps: 8 },
@@ -91,7 +91,7 @@ test('classifyScanEntry: 件数不足は review(枠のみ先行)', () => {
       status: 'found',
       timestampCount: 4,
       matches: [{ commentId: 'a' }],
-      timestamps: [{ raw: '8:21', label: 'HOT LIMIT' }],
+      timestamps: [{ raw: '8:21', label: 'HOT LIMIT / T.M.Revolution' }],
     },
     { minTimestamps: 8 },
   );
@@ -106,7 +106,7 @@ test('classifyScanEntry: 複数候補は review', () => {
       status: 'found',
       timestampCount: 20,
       matches: [{ commentId: 'a' }, { commentId: 'b' }, { commentId: 'c' }],
-      timestamps: [{ raw: '8:21', label: 'HOT LIMIT' }],
+      timestamps: [{ raw: '8:21', label: 'HOT LIMIT / T.M.Revolution' }],
     },
     { minTimestamps: 8, maxMatches: 2 },
   );

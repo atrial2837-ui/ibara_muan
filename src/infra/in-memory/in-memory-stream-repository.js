@@ -129,6 +129,26 @@ export class InMemoryStreamRepository {
   }
 
   /**
+   * 歌枠のメタ情報 (title / url / streamed_on / source_index) を直接更新。
+   * song_count は変更しない。
+   *
+   * @param {number} id
+   * @param {{ title: string|null, url: string|null, streamed_on: string, source_index: number|null }} patch
+   * @returns {Promise<void>}
+   */
+  async updateInfo(id, patch) {
+    const row = this._store.get(id);
+    if (!row) return;
+    this._store.set(id, {
+      ...row,
+      title: patch.title ?? null,
+      url: patch.url ?? null,
+      streamed_on: patch.streamed_on,
+      source_index: patch.source_index ?? null,
+    });
+  }
+
+  /**
    * @param {number} channelId
    * @returns {Promise<Stream[]>}
    */

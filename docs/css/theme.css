@@ -24,12 +24,6 @@
   --accent: #e4b129;
   --accent-strong: #936715;
   --accent-soft: #fff0b9;
-  --chart-primary: #f4c44a;
-  --chart-primary-strong: #c88f14;
-  --chart-primary-soft: #fff3c7;
-  --chart-accent: #92bf67;
-  --chart-accent-strong: #5f8f45;
-  --chart-accent-soft: #e6f4d7;
   --gold: #e0b23d;
   --silver: #b9b7ae;
   --bronze: #b98b52;
@@ -70,12 +64,6 @@
     --accent: #78a064;
     --accent-strong: #b8d29b;
     --accent-soft: #26361f;
-    --chart-primary: #f2c84b;
-    --chart-primary-strong: #ffd96f;
-    --chart-primary-soft: #4a3a16;
-    --chart-accent: #9bc978;
-    --chart-accent-strong: #c7e6a7;
-    --chart-accent-soft: #2f421f;
     --gold: #e0b23d;
     --silver: #c8c4b7;
     --bronze: #c39156;
@@ -112,12 +100,6 @@
   --accent: #78a064;
   --accent-strong: #b8d29b;
   --accent-soft: #26361f;
-  --chart-primary: #f2c84b;
-  --chart-primary-strong: #ffd96f;
-  --chart-primary-soft: #4a3a16;
-  --chart-accent: #9bc978;
-  --chart-accent-strong: #c7e6a7;
-  --chart-accent-soft: #2f421f;
   --gold: #e0b23d;
   --silver: #c8c4b7;
   --bronze: #c39156;
@@ -133,25 +115,34 @@
 
 /* === Reset / base === */
 
-@font-face {
-  font-family: "Ibara Noto Sans JP";
-  font-style: normal;
-  font-display: swap;
-  font-weight: 400;
-  src: url("../assets/fonts/noto-sans-jp-ibara-400.woff2") format("woff2");
-}
+/* Webフォント（Noto Sans JP のサブセット 114KB）は使わない。
+   サブセットは UI 文言向けの554文字しか持たず、曲名・アーティスト名に出てくる
+   932文字のうち552文字が未収録だった。その結果、日本語を含む文字列の54%で
+   1行の中に収録文字と未収録文字が混ざり、文字ごとに書体が変わって見えていた。
+   端末のフォントに統一した方が見た目が揃い、転送量も37%減る。
+   戻す場合は tools/build_noto_subset.py でサブセットを作り直すこと。 */
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-  font-family: "Ibara Noto Sans JP", "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", "Yu Gothic", "Meiryo", system-ui, sans-serif;
-  background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+  --db-sidebar-collapsed: 80px;
+  --db-sidebar-expanded: 248px;
+  --db-sidebar-current: var(--db-sidebar-expanded);
+  font-family: "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+  background:
+    radial-gradient(circle at 15% 5%, var(--bg-radial-1) 0%, transparent 38%),
+    radial-gradient(circle at 85% 95%, var(--bg-radial-2) 0%, transparent 32%),
+    linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
   background-attachment: fixed;
   color: var(--ink);
   min-height: 100vh;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   transition: background 0.3s ease, color 0.2s ease;
+}
+
+body.sidebar-collapsed {
+  --db-sidebar-current: var(--db-sidebar-collapsed);
 }
 
 a { color: var(--primary-strong); text-decoration: none; }
@@ -164,7 +155,11 @@ input, select, textarea { font-family: inherit; color: inherit; }
 /* === Background bubbles === */
 
 .bubbles {
-  display: none;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
 }
 .bubble {
   position: absolute;
@@ -197,6 +192,47 @@ input, select, textarea { font-family: inherit; color: inherit; }
 }
 
 main.container { padding-top: 28px; padding-bottom: 80px; }
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: none;
+    width: 100%;
+    padding-inline: clamp(16px, 1.6vw, 32px);
+  }
+}
+
+@media (min-width: 1021px) {
+  body {
+    padding-left: var(--db-sidebar-current);
+  }
+
+  body.sidebar-anim-ready {
+    transition: padding-left 0.18s ease;
+  }
+
+  .topbar {
+    left: var(--db-sidebar-current);
+    width: auto;
+  }
+
+  body.sidebar-anim-ready .topbar {
+    transition: left 0.18s ease;
+  }
+
+  .topbar-inner.container,
+  main.container {
+    margin-left: 0;
+    margin-right: 0;
+    max-width: none;
+    width: 100%;
+    padding-left: clamp(16px, 1.6vw, 32px);
+    padding-right: clamp(16px, 1.6vw, 32px);
+  }
+
+  main.container {
+    padding-top: 28px;
+  }
+}
 
 /* === Topbar === */
 
@@ -252,68 +288,6 @@ main.container { padding-top: 28px; padding-bottom: 80px; }
 .mobile-menu-toggle {
   display: none;
 }
-
-/* === Topbar search trigger === */
-
-.topbar-search-btn {
-  flex: 1 1 auto;
-  max-width: 300px;
-  min-width: 100px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 34px;
-  padding: 0 10px 0 12px;
-  background: var(--surface-raised);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--ink-mute);
-  font-family: inherit;
-  font-size: 13px;
-  cursor: pointer;
-  text-align: left;
-  transition: border-color 0.15s, box-shadow 0.15s, color 0.15s;
-}
-.topbar-search-btn:hover {
-  border-color: var(--primary);
-  color: var(--ink);
-  box-shadow: 0 0 0 2px var(--primary-soft);
-}
-.topbar-search-btn:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-.topbar-search-icon {
-  flex: 0 0 auto;
-  color: var(--ink-mute);
-  transition: color 0.15s;
-}
-.topbar-search-btn:hover .topbar-search-icon {
-  color: var(--primary);
-}
-.topbar-search-placeholder {
-  flex: 1 1 auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  letter-spacing: 0.01em;
-}
-.topbar-search-kbd {
-  flex: 0 0 auto;
-  font-family: inherit;
-  font-size: 10px;
-  font-weight: 600;
-  padding: 1px 5px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--ink-dim);
-  background: var(--surface);
-  letter-spacing: 0.05em;
-  line-height: 1.5;
-}
-
-/* メニュー内検索ボタン（デスクトップでは非表示） */
-.topbar-search-menu-btn { display: none; }
 
 /* === Footer === */
 
@@ -380,11 +354,6 @@ main.container { padding-top: 28px; padding-bottom: 80px; }
   font-size: 13px;
   line-height: 1.65;
 }
-.help-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
 .guide-flow {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -442,41 +411,23 @@ main.container { padding-top: 28px; padding-bottom: 80px; }
 .guide-section ul {
   margin: 0;
   padding-left: 18px;
-  color: var(--ink-soft);
+  color: var(--ink);
   font-size: 12.5px;
   line-height: 1.75;
 }
-.help-item {
-  display: grid;
-  grid-template-columns: 34px 1fr;
-  gap: 10px;
-  align-items: start;
-  background: var(--surface-2);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-sm);
-  padding: 14px;
-}
-.help-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--primary-soft);
-  color: var(--primary-strong);
-  font-size: 13px;
-  font-weight: 800;
-}
-.help-item h3 {
-  font-size: 14px;
+kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 700;
   color: var(--ink);
-  margin-bottom: 3px;
-}
-.help-item p {
-  color: var(--ink-soft);
-  font-size: 12.5px;
-  line-height: 1.65;
+  line-height: 1.6;
+  vertical-align: baseline;
 }
 .song-dialog {
   width: min(760px, 100%);
@@ -510,14 +461,14 @@ main.container { padding-top: 28px; padding-bottom: 80px; }
 .song-detail-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 10px;
   width: min(100%, 360px);
 }
 .song-detail-stats div {
   background: var(--surface-2);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-sm);
-  padding: 10px;
+  padding: 12px 10px;
   text-align: center;
 }
 .song-detail-stats strong {
@@ -533,8 +484,8 @@ main.container { padding-top: 28px; padding-bottom: 80px; }
 .song-detail-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin: 18px 0;
+  gap: 10px;
+  margin: 22px 0 18px;
 }
 .song-detail-history h3 {
   color: var(--ink);
@@ -543,26 +494,24 @@ main.container { padding-top: 28px; padding-bottom: 80px; }
 }
 .song-detail-stream {
   display: grid;
-  grid-template-columns: 72px 1fr auto;
-  gap: 10px;
+  grid-template-columns: 72px 1fr;
+  gap: 12px;
   align-items: center;
-  padding: 9px 0;
+  padding: 11px 0;
   border-top: 1px dashed var(--border);
   color: var(--ink);
-}
-.song-detail-thumb-wrap {
-  display: grid;
-  gap: 4px;
 }
 .song-detail-thumb-link {
   position: relative;
   display: block;
-  appearance: none;
-  border: 0;
-  padding: 0;
-  background: transparent;
   cursor: pointer;
   border-radius: 6px;
+  text-decoration: none;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.song-detail-thumb-link:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 .song-detail-thumb {
   width: 72px;
@@ -573,54 +522,23 @@ main.container { padding-top: 28px; padding-bottom: 80px; }
   border: 1px solid var(--border-soft);
   height: auto;
 }
-.song-detail-thumb-link span {
-  position: absolute;
-  inset: auto 4px 4px 4px;
-  border-radius: 999px;
-  background: rgba(94, 75, 38, 0.88);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 800;
-  line-height: 1.4;
-  text-align: center;
-}
-.song-detail-youtube-link {
-  display: inline-flex;
-  justify-content: center;
-  min-height: 20px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--surface-2);
-  color: var(--primary-strong);
-  font-size: 10px;
-  font-weight: 800;
-  line-height: 1.7;
-}
-.song-detail-youtube-link:hover {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  text-decoration: none;
-}
 .song-detail-thumb.placeholder {
   display: block;
 }
-.song-detail-watch {
-  appearance: none;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--ink-soft);
-  font-size: 11px;
+/* サムネ右下に「その曲が始まる位置」を出す。押すとその地点から YouTube が開く */
+.song-detail-at {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.78);
+  color: #fff;
+  font-size: 10px;
   font-weight: 700;
-  cursor: pointer;
-  border-radius: 6px;
-  padding: 4px 8px;
-  white-space: nowrap;
-  align-self: center;
-}
-.song-detail-watch:hover {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent-strong);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+  pointer-events: none;
 }
 .song-detail-frame {
   appearance: none;
@@ -694,41 +612,56 @@ main.container { padding-top: 28px; padding-bottom: 80px; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 82px;
+  width: min(120px, 30vw);
   min-height: 42px;
-  padding: 0 14px;
-  border: 2px solid var(--border-strong);
-  border-radius: 999px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: #ffffff;
+  padding: 0;
+  border: 0;
+  background: transparent;
   font-family: inherit;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0;
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
   transform: translateY(10px);
-  transition: opacity 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
-  box-shadow: var(--shadow);
+  transition: opacity 0.18s ease, transform 0.18s ease, filter 0.18s ease;
+  filter: drop-shadow(0 8px 18px rgba(106, 184, 219, 0.24));
 }
 .page-top-toast[hidden] {
   display: none;
 }
+.page-top-toast img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 150 / 51;
+}
 .page-top-toast.is-visible {
-  opacity: 0.98;
+  /* コンテンツに重なる場面で主張しすぎないよう待機時は半透明 */
+  opacity: 0.72;
   pointer-events: auto;
   transform: translateY(0);
 }
-.page-top-toast:hover {
+.page-top-toast:hover,
+.page-top-toast:focus-visible {
+  opacity: 1;
   transform: translateY(-1px);
-  box-shadow: var(--shadow-lg);
+  filter: drop-shadow(0 10px 20px rgba(106, 184, 219, 0.32));
 }
 
 @media (max-width: 700px) {
   html,
   body {
     overflow-x: hidden;
+  }
+  .page-top-toast {
+    right: max(14px, env(safe-area-inset-right));
+    bottom: calc(env(safe-area-inset-bottom) + 86px);
+    z-index: 72;
+    width: 118px;
+  }
+  body.has-mobile-tab-open .page-top-toast {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
   }
   .container {
     width: 100%;
@@ -750,39 +683,6 @@ main.container { padding-top: 28px; padding-bottom: 80px; }
     flex: 1 1 calc(100% - 46px);
     max-width: calc(100% - 46px);
     min-width: 0;
-  }
-  .topbar-search-btn { display: none; }
-  .topbar-search-menu-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    grid-column: 1 / -1;
-    width: 100%;
-    height: 36px;
-    padding: 0 12px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--ink-mute);
-    font-family: inherit;
-    font-size: 13px;
-    cursor: pointer;
-    text-align: left;
-  }
-  .topbar-search-menu-btn kbd {
-    margin-left: auto;
-    font-family: inherit;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 1px 5px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--ink-dim);
-    background: var(--surface-2);
-  }
-  .topbar-search-menu-btn:hover {
-    border-color: var(--primary);
-    color: var(--ink);
   }
   .brand-title {
     max-width: 100%;
@@ -886,7 +786,6 @@ main.container { padding-top: 28px; padding-bottom: 80px; }
     grid-column: 2;
   }
   .theme-toggle { width: 36px; padding: 0; justify-content: center; }
-  .help-grid { grid-template-columns: 1fr; }
   .guide-flow,
   .guide-sections {
     grid-template-columns: 1fr;
@@ -910,11 +809,11 @@ main.container { padding-top: 28px; padding-bottom: 80px; }
     overflow-wrap: anywhere;
   }
   .song-detail-stream {
-    grid-template-columns: 72px 1fr auto;
+    grid-template-columns: 58px 1fr;
     gap: 6px 10px;
   }
   .song-detail-thumb-link {
-    width: 72px;
+    width: 58px;
     aspect-ratio: 16 / 9;
     background: var(--surface-2);
   }
@@ -982,17 +881,6 @@ main.container { padding-top: 28px; padding-bottom: 80px; }
   50% { opacity: 0.25; }
 }
 
-kbd {
-  display: inline-block;
-  padding: 1px 6px;
-  background: var(--surface-3);
-  border: 1px solid var(--border-strong);
-  border-bottom-width: 2px;
-  border-radius: 5px;
-  font-family: ui-monospace, monospace;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--ink);
-  line-height: 1.6;
-  vertical-align: baseline;
-}
+/* ダッシュボード以外ではヒーロー非表示 */
+/* 属性未設定（JS起動前）はダッシュボード扱いにして初回ペイントのシフトを防ぐ */
+body[data-active-tab]:not([data-active-tab='dashboard']) #hero { display: none; }

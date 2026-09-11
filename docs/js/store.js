@@ -22,7 +22,7 @@ const VIDEO_ID_RE = /^[\w-]{11}$/;
 /**
  * @typedef {object} UrlState
  * @property {'dashboard'|'ranking'|'songs'|'timeline'|'analytics'} tab
- * @property {'new'|'old'|'all'} channel
+ * @property {'main'|'all'} channel
  * @property {string} q
  */
 
@@ -82,7 +82,7 @@ export function writeUrlState(next = {}, options = {}) {
   const merged = { ...readUrlState(), ...next };
   const params = new URLSearchParams();
   if (merged.tab !== 'dashboard') params.set('tab', merged.tab);
-  if (merged.channel !== 'new') params.set('ch', merged.channel);
+  if (merged.channel !== 'main') params.set('ch', merged.channel);
   if (merged.q) params.set('q', merged.q);
   if (merged.v) {
     params.set('v', merged.v);
@@ -123,6 +123,7 @@ const DEFAULT_IN_MEMORY = {
   rankingLimit: 50,
   rankingPeriod: 'all',
   rankingMonth: '',
+  rankingCompareMonth: '', // 期間ランキングの比較先（'' = 直前の期間と自動比較）
   favorites: loadFavorites(),
   favoritesFilter: false,
   fullLoaded: false,
@@ -301,6 +302,9 @@ export const state = {
 
   get rankingMonth() { return get('rankingMonth'); },
   set rankingMonth(v) { set('rankingMonth', v); },
+
+  get rankingCompareMonth() { return get('rankingCompareMonth'); },
+  set rankingCompareMonth(v) { set('rankingCompareMonth', v); },
 
   get fullLoaded() { return get('fullLoaded'); },
   set fullLoaded(v) { set('fullLoaded', v); },

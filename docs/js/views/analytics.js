@@ -3,6 +3,7 @@ import { $, escapeHtml, fmtDate, fmtMonth, monthKey } from '../utils.js';
 import { TOP_ARTISTS_LIMIT } from '../config.js';
 import { createChart, chartCanvas, getColors } from '../charts.js';
 import { deriveArtists, computeComebacks } from '../domain-compat.js';
+import { icon } from '../icons.js';
 
 export function renderAnalytics() {
   const { songs, streams, artists } = state.data;
@@ -10,44 +11,44 @@ export function renderAnalytics() {
   const panel = $('#panel-analytics');
   panel.innerHTML = `
     <div class="section-header">
-      <h2>📈 アナリティクス</h2>
+      <h2>${icon('analytics')} アナリティクス</h2>
       <span class="count-pill">${streams.length}枠 × ${songs.length}曲を分析</span>
     </div>
 
     <div class="analytics-grid">
 
       <div class="card col-6">
-        <div class="card-title">📚 持ち曲の累積成長 <span class="pill">初披露ベース</span></div>
+        <div class="card-title">${icon('chart')} 持ち曲の累積成長 <span class="pill">初披露ベース</span></div>
         ${chartCanvas('chart-growth')}
       </div>
 
       <div class="card col-6">
-        <div class="card-title">🎤 1枠あたりの曲数 <span class="pill">時系列</span></div>
+        <div class="card-title">${icon('mic')} 1枠あたりの曲数 <span class="pill">時系列</span></div>
         ${chartCanvas('chart-songs-per-stream')}
       </div>
 
       <div class="card col-6">
-        <div class="card-title">📅 曜日分布 <span class="pill">配信日</span></div>
+        <div class="card-title">${icon('calendar')} 曜日分布 <span class="pill">配信日</span></div>
         ${chartCanvas('chart-dow', { class: 'short' })}
       </div>
 
       <div class="card col-6">
-        <div class="card-title">📊 歌唱回数の分布 <span class="pill">ヒストグラム</span></div>
+        <div class="card-title">${icon('chart')} 歌唱回数の分布 <span class="pill">ヒストグラム</span></div>
         ${chartCanvas('chart-histogram', { class: 'short' })}
       </div>
 
       <div class="card col-12">
-        <div class="card-title">👥 アーティスト別 歌唱合計 <span class="pill">TOP${TOP_ARTISTS_LIMIT}</span></div>
+        <div class="card-title">${icon('artist')} アーティスト別 歌唱合計 <span class="pill">TOP${TOP_ARTISTS_LIMIT}</span></div>
         <div id="artist-bar-list" class="bar-list"></div>
       </div>
 
       <div class="card col-6">
-        <div class="card-title">🌟 久しぶりに歌われた曲 <span class="pill">前回から長かったTOP10</span></div>
+        <div class="card-title">${icon('sparkle')} 久しぶりに歌われた曲 <span class="pill">前回から長かったTOP10</span></div>
         <div id="comeback-list"></div>
       </div>
 
       <div class="card col-6">
-        <div class="card-title">⏳ 1回しか歌われていない曲 <span class="pill">${songs.filter(s => s.count === 1).length}曲</span></div>
+        <div class="card-title">${icon('time')} 1回しか歌われていない曲 <span class="pill">${songs.filter(s => s.count === 1).length}曲</span></div>
         <div id="oneshot-list"></div>
       </div>
 
@@ -90,8 +91,8 @@ function drawGrowth(songs) {
     datasets: [{
       label: '累積持ち曲数',
       data,
-      borderColor: c.chartPrimaryStrong,
-      backgroundColor: c.chartPrimary + '3d',
+      borderColor: c.primaryStrong,
+      backgroundColor: c.primary + '33',
       tension: 0.25,
       fill: true,
       pointRadius: 2,
@@ -113,8 +114,8 @@ function drawSongsPerStream(streams) {
     datasets: [{
       label: '曲数',
       data: sorted.map(s => s.songs.length),
-      borderColor: c.chartAccentStrong,
-      backgroundColor: c.chartAccent + '3d',
+      borderColor: c.accentStrong,
+      backgroundColor: c.accent + '33',
       tension: 0.2,
       fill: true,
       pointRadius: 1.5,
@@ -140,8 +141,8 @@ function drawDow(streams) {
       {
         label: '配信回数',
         data: counts,
-        backgroundColor: c.chartPrimary + 'd9',
-        borderColor: c.chartPrimaryStrong,
+        backgroundColor: c.primary + 'cc',
+        borderColor: c.primaryStrong,
         borderWidth: 1,
         yAxisID: 'y',
         borderRadius: 6,
@@ -149,8 +150,8 @@ function drawDow(streams) {
       {
         label: '歌唱数',
         data: songs,
-        backgroundColor: c.chartAccent + 'd9',
-        borderColor: c.chartAccentStrong,
+        backgroundColor: c.accent + 'cc',
+        borderColor: c.accentStrong,
         borderWidth: 1,
         yAxisID: 'y2',
         borderRadius: 6,
@@ -181,8 +182,8 @@ function drawHistogram(songs) {
     datasets: [{
       label: '曲数',
       data: counts,
-      backgroundColor: c.chartPrimary + 'd9',
-      borderColor: c.chartPrimaryStrong,
+      backgroundColor: c.primary + 'cc',
+      borderColor: c.primaryStrong,
       borderWidth: 1,
       borderRadius: 6,
     }],
@@ -200,7 +201,7 @@ function renderArtistBars(artists) {
   el.innerHTML = top.map((a, i) => {
     const pct = Math.round((a.totalCount / max) * 100);
     return `
-      <div class="bar-row">
+      <div class="bar-row" data-artist-search="${escapeHtml(a.artist)}" style="cursor:pointer;" title="クリックでこのアーティストの曲を表示">
         <div class="bar-rank">${i + 1}</div>
         <div class="bar-content">
           <div class="bar-label">${escapeHtml(a.artist)} <span style="color:var(--ink-mute);font-size:11px;">（${a.songCount}曲）</span></div>

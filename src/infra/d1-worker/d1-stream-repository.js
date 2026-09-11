@@ -122,6 +122,25 @@ export class D1StreamRepository {
   }
 
   /**
+   * 歌枠のメタ情報 (title / url / streamed_on / source_index) を直接更新。
+   * song_count は変更しない。
+   *
+   * @param {number} id
+   * @param {{ title: string|null, url: string|null, streamed_on: string, source_index: number|null }} patch
+   * @returns {Promise<void>}
+   */
+  async updateInfo(id, patch) {
+    await this.client.run(
+      `UPDATE streams SET source_index = ?, streamed_on = ?, title = ?, url = ? WHERE id = ?`,
+      patch.source_index ?? null,
+      patch.streamed_on,
+      patch.title ?? null,
+      patch.url ?? null,
+      id,
+    );
+  }
+
+  /**
    * 指定チャンネルの歌枠を全件取得。
    * 根拠: data.js:226 の ORDER + channel_id フィルタ。
    *
