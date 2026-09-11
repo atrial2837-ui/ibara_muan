@@ -6,6 +6,14 @@ on:
     - cron: '0 9 * * 0'
   workflow_dispatch:
     inputs:
+      source:
+        description: Request source
+        required: false
+        default: manual
+      requested_at:
+        description: Request timestamp
+        required: false
+        default: ''
       mode:
         description: 実行モード
         required: false
