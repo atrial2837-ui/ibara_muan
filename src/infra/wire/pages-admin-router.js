@@ -34,8 +34,8 @@ export function createPagesAdminRouter(env) {
           owner: e.GITHUB_OWNER || 'atrial2837-ui',
           repo: e.GITHUB_REPO || 'ibara_muan',
           workflow: e.GITHUB_STATIC_WORKFLOW || 'update-static-data.yml',
-          ref: e.GITHUB_STATIC_REF || 'main',
-          environment: e.GITHUB_STATIC_ENV || 'production',
+          ref: e.GITHUB_STATIC_REF || 'stg-rp',
+          environment: e.GITHUB_STATIC_ENV || 'staging',
         },
       );
       return jsonResponse(result);
