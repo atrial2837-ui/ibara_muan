@@ -275,7 +275,15 @@ async function main() {
     throw new Error('YOUTUBE_API_KEY が必要です(環境変数 or --api-key)');
   }
   const refs = loadRefs(args.input);
-  if (!refs.length) throw new Error(`入力から動画IDを1件も取り出せませんでした: ${args.input}`);
+  if (!refs.length) {
+    // 新着候補0件は正常系。空結果を書いて終了する(throwするとrunが赤くなる)
+    console.error('No videos to scan (fresh=0). Writing empty result.');
+    const outAbs = path.resolve(ROOT, args.out);
+    fs.mkdirSync(path.dirname(outAbs), { recursive: true });
+    fs.writeFileSync(outAbs, '[]', 'utf-8');
+    console.log(JSON.stringify({ total: 0, found: 0, notFound: 0, errors: 0, out: args.out }));
+    return;
+  }
   console.error(`${refs.length} videos detected`);
 
   const found = await fetchVideos(args.apiKey, refs.map((r) => r.videoId));
