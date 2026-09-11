@@ -29,6 +29,8 @@ function parseArgs(argv) {
     channelId: DEFAULT_CHANNEL_ID,
     titleFilter: DEFAULT_TITLE_FILTER,
     source: 'json',
+    via: 'auto',
+    apiKey: process.env.YOUTUBE_API_KEY ?? '',
     outDir: 'tmp/auto-update',
     since: '',
     limit: 0,
@@ -40,6 +42,8 @@ function parseArgs(argv) {
     if (a === '--channel-id') args.channelId = next();
     else if (a === '--title-filter') args.titleFilter = next();
     else if (a === '--source') args.source = next();
+    else if (a === '--via') args.via = next();
+    else if (a === '--api-key') args.apiKey = next();
     else if (a === '--out-dir') args.outDir = next();
     else if (a === '--since') args.since = next();
     else if (a === '--limit') args.limit = Number(next()) || 0;
@@ -117,16 +121,90 @@ async function knownIdsFromD1() {
   return known;
 }
 
-async function main() {
-  const args = parseArgs(process.argv.slice(2));
+/** RSS(XML)から { videoId, title, publishedAt } を取得 */
+async function fetchViaRss(args) {
   const feedUrl =
     args.feedUrl || `https://www.youtube.com/feeds/videos.xml?channel_id=${args.channelId}`;
-
   console.error(`Fetching feed: ${feedUrl}`);
-  const res = await fetch(feedUrl, { headers: { 'User-Agent': 'ibara_muan-auto-update/1.0' } });
+  const res = await fetch(feedUrl, {
+    headers: {
+      'User-Agent': 'ibara_muan-auto-update/1.0',
+      Accept: 'application/atom+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'ja-JP,ja;q=0.9',
+    },
+  });
   if (!res.ok) throw new Error(`Feed fetch failed: ${res.status} ${res.statusText}`);
-  const entries = parseFeed(await res.text());
-  console.error(`Feed entries: ${entries.length}`);
+  return parseFeed(await res.text());
+}
+
+/**
+ * YouTube Data APIから { videoId, title, publishedAt } を取得。
+ * RSSがブロックされる環境(Actions等)のフォールバック。
+ * channels.list(1unit) + playlistItems(ページ毎1unit)でuploadsを取得する。
+ */
+async function fetchViaApi(args) {
+  const api = async (endpoint, params) => {
+    const url = new URL(`https://www.googleapis.com/youtube/v3/${endpoint}`);
+    for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
+    const res = await fetch(url, { headers: { 'X-goog-api-key': args.apiKey } });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const reason = payload?.error?.errors?.[0]?.reason ?? `http_${res.status}`;
+      throw new Error(`YouTube API error (${endpoint}): ${reason}`);
+    }
+    return payload;
+  };
+
+  console.error(`Fetching uploads via API: channel ${args.channelId}`);
+  const ch = await api('channels', {
+    part: 'contentDetails', id: args.channelId, key: args.apiKey,
+  });
+  const uploads = ch.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
+  if (!uploads) throw new Error('uploads playlist not found for channel');
+
+  const entries = [];
+  let pageToken = '';
+  while (entries.length < 100) {
+    const pl = await api('playlistItems', {
+      part: 'snippet,contentDetails', playlistId: uploads, maxResults: 50,
+      key: args.apiKey, ...(pageToken ? { pageToken } : {}),
+    });
+    for (const item of pl.items ?? []) {
+      const videoId = item.contentDetails?.videoId || item.snippet?.resourceId?.videoId;
+      const title = item.snippet?.title ?? '';
+      const publishedAt = item.snippet?.publishedAt ?? '';
+      if (videoId && title && !title.startsWith('Private video') && !title.startsWith('Deleted video')) {
+        entries.push({ videoId, title, publishedAt });
+      }
+    }
+    pageToken = pl.nextPageToken ?? '';
+    if (!pageToken) break;
+  }
+  return entries;
+}
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+
+  let entries = [];
+  let via = args.via;
+  if (args.via === 'rss' || args.via === 'auto') {
+    try {
+      entries = await fetchViaRss(args);
+      via = 'rss';
+    } catch (err) {
+      if (args.via === 'rss') throw err;
+      console.error(`RSS failed (${err.message}). Falling back to YouTube API.`);
+    }
+  }
+  if (!entries.length && via !== 'rss') {
+    if (!args.apiKey) {
+      throw new Error('RSS取得に失敗し、フォールバック用の YOUTUBE_API_KEY もありません');
+    }
+    entries = await fetchViaApi(args);
+    via = 'api';
+  }
+  console.error(`Feed entries (${via}): ${entries.length}`);
 
   let filtered = entries.filter((e) => e.title.includes(args.titleFilter));
   if (args.since) filtered = filtered.filter((e) => (e.publishedAt ?? '') >= args.since);
@@ -159,6 +237,7 @@ async function main() {
   );
 
   console.log(JSON.stringify({
+    via,
     feedEntries: entries.length,
     utawakuEntries: filtered.length,
     known: known.size,
