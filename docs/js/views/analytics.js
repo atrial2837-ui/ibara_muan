@@ -1,7 +1,8 @@
-import { state } from '../state.js';
-import { $, escapeHtml, fmtDate, monthKey, fmtMonth } from '../utils.js';
+import { state } from '../store.js';
+import { $, escapeHtml, fmtDate, fmtMonth, monthKey } from '../utils.js';
 import { TOP_ARTISTS_LIMIT } from '../config.js';
 import { createChart, chartCanvas, getColors } from '../charts.js';
+import { deriveArtists, computeComebacks } from '../domain-compat.js';
 
 export function renderAnalytics() {
   const { songs, streams, artists } = state.data;
@@ -13,7 +14,7 @@ export function renderAnalytics() {
       <span class="count-pill">${streams.length}枠 × ${songs.length}曲を分析</span>
     </div>
 
-    <div class="dashboard-grid">
+    <div class="analytics-grid">
 
       <div class="card col-6">
         <div class="card-title">📚 持ち曲の累積成長 <span class="pill">初披露ベース</span></div>
@@ -57,14 +58,13 @@ export function renderAnalytics() {
   drawSongsPerStream(streams);
   drawDow(streams);
   drawHistogram(songs);
-  renderArtistBars(artists.length ? artists : deriveArtistsFromSongs(songs));
+  renderArtistBars(artists.length ? artists : deriveArtists(songs));
   renderComebacks(songs);
   renderOneShots(songs);
 }
 
 function drawGrowth(songs) {
   const c = getColors();
-  // by first-sung month
   const byMonth = new Map();
   for (const s of songs) {
     if (!s.firstSung) continue;
@@ -76,7 +76,6 @@ function drawGrowth(songs) {
   const labels = [];
   const data = [];
   let total = 0;
-  // fill gaps
   let cur = parseMonthKey(keys[0]);
   const end = parseMonthKey(keys[keys.length - 1]);
   while (cur <= end) {
@@ -213,41 +212,9 @@ function renderArtistBars(artists) {
   }).join('');
 }
 
-function deriveArtistsFromSongs(songs) {
-  const byArtist = new Map();
-  for (const song of songs) {
-    const artist = song.artist || '(不明)';
-    if (!byArtist.has(artist)) {
-      byArtist.set(artist, { artist, totalCount: 0, songCount: 0 });
-    }
-    const item = byArtist.get(artist);
-    item.totalCount += Number(song.count || 0);
-    item.songCount += 1;
-  }
-  return Array.from(byArtist.values()).sort((a, b) => b.totalCount - a.totalCount);
-}
-
 function renderComebacks(songs) {
-  // for each song with >=2 plays, find max gap between consecutive sing dates
-  const candidates = [];
-  for (const s of songs) {
-    if (s.dates.length < 2) continue;
-    const sorted = [...s.dates].sort((a, b) => a - b);
-    let maxGap = 0;
-    let gapStart = null, gapEnd = null;
-    for (let i = 1; i < sorted.length; i++) {
-      const g = Math.floor((sorted[i] - sorted[i - 1]) / 86400000);
-      if (g > maxGap) {
-        maxGap = g;
-        gapStart = sorted[i - 1];
-        gapEnd = sorted[i];
-      }
-    }
-    candidates.push({ song: s, maxGap, gapStart, gapEnd });
-  }
-  candidates.sort((a, b) => b.maxGap - a.maxGap);
-  const top = candidates.slice(0, 10);
-  $('#comeback-list').innerHTML = top.length ? top.map((c, i) => `
+  const candidates = computeComebacks(songs, 10);
+  $('#comeback-list').innerHTML = candidates.length ? candidates.map((c, i) => `
     <div class="activity-row" data-songkey="${escapeHtml(c.song.key)}" data-songtitle="${escapeHtml(c.song.title)}" data-songartist="${escapeHtml(c.song.artist)}" style="cursor:pointer;" title="クリックで配信タイムラインに絞り込み">
       <span class="a-date">${c.maxGap}日</span>
       <span class="a-title">${escapeHtml(c.song.title)} <span style="color:var(--ink-mute);">/ ${escapeHtml(c.song.artist)}</span></span>

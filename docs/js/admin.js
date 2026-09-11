@@ -367,6 +367,172 @@ function initManagement() {
   });
 }
 
+/* ── コミュニティタイムスタンプ審査 ──────────────────────────────────────── */
+
+let _tsFilter  = 'pending';
+let _tsData    = null; // loadAll() の結果キャッシュ（配信・曲名参照用）
+let _tsItems   = [];
+let _tsBusy    = false;
+
+function fmtSeconds(s) {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  return `${m}:${String(sec).padStart(2, '0')}`;
+}
+
+function resolveTs(item) {
+  const ch     = _tsData?.channels?.[item.channelCode];
+  const stream = ch?.streams?.find(s => Number(s.index) === Number(item.streamIndex));
+  const song   = stream?.songs?.[item.songIndex];
+  return {
+    streamTitle: stream?.title || `第${item.streamIndex}枠`,
+    songTitle:   song ? `${song.title} / ${song.artist || ''}` : `曲${item.songIndex + 1}`,
+    date:        stream?.date || '',
+  };
+}
+
+function renderTimestamps(items) {
+  const wrap = $('#ts-table-wrap');
+  _tsItems = Array.isArray(items) ? items : [];
+  $('#ts-count').textContent = `${items.length}件`;
+  const approveAllBtn = $('#ts-approve-all');
+  if (approveAllBtn) {
+    approveAllBtn.hidden = _tsFilter !== 'pending';
+    approveAllBtn.disabled = _tsBusy || _tsFilter !== 'pending' || !_tsItems.length;
+    approveAllBtn.textContent = _tsItems.length ? `表示中${_tsItems.length}件を一括承認` : '表示中を一括承認';
+  }
+  if (!items.length) {
+    wrap.innerHTML = '<p class="admin-note">該当する申請はありません</p>';
+    return;
+  }
+  wrap.innerHTML = `
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ch</th><th>配信</th><th>曲</th><th>時間</th><th>コメント</th><th>申請日</th>
+          ${_tsFilter === 'pending' ? '<th>操作</th>' : '<th>審査日</th>'}
+        </tr>
+      </thead>
+      <tbody>
+        ${items.map(item => {
+          const { streamTitle, songTitle, date } = resolveTs(item);
+          const createdAt  = item.createdAt  ? fmtDate(new Date(item.createdAt))  : '—';
+          const reviewedAt = item.reviewedAt ? fmtDate(new Date(item.reviewedAt)) : '—';
+          const actionCell = _tsFilter === 'pending'
+            ? `<td>
+                <button class="btn ghost" data-ts-approve="${item.id}" type="button" style="margin-right:4px">承認</button>
+                <button class="btn ghost" data-ts-reject="${item.id}"  type="button">却下</button>
+               </td>`
+            : `<td>${reviewedAt}</td>`;
+          return `
+            <tr>
+              <td>${escapeHtml(item.channelCode)}</td>
+              <td title="${escapeHtml(streamTitle)}">${escapeHtml(streamTitle.length > 20 ? streamTitle.slice(0, 20) + '…' : streamTitle)}<br><small>${escapeHtml(date)}</small></td>
+              <td>${escapeHtml(songTitle)}</td>
+              <td><strong>${fmtSeconds(item.timeSeconds)}</strong></td>
+              <td>${escapeHtml(item.submitterNote || '—')}</td>
+              <td>${createdAt}</td>
+              ${actionCell}
+            </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+async function loadTimestamps() {
+  $('#ts-status').textContent = '読み込み中…';
+  $('#ts-table-wrap').innerHTML = '<p class="admin-note">読み込み中…</p>';
+  const approveAllBtn = $('#ts-approve-all');
+  if (approveAllBtn) approveAllBtn.disabled = true;
+  try {
+    const data = await adminApi(`timestamps?status=${_tsFilter}&limit=100`);
+    $('#ts-status').textContent = '';
+    renderTimestamps(data.items || []);
+  } catch (err) {
+    $('#ts-status').textContent = `エラー: ${err.message || err}`;
+    $('#ts-table-wrap').innerHTML = '';
+  }
+}
+
+async function initTimestamps() {
+  // 配信・曲名参照用にデータをキャッシュ
+  try { _tsData = await loadAll(); } catch (_) {}
+
+  document.querySelectorAll('.ts-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (_tsBusy) return;
+      document.querySelectorAll('.ts-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      _tsFilter = btn.dataset.tsFilter;
+      loadTimestamps();
+    });
+  });
+
+  $('#ts-approve-all')?.addEventListener('click', async () => {
+    const pending = _tsFilter === 'pending' ? _tsItems.slice() : [];
+    if (!pending.length || _tsBusy) return;
+    if (!confirm(`表示中の${pending.length}件をすべて承認しますか？`)) return;
+
+    _tsBusy = true;
+    const approveAllBtn = $('#ts-approve-all');
+    const rowButtons = $('#ts-table-wrap')?.querySelectorAll('button');
+    if (approveAllBtn) {
+      approveAllBtn.disabled = true;
+      approveAllBtn.textContent = '一括承認中…';
+    }
+    rowButtons?.forEach(btn => { btn.disabled = true; });
+
+    let succeeded = 0;
+    const failed = [];
+    for (let i = 0; i < pending.length; i++) {
+      const item = pending[i];
+      $('#ts-status').textContent = `一括承認中… ${i + 1}/${pending.length}`;
+      try {
+        await adminApi(`timestamps/${item.id}/approve`, {});
+        succeeded++;
+      } catch (err) {
+        failed.push({ item, error: err });
+      }
+    }
+
+    _tsBusy = false;
+    if (failed.length) {
+      $('#ts-status').textContent = `${succeeded}件を承認しました。${failed.length}件は失敗しました。`;
+    } else {
+      $('#ts-status').textContent = `${succeeded}件を一括承認しました`;
+    }
+    loadTimestamps();
+  });
+
+  $('#ts-table-wrap').addEventListener('click', async (e) => {
+    if (_tsBusy) return;
+    const approveBtn = e.target.closest('[data-ts-approve]');
+    const rejectBtn  = e.target.closest('[data-ts-reject]');
+    if (!approveBtn && !rejectBtn) return;
+
+    const id     = approveBtn ? approveBtn.dataset.tsApprove : rejectBtn.dataset.tsReject;
+    const action = approveBtn ? 'approve' : 'reject';
+    const label  = approveBtn ? '承認' : '却下';
+
+    if (!confirm(`この申請を${label}しますか？`)) return;
+    $('#ts-status').textContent = `${label}中…`;
+    try {
+      await adminApi(`timestamps/${id}/${action}`, {});
+      $('#ts-status').textContent = `${label}しました`;
+      loadTimestamps();
+    } catch (err) {
+      $('#ts-status').textContent = `エラー: ${err.message || err}`;
+    }
+  });
+
+  loadTimestamps();
+}
+
+/* ─── 起動 ───────────────────────────────────────────────────────────────── */
+
 $('#refresh-status').addEventListener('click', loadStatus);
 initManagement();
 loadStatus();
+initTimestamps();

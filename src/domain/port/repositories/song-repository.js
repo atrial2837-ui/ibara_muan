@@ -55,6 +55,10 @@
  * @typedef {object} SongMetadata
  * @property {string} displayKey - 正規化済み DisplayKey (parseDisplayKey 済み)
  * @property {string} genre      - 正規化済み Genre (parseGenre 済み)
+ * @property {string} [title]           - 表示用タイトル
+ * @property {string} [normalizedTitle] - normalizedKey(title) の結果
+ * @property {number} [artistId]        - artists.id
+ * @property {string} [songKey]         - buildSongKey で生成したキー
  */
 
 /**

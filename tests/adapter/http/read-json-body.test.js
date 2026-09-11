@@ -22,9 +22,9 @@ function makeRequest(body) {
 
 describe('readJsonBody', () => {
   it('正常な JSON オブジェクト → object を返す', async () => {
-    const req = makeRequest('{"name":"kanau","count":10}');
+    const req = makeRequest('{"name":"ibara","count":10}');
     const result = await readJsonBody(req);
-    assert.deepEqual(result, { name: 'kanau', count: 10 });
+    assert.deepEqual(result, { name: 'ibara', count: 10 });
   });
 
   it('JSON 配列 → array を返す', async () => {

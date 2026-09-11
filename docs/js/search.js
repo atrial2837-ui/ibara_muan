@@ -1,5 +1,36 @@
-import { normalize } from './utils.js';
-import { ensureSongsTags } from './data.js';
+import { normalize, parseQuery, matchReasons } from './domain-compat.js';
+import { ensureSongsTags } from './tagging.js';
+
+const SEARCH_HISTORY_KEY = 'ibara-search-history-v1';
+const MAX_HISTORY = 10;
+
+export function getSearchHistory() {
+  try {
+    const raw = localStorage.getItem(SEARCH_HISTORY_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.slice(0, MAX_HISTORY) : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+export function addSearchHistory(query) {
+  const q = (query || '').trim();
+  if (!q) return;
+  const history = getSearchHistory().filter(item => item !== q);
+  history.unshift(q);
+  localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
+}
+
+export function removeSearchHistory(query) {
+  const history = getSearchHistory().filter(item => item !== query);
+  localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
+}
+
+export function clearSearchHistory() {
+  localStorage.removeItem(SEARCH_HISTORY_KEY);
+}
 
 const fuseOptions = {
   keys: [
@@ -7,7 +38,11 @@ const fuseOptions = {
     { name: 'artist', weight: 0.35 },
     { name: 'genreText', weight: 0.18 },
     { name: 'tagText', weight: 0.14 },
+    { name: 'moodText', weight: 0.12 },
+    { name: 'seasonText', weight: 0.1 },
     { name: 'keyText', weight: 0.1 },
+    { name: 'moodTagText', weight: 0.1 },
+    { name: 'singerTagText', weight: 0.08 },
   ],
   threshold: 0.38,
   ignoreLocation: true,
@@ -24,13 +59,15 @@ let indexToken = 0;
 function loadFuse() {
   if (fuseCtor) return Promise.resolve(fuseCtor);
   if (!fusePromise) {
-    fusePromise = import('fuse').then((module) => {
+    fusePromise = import('fuse.js').then((module) => {
       fuseCtor = module.default;
       return fuseCtor;
     });
   }
   return fusePromise;
 }
+
+export { parseQuery, matchReasons };
 
 export function buildIndex(songs) {
   ensureSongsTags(songs);
@@ -53,7 +90,7 @@ export function buildIndex(songs) {
 
 const FIELD_RE = /(?<key>title|artist|genre|tag|mood|season|key|count|last|days)\s*(?<op>:|<=|>=|=|<|>)\s*(?<val>"[^"]*"|\S+)/gi;
 
-function parseQuery(raw) {
+function parseQueryLocal(raw) {
   const filters = [];
   let rest = raw;
   rest = rest.replace(FIELD_RE, (m, key, op, val, ..._args) => {
@@ -169,7 +206,11 @@ export function search(rawQuery, fallbackSongs) {
         song.artist,
         song.genreText || song.genre,
         song.tagText,
+        song.moodText,
+        song.seasonText,
         song.keyText,
+        song.moodTagText || '',
+        song.singerTagText || '',
       ].some((value) => normalize(value).toLowerCase().includes(needle))),
       tokens,
     };
@@ -179,24 +220,4 @@ export function search(rawQuery, fallbackSongs) {
     : new fuseCtor(pool, fuseOptions);
   const fuseResults = fuseLocal.search(phrase);
   return { results: fuseResults.map(r => r.item), tokens };
-}
-
-export function matchReasons(song, query) {
-  const q = normalize(query).toLowerCase();
-  if (!q) return [];
-  const { tokens, filters } = parseQuery(q);
-  const reasons = [];
-  for (const f of filters) {
-    if (!reasons.includes(f.key)) reasons.push(f.key);
-  }
-  const phrase = tokens.join(' ');
-  if (phrase) {
-    const contains = (value) => normalize(value).toLowerCase().includes(phrase);
-    if (contains(song.title)) reasons.push('曲名');
-    if (contains(song.artist)) reasons.push('アーティスト');
-    if (contains(song.genreText || song.genre)) reasons.push('ジャンル');
-    if (contains(song.tagText)) reasons.push('タグ');
-    if (contains(song.keyText)) reasons.push('キー');
-  }
-  return Array.from(new Set(reasons)).slice(0, 4);
 }

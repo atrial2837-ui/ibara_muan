@@ -157,6 +157,10 @@ export class InMemorySongRepository {
     if (!row) return;
     this._store.set(id, {
       ...row,
+      title: metadata.title ?? row.title,
+      normalized_title: metadata.normalizedTitle ?? row.normalized_title,
+      artist_id: metadata.artistId ?? row.artist_id,
+      song_key: metadata.songKey ?? row.song_key,
       display_key: metadata.displayKey,
       genre: metadata.genre,
     });

@@ -11,7 +11,7 @@ describe('LocalFileWriter', () => {
   let tmpDir;
 
   before(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kanau-local-file-'));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ibara-local-file-'));
   });
 
   after(() => {

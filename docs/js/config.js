@@ -28,3 +28,6 @@ export const SOURCE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/ed
 
 export const gvizUrl = (gid) =>
   `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}&_t=${Date.now()}`;
+
+// プレイヤー音量の localStorage キー（main.js と music-player.js で共有）
+export const VOLUME_STORAGE_KEY = 'ibaraVol';

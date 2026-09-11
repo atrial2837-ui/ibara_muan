@@ -9,6 +9,9 @@
 import { normalize } from '../shared/text.js';
 import { parseDateIso } from '../shared/date.js';
 
+const DAYS_FRESH = 30;
+const DAYS_STALE = 180;
+
 /**
  * @param {number} a
  * @param {string} op
@@ -23,7 +26,7 @@ export function compareNumeric(a, op, b) {
     case '<=': return a <= b;
     case '=':
     case ':': return a == b;
-    default: return true;
+    default: return false;
   }
 }
 
@@ -75,9 +78,9 @@ export function applyFieldFilters(songs, filters) {
           if (v === 'never' || v === 'untouched') {
             if (song.lastSung) return false;
           } else if (v === 'fresh') {
-            if (song.daysSinceLast == null || song.daysSinceLast > 30) return false;
+            if (song.daysSinceLast == null || song.daysSinceLast > DAYS_FRESH) return false;
           } else if (v === 'stale') {
-            if (song.daysSinceLast == null || song.daysSinceLast < 180) return false;
+            if (song.daysSinceLast == null || song.daysSinceLast < DAYS_STALE) return false;
           } else {
             const days = parseInt(String(v).replace(/d$/i, ''), 10);
             if (!Number.isNaN(days)) {
@@ -111,9 +114,9 @@ export function applyGenreFilter(songs, genre, genreLabelFn = (s) => s.genreText
 export function applyTagFilter(songs, filter) {
   switch (filter) {
     case 'fresh':
-      return songs.filter((s) => s.daysSinceLast != null && s.daysSinceLast <= 30);
+      return songs.filter((s) => s.daysSinceLast != null && s.daysSinceLast <= DAYS_FRESH);
     case 'stale':
-      return songs.filter((s) => s.daysSinceLast != null && s.daysSinceLast >= 180);
+      return songs.filter((s) => s.daysSinceLast != null && s.daysSinceLast >= DAYS_STALE);
     case 'never':
       return songs.filter((s) => !s.lastSung);
     default:
@@ -141,6 +144,21 @@ export function applySingerMode(songs, options) {
       return base.filter((s) => s.daysSinceLast >= 180);
     case 'rare':
       return base.filter((s) => s.count <= 2);
+    case 'chill':
+      return base.filter((s) => {
+        const text = `${s.moodText || ''} ${s.tagText || ''}`.toLowerCase();
+        return /chill|チル|のんびり|リラックス|ほっこり|まったり|しっとり/.test(text);
+      });
+    case 'energetic':
+      return base.filter((s) => {
+        const text = `${s.moodText || ''} ${s.tagText || ''}`.toLowerCase();
+        return /激しい|アグレッシブ|パンク|メタル|盛り上がる|アップテンポ/.test(text);
+      });
+    case 'nostalgic':
+      return base.filter((s) => {
+        const text = `${s.moodText || ''} ${s.tagText || ''}`.toLowerCase();
+        return /ノスタルジ|レトロ|昭和|平成|青春|初恋|懐かしい/.test(text);
+      });
     default:
       return base.filter((s) =>
         s.displayKey || !options.keyPublished || s.count >= 5 || s.daysSinceLast >= 120,
@@ -162,6 +180,8 @@ export function filterByTextIncludes(songs, phrase) {
     song.artist,
     song.genreText || song.genre,
     song.tagText,
+    song.moodText,
+    song.seasonText,
     song.keyText,
   ].some((value) => normalize(value).toLowerCase().includes(needle)));
 }

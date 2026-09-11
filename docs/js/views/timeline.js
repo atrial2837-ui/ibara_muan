@@ -1,4 +1,4 @@
-import { state } from '../state.js';
+import { state } from '../store.js';
 import { TIMELINE_INITIAL, TIMELINE_STEP } from '../config.js';
 import { $, $$, escapeHtml, fmtDate, streamKey } from '../utils.js';
 
@@ -114,11 +114,10 @@ function renderItem(s, idx, filter) {
     ? `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener">${escapeHtml(s.title || '配信')}</a>`
     : escapeHtml(s.title || '配信');
   const watchHtml = s.url
-    ? `<a class="watch-link" href="${escapeHtml(s.url)}" target="_blank" rel="noopener">▶ YouTube</a>`
+    ? `<span class="watch-actions"><button class="watch-link" type="button" data-stream-play="${escapeHtml(streamKey(s))}" data-inline-youtube="${escapeHtml(s.url)}">▶ 再生</button><a class="watch-open-link" href="${escapeHtml(s.url)}" target="_blank" rel="noopener">↗ 開く</a></span>`
     : '';
-  const copyHtml = state.singerMode
-    ? `<button class="timeline-copy-btn" type="button" data-copy-stream="${idx}">セトリコピー</button>`
-    : '';
+  const saveHtml = `<button class="timeline-save-btn" type="button" data-playlist-add="${escapeHtml(streamKey(s))}" data-stream-title="${escapeHtml(s.title || '配信')}" title="プレイリストに保存">☆</button>`;
+  const copyHtml = `<button class="timeline-copy-btn" type="button" data-copy-stream="${idx}">セトリコピー</button>`;
   return `
     <article class="timeline-item ${recentClass}">
       <span class="stream-anchor" data-streamkey="${escapeHtml(streamKey(s))}"></span>
@@ -126,6 +125,7 @@ function renderItem(s, idx, filter) {
         <span class="timeline-date">${fmtDate(s.date)}</span>
         <span class="timeline-stream-no">第${s.index}枠</span>
         <span class="timeline-songcount">🎤 ${s.songs.length}曲</span>
+        ${saveHtml}
         ${copyHtml}
         ${watchHtml}
       </header>
@@ -173,6 +173,11 @@ function sortTimelineStreams(streams, sort) {
 
 function formatStreamSetlist(stream) {
   return (stream.songs || [])
-    .map((song) => `00:00 ${song.title} / ${song.artist}`)
+    .map((song) => {
+      const title = String(song?.title || '').trim();
+      const artist = String(song?.artist || '').trim();
+      return artist ? `${title} / ${artist}` : title;
+    })
+    .filter(Boolean)
     .join('\n');
 }
