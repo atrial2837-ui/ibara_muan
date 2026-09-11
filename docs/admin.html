@@ -93,6 +93,27 @@
     <p class="admin-note" id="static-status"></p>
   </section>
 
+  <section class="admin-panel">
+    <div class="section-header">
+      <h2>YouTube自動更新</h2>
+      <span class="badge" id="auto-update-badge">GitHub Actions</span>
+    </div>
+    <p class="admin-note">新着歌枠の検出→コメント欄スキャン→信頼度ゲート→D1投入→静的JSON生成を一括実行します。試運転ではD1に触れず候補と判定だけ出します。</p>
+    <div class="admin-actions">
+      <label class="admin-field">モード
+        <select id="auto-update-mode">
+          <option value="full">full (自動適用あり)</option>
+          <option value="scan-only" selected>scan-only (試運転)</option>
+        </select>
+      </label>
+      <label class="admin-field">自動採用の最低件数
+        <input id="auto-update-min" type="number" min="1" value="8">
+      </label>
+      <button class="btn primary" id="trigger-auto-update" type="button">自動更新を開始</button>
+    </div>
+    <p class="admin-note" id="auto-update-status"></p>
+  </section>
+
   <section class="admin-grid">
     <article class="admin-panel">
       <div class="section-header">

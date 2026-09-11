@@ -33,6 +33,7 @@ import { reviewTimestamp } from '../../usecase/timestamp/review-timestamp.js';
  * @property {(env: object) => string|null|undefined} getAdminToken
  * @property {boolean} [authStrict=false]
  * @property {(ctx: RouteContext) => Promise<Response>|Response} staticDataHandler
+ * @property {(ctx: RouteContext) => Promise<Response>|Response} [autoUpdateHandler]
  * @property {boolean} [includeIndexPage=false]
  * @property {() => string} [renderIndexPage]
  */
@@ -50,6 +51,7 @@ export function buildAdminRouter(options) {
     getAdminToken,
     authStrict = false,
     staticDataHandler,
+    autoUpdateHandler,
     includeIndexPage = false,
     renderIndexPage,
   } = options;
@@ -116,6 +118,10 @@ export function buildAdminRouter(options) {
   }));
 
   router.post(p('/static-data/generate'), auth(staticDataHandler));
+
+  if (autoUpdateHandler) {
+    router.post(p('/auto-update/trigger'), auth(autoUpdateHandler));
+  }
 
   // ─── コミュニティタイムスタンプ管理 ──────────────────────────────────────
 

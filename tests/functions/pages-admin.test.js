@@ -57,4 +57,40 @@ describe('Pages admin function', () => {
       globalThis.fetch = originalFetch;
     }
   });
+
+  it('自動更新は body の mode / min_timestamps を中継する', async () => {
+    const originalFetch = globalThis.fetch;
+    let capturedBody = null;
+    let capturedUrl = null;
+    globalThis.fetch = async (url, options) => {
+      capturedUrl = String(url);
+      capturedBody = JSON.parse(options.body);
+      return new Response(null, { status: 204 });
+    };
+
+    try {
+      const response = await onRequest({
+        request: new Request('https://example.test/api/admin/auto-update/trigger', {
+          method: 'POST',
+          headers: { 'x-admin-token': 'secret', 'content-type': 'application/json' },
+          body: JSON.stringify({ mode: 'scan-only', min_timestamps: 5 }),
+        }),
+        env: {
+          ADMIN_TOKEN: 'secret',
+          GITHUB_ACTIONS_TOKEN: 'ghp_test',
+        },
+        params: { path: ['auto-update', 'trigger'] },
+      });
+
+      assert.equal(response.status, 200);
+      const body = await response.json();
+      assert.equal(body.mode, 'scan-only');
+      assert.equal(body.minTimestamps, 5);
+      assert.ok(capturedUrl.endsWith('/actions/workflows/auto-update.yml/dispatches'));
+      assert.equal(capturedBody.inputs.mode, 'scan-only');
+      assert.equal(capturedBody.inputs.min_timestamps, '5');
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
 });
