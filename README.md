@@ -32,6 +32,45 @@ https://docs.google.com/spreadsheets/d/1supVLmIOoa3fdwvT_NHioLefjsa-ldQBQCMhZakK
 4. まとまった単位で D1 へ登録します。
 5. `docs/admin.html` の「静的データ生成を開始」で公開用JSONを更新します。
 
+## 自動更新 (YouTube起点)
+
+毎週日曜 18:00 JST に `.github/workflows/auto-update.yml` が巡回します。
+対象は `@ibaramuan` (`UC9zLKU6WiRdcKtAh-6o_zmA`) のタイトルに「歌枠」を含む動画のみです。
+
+流れ:
+
+```text
+RSS取得 → 歌枠フィルタ → D1と突合 → コメント欄スキャン → 信頼度ゲート
+  ├─ 高信頼(タイムスタンプ8件以上・候補2件以下): D1へ自動投入 + 静的JSON生成push
+  │   ※既に曲が登録済みの枠は手作業優先で上書きしない(--force で強制可)
+  ├─ 低信頼(件数不足・複数候補・セトリなし): 枠のみ先行登録(song_count=0)し、
+  │   review-queue.json + GitHub Issue に残して手動承認待ち
+  └─ 枠のみ登録分はコメント欄にセトリが出次第、次回スキャンで自動補完される
+```
+
+手動実行:
+
+```powershell
+# 試しにスキャンだけ( D1に触れない )
+node tools/collect_new_videos.mjs --source d1 --out-dir tmp/auto-update
+node tools/scan_utawaku.mjs --input tmp/auto-update/candidates.json
+node tools/apply_scan_results.mjs
+
+# 実際にD1へ適用する
+node tools/apply_scan_results.mjs --apply
+```
+
+または Actions の `Auto update from YouTube` を `mode=scan-only`(試運転) /
+`mode=full`(適用あり) で手動実行します。
+
+追加で必要な GitHub repository secret:
+
+```text
+YOUTUBE_API_KEY
+```
+
+自動投入分も `docs/admin.html` から後で修正できます。
+
 ## D1 初期化
 
 新しい D1 を作ったら、Cloudflare D1 Console などで次を実行します。
