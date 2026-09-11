@@ -18,8 +18,8 @@
   --ink: #191713;
   --ink-soft: #3f3a31;
   --ink-mute: #746b5e;
-  --primary: #18150f;
-  --primary-strong: #030302;
+  --primary:#6e4f2a;
+  --primary-strong:#4a351d;
   --primary-soft: #f4e7c0;
   --accent: #e4b129;
   --accent-strong: #936715;
@@ -612,12 +612,17 @@ kbd {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: min(120px, 30vw);
+  gap: 6px;
   min-height: 42px;
-  padding: 0;
-  border: 0;
-  background: transparent;
+  padding: 0 18px;
+  border: 2px solid var(--border-strong);
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: #fff;
   font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
@@ -627,12 +632,6 @@ kbd {
 }
 .page-top-toast[hidden] {
   display: none;
-}
-.page-top-toast img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 150 / 51;
 }
 .page-top-toast.is-visible {
   /* コンテンツに重なる場面で主張しすぎないよう待機時は半透明 */
@@ -656,7 +655,6 @@ kbd {
     right: max(14px, env(safe-area-inset-right));
     bottom: calc(env(safe-area-inset-bottom) + 86px);
     z-index: 72;
-    width: 118px;
   }
   body.has-mobile-tab-open .page-top-toast {
     opacity: 0;

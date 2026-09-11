@@ -54,7 +54,7 @@ function parseArgs(argv) {
 }
 
 const hasBracket = (s) => /[[［].*[\]］]/.test(String(s ?? ''));
-const hasNumbering = (s) => /^(?:\d{1,3}\.\s*|⟦\d{1,3}⟧\s*)/.test(String(s ?? '').trim());
+const hasNumbering = (s) => /^(?:\d{1,3}\.\s+|⟦\d{1,3}⟧\s*)/.test(String(s ?? '').trim());
 
 async function findOrCreateArtist(client, clockIso, name) {
   const norm = normalizedKey(name);
@@ -107,6 +107,10 @@ async function main() {
     // タイトル側に '/' が残る場合(例: キーと曲名の混在)は splitSongLine で分離
     const parsed = splitSongLine(`${canonTitle} / ${artistName}`);
     const key = buildSongKey(parsed.title, parsed.artist);
+    if (key === song.song_key) {
+      plan.push({ action: 'skip', reason: 'already_canonical', song });
+      continue;
+    }
     const existing = byKey.get(key);
     if (existing && existing.id !== song.id) {
       plan.push({ action: 'remap', from: song, to: existing, canonTitle: parsed.title, artistName: parsed.artist });
