@@ -329,6 +329,8 @@ function genreCenterPlugin(total) {
   return {
     id: 'genre-center',
     afterDraw(chart) {
+      // ツールチップ表示中は中央合計を隠す(重なり防止)。閉じれば再表示される
+      if (chart.tooltip && chart.tooltip.opacity) return;
       const arc = chart.getDatasetMeta(0)?.data?.[0];
       if (!arc) return;
       const c = getColors();
@@ -371,6 +373,8 @@ function drawGenreChart(rows) {
     plugins: {
       legend: { display: false },
       tooltip: {
+        // 弧の重心ではなく縁に寄せて出す(中央合計との重なり防止)
+        position: 'nearest',
         callbacks: {
           label: (item) => {
             const t = item.dataset.data.reduce((sum, v) => sum + v, 0);
