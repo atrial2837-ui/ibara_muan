@@ -35,10 +35,10 @@ describe('videoIdFromUrl', () => {
 });
 
 describe('buildSitemapEntries', () => {
-  it('トップと5タブを含む(requestsは未移植のため除外)', () => {
+  it('トップと4タブを含む(requests・analyticsは対象外)', () => {
     const locs = buildSitemapEntries(payload, TODAY).map(e => e.loc);
     assert.ok(locs.includes('https://ibara-muan-songlist.pages.dev/'));
-    for (const tab of ['ranking', 'songs', 'timeline', 'analytics', 'playlists']) {
+    for (const tab of ['ranking', 'songs', 'timeline', 'playlists']) {
       assert.ok(locs.includes(`https://ibara-muan-songlist.pages.dev/?tab=${tab}`), tab);
     }
   });
@@ -62,7 +62,7 @@ describe('buildSitemapEntries', () => {
   });
 
   it('データが空でもトップとタブは出る', () => {
-    assert.equal(buildSitemapEntries({}, TODAY).length, 6);
+    assert.equal(buildSitemapEntries({}, TODAY).length, 5);
   });
 });
 

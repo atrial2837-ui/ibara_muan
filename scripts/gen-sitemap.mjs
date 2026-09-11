@@ -13,8 +13,8 @@ const ROOT = join(__dirname, '..');
 const ORIGIN = 'https://ibara-muan-songlist.pages.dev';
 
 // seo-meta.js の TAB_META と揃える（dashboard はトップなので個別には出さない）
-// requests はバックエンド未移植のため除外
-const TABS = ['ranking', 'songs', 'timeline', 'analytics', 'playlists'];
+// 分析はダッシュボード内のセクションになったため単独URLは載せない
+const TABS = ['ranking', 'songs', 'timeline', 'playlists'];
 
 const VIDEO_ID_PATTERNS = [
   /youtu\.be\/([A-Za-z0-9_-]{11})/,
@@ -53,7 +53,7 @@ export function buildSitemapEntries(streamsPayload, today, songEntries = []) {
     entries.push({ loc: `${ORIGIN}/song/`, changefreq: 'daily', priority: '0.8', lastmod: today });
     for (const { slug, performances } of songEntries) {
       entries.push({
-        loc: `${ORIGIN}/song/${encodeURI(slug)}.html`,
+        loc: `${ORIGIN}/song/${encodeURI(slug)}`,
         changefreq: 'monthly',
         priority: '0.6',
         lastmod: /^\d{4}-\d{2}-\d{2}$/.test(performances?.[0]?.date || '') ? performances[0].date : today,

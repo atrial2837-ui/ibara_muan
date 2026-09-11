@@ -86,14 +86,6 @@ export function renderPlaylists() {
   }
 
   panel.innerHTML = `
-    <nav class="panel-topnav" aria-label="ページナビゲーション">
-      <button class="panel-topnav-btn" type="button" data-nav-tab="dashboard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h5v7H4z"/><path d="M10 4h5v16h-5z"/><path d="M16 9h4v11h-4z"/></svg>ダッシュボード</button>
-      <button class="panel-topnav-btn" type="button" data-nav-tab="ranking"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v3a4 4 0 0 1-8 0z"/><path d="M6 5H3v2a4 4 0 0 0 4 4"/><path d="M18 5h3v2a4 4 0 0 1-4 4"/><path d="M12 11v5"/><path d="M8 20h8"/><path d="M9 16h6v4H9z"/></svg>ランキング</button>
-      <button class="panel-topnav-btn" type="button" data-nav-tab="songs"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>全曲リスト</button>
-      <button class="panel-topnav-btn" type="button" data-nav-tab="timeline"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v4"/><path d="M17 3v4"/><path d="M4 8h16"/><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 13h3"/><path d="M13 13h3"/><path d="M8 17h3"/></svg>タイムライン</button>
-      <button class="panel-topnav-btn" type="button" data-nav-tab="analytics"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M7 15l3-4 4 2 5-7"/><circle cx="7" cy="15" r="1"/><circle cx="10" cy="11" r="1"/><circle cx="14" cy="13" r="1"/><circle cx="19" cy="6" r="1"/></svg>アナリティクス</button>
-      <button class="panel-topnav-btn active" type="button" data-nav-tab="playlists"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h10"/><path d="M5 11h10"/><path d="M5 16h7"/><path d="M18 8v10l3-2 3 2V8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1z"/></svg>プレイリスト</button>
-    </nav>
     <div class="pl-wrap">
       <nav class="pl-subtabs" role="tablist" aria-label="プレイリストサブタブ">
         <button class="pl-subtab${_activeSubTab === 'all-streams'  ? ' active' : ''}"
@@ -133,12 +125,6 @@ export function renderPlaylists() {
 
   // サブタブ切り替え（panel.onclick で毎回上書き → リスナー重複なし）
   panel.onclick = (e) => {
-    // ── トップナビタブ切り替え ──
-    const navTabBtn = e.target.closest('[data-nav-tab]');
-    if (navTabBtn) {
-      document.querySelector(`[data-tab="${navTabBtn.dataset.navTab}"]`)?.click();
-      return;
-    }
     // ── サブタブ ──
     const subtabBtn = e.target.closest('[data-pl-subtab]');
     if (subtabBtn) {

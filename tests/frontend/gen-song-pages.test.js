@@ -152,8 +152,15 @@ describe('buildSongPage', () => {
     assert.ok(html.includes('32回'));
   });
 
-  it('canonical が自分自身を指す', () => {
-    assert.ok(html.includes('rel="canonical" href="https://ibara-muan-songlist.pages.dev/song/catch-you-catch-me-グミ.html"'));
+  it('canonical が自分自身(拡張子なし)を指す', () => {
+    assert.ok(html.includes('rel="canonical" href="https://ibara-muan-songlist.pages.dev/song/catch-you-catch-me-グミ"'));
+    assert.ok(!html.includes('catch-you-catch-me-グミ.html'));
+  });
+
+  it('独自文章として初披露・最新・回数・ジャンルを出す', () => {
+    assert.ok(html.includes('これまで32回歌唱しています'));
+    assert.ok(html.includes('初めて歌われたのは'));
+    assert.ok(html.includes('最新の歌唱は'));
   });
 
   it('歌枠ごとに開始時刻つきのYouTubeリンクを出す', () => {

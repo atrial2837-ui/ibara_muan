@@ -134,6 +134,7 @@ a{color:var(--link)}
 nav.crumbs{font-size:13px;color:var(--mute);margin-bottom:14px}
 h1{font-size:24px;margin:0 0 6px}
 p.byline{margin:0 0 14px;color:var(--mute);font-size:15px}
+p.summary{margin:0 0 8px;font-size:14px;line-height:1.9}
 ul.facts{display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:0 0 22px;list-style:none}
 ul.facts li{background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:4px 12px;font-size:13px}
 h2{font-size:17px;margin:26px 0 10px}
@@ -186,7 +187,10 @@ ${body}
 }
 
 export function buildSongPage(song, performances, slug) {
-  const canonical = `${ORIGIN}/song/${slug}.html`;
+  // 正規URLは拡張子なしに統一する。物理ファイルは .html のままだが、
+  // Cloudflare Pages は拡張子なしでも配信するため 404 にならない。
+  // sitemap・曲一覧リンクも拡張子なしで揃えること。
+  const canonical = `${ORIGIN}/song/${slug}`;
   const title = `${song.title} / ${song.artist} - ${SITE_NAME}`;
   const latest = performances[0]?.date || '';
   const description = `茨むあんさんが「${song.title}」（${song.artist}）を歌った歌枠の一覧。歌唱回数${song.count}回${latest ? `、最新は${latest}の配信` : ''}。曲の開始時刻から再生できます。`;
@@ -196,6 +200,17 @@ export function buildSongPage(song, performances, slug) {
     song.displayKey && `キー: ${song.displayKey}`,
     `歌唱回数: ${song.count}回`,
   ].filter(Boolean);
+
+  // 検索向けの独自文章。データ一覧だけでなく「この曲についての説明」にして
+  // 単なる集計ページとの差別化を図る。performances は新しい順。
+  const firstSung = performances.length ? (performances[performances.length - 1]?.date || '') : '';
+  const summary = performances.length
+    ? `「${song.title}」は${song.artist}の楽曲で、茨むあんさんはこれまで${song.count}回歌唱しています。`
+      + (firstSung && firstSung !== latest
+        ? `初めて歌われたのは${firstSung}で、最新の歌唱は${latest}です。`
+        : (latest ? `歌唱は${latest}の記録があります。` : ''))
+      + (song.genre ? `ジャンルは${song.genre}です。` : '')
+    : `「${song.title}」は${song.artist}の楽曲です。歌唱記録の追加を待っています。`;
 
   const plays = performances.map((p) => {
     const at = p.t != null && p.t > 0 ? p.t : 0;
@@ -234,6 +249,7 @@ export function buildSongPage(song, performances, slug) {
 <h1>${escapeHtml(song.title)}</h1>
 <p class="byline">${escapeHtml(song.artist)}</p>
 <ul class="facts">${facts.map(f => `<li>${escapeHtml(f)}</li>`).join('')}</ul>
+<p class="summary">${escapeHtml(summary)}</p>
 <h2>歌った歌枠（${performances.length}件）</h2>
 ${performances.length ? `<ol class="plays">\n${plays}\n</ol>` : '<p>歌枠の記録がまだありません。</p>'}
 <h2>サイトで探す</h2>
@@ -306,7 +322,7 @@ export function buildSongIndexPage(entries) {
   const description = `茨むあんさんの歌枠で歌われた${entries.length}曲の一覧。曲ごとに歌唱回数と、歌った歌枠・開始時刻を確認できます。`;
   const items = [...entries]
     .sort((a, b) => (b.song.count - a.song.count) || a.song.title.localeCompare(b.song.title, 'ja'))
-    .map(({ song, slug }) => `  <li><a href="/song/${escapeHtml(slug)}.html">${escapeHtml(song.title)}</a> <small>/ ${escapeHtml(song.artist)}（${song.count}回）</small></li>`)
+    .map(({ song, slug }) => `  <li><a href="/song/${escapeHtml(slug)}">${escapeHtml(song.title)}</a> <small>/ ${escapeHtml(song.artist)}（${song.count}回）</small></li>`)
     .join('\n');
 
   const jsonLd = {

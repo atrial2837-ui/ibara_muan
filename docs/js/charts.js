@@ -174,7 +174,7 @@ export function createLineChart(ctx, labels, data, label) {
  */
 export function createDoughnutChart(ctx, labels, data) {
   const c = getColors();
-  const colors = [c.primary, c.accent, c.gold, c.primaryStrong, c.accentStrong, '#6cc6ec', '#ff9eb5', '#f4c44a'];
+  const colors = [c.primary, c.accent, c.gold, c.primaryStrong, c.accentStrong, '#8d86c9', '#6fbfb0', '#f4c44a'];
   return createChart(ctx, 'doughnut', {
     labels,
     datasets: [{

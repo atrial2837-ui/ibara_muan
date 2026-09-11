@@ -1,20 +1,12 @@
-import { state } from '../store.js';
 import { $, escapeHtml, fmtDate, fmtMonth, monthKey } from '../utils.js';
 import { TOP_ARTISTS_LIMIT } from '../config.js';
 import { createChart, chartCanvas, getColors } from '../charts.js';
 import { deriveArtists, computeComebacks } from '../domain-compat.js';
 import { icon } from '../icons.js';
 
-export function renderAnalytics() {
-  const { songs, streams, artists } = state.data;
-
-  const panel = $('#panel-analytics');
-  panel.innerHTML = `
-    <div class="section-header">
-      <h2>${icon('analytics')} アナリティクス</h2>
-      <span class="count-pill">${streams.length}枠 × ${songs.length}曲を分析</span>
-    </div>
-
+// ダッシュボード統合用のセクションHTML（グリッド部分のみ）
+export function analyticsSectionHtml(songs, streams) {
+  return `
     <div class="analytics-grid">
 
       <div class="card col-6">
@@ -54,7 +46,10 @@ export function renderAnalytics() {
 
     </div>
   `;
+}
 
+/** ダッシュボード統合用の描画処理（analyticsSectionHtml の後に呼ぶ） */
+export function bindAnalytics(songs, streams, artists) {
   drawGrowth(songs);
   drawSongsPerStream(streams);
   drawDow(streams);

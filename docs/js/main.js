@@ -10,18 +10,19 @@ import { buildPageMeta } from './seo-meta.js';
 import { initSearchPalette, openSearchPalette, closeSearchPalette, isSearchPaletteOpen } from './views/search-palette.js';
 import { icon } from './icons.js';
 import { initChannelModal, initHelpModal, initWelcomeTip } from './views/modals.js';
+import { initTooltip } from './tooltip.js';
 import { renderHero } from './views/hero.js';
 import { _epSetPendingTabOptions, _epSetPrevTab, _maybeImportSharedPlaylist, _maybeOpenSharedVideo, closeStreamViewer, getPlayerMode, handleViewerKeyboard, initPlayerShell, initStreamViewer, initYouTubePlayer, openStreamViewer } from './player/stream-player.js';
 
 initTheme();
 initStore();
+initTooltip();
 
 const VIEW_LOADERS = {
   dashboard: () => import('./views/dashboard.js').then(m => m.renderDashboard),
   ranking:   () => import('./views/ranking.js').then(m => m.renderRanking),
   songs:     () => import('./views/songs.js').then(m => m.renderSongs),
   timeline:  () => import('./views/timeline.js').then(m => m.renderTimeline),
-  analytics: () => import('./views/analytics.js').then(m => m.renderAnalytics),
   // requests は後回し(バックエンド未移植): views/requests.js は残すが登録しない
   playlists: () => import('./views/playlists.js').then(m => m.renderPlaylists),
 };
@@ -43,10 +44,10 @@ async function getRenderer(tab) {
   }
 }
 
-// ストリームデータが必要なタブ（dashboard/timeline/analytics）
-// ranking/songs は songs.json だけで描画できる
+// ストリームデータが必要なタブ（dashboard/timeline）
+// ranking/songs は songs.json だけで描画できる（分析は dashboard 内のセクション）
 function needsStreams(tab) {
-  return ['dashboard', 'timeline', 'analytics'].includes(tab);
+  return ['dashboard', 'timeline'].includes(tab);
 }
 
 function renderDeferredPanel(tab, options = {}) {
@@ -57,7 +58,6 @@ function renderDeferredPanel(tab, options = {}) {
     ranking: 'ランキング',
     songs: '曲リスト',
     timeline: '配信タイムライン',
-    analytics: 'アナリティクス',
   };
   panel.innerHTML = `
     <div class="state-card">
@@ -116,7 +116,7 @@ async function ensureFullData() {
 
 async function renderTab(tab = state.activeTab, options = {}) {
   if (!isValidTab(tab)) return;
-  // playlists はアプリ本体データ待ち不要
+  // playlists / requests はアプリ本体データ待ち不要
   if (tab !== 'playlists' && !state.data) return;
   const hasPartial = state.channelData?.partialLoaded || state.channelData?.fullLoaded;
   const hasFull    = state.channelData?.fullLoaded;
@@ -210,8 +210,8 @@ function syncActiveTabUi(tab) {
   $$('.panel').forEach(p => p.classList.toggle('active', p.id === (playerVisible ? 'panel-player' : `panel-${tab}`)));
   document.body.dataset.activeTab = playerVisible ? 'player' : tab; // ヒーロー圧縮・ビューワー集中表示の CSS フック
 
-  // ビューワー表示中とプレイリストタブはサイドバーを非表示にして全幅使用
-  _setSidebarHidden(playerVisible || tab === 'playlists');
+  // サイドバーは常時表示（ビューワー全画面時は overlay が覆うため意識しない）
+  _setSidebarHidden(false);
 }
 
 /** サイドバーの表示・非表示を切り替え、body padding と topbar left を同期する */
@@ -242,10 +242,19 @@ function initSidebarNav() {
     try { localStorage.setItem(storageKey, collapsed ? '1' : '0'); } catch (_) {}
   };
 
+  // 折りたたみを標準状態にする。初回表示だけでなく、以前に展開を
+  // 選んだ記録が残っている場合も今回は折りたたみで始め、以後の選択を保存する。
+  // 移行済みマーカーで初回だけ強制し、2回目以降は保存値を尊重する。
+  const migratedKey = 'ibara-sidebar-collapsed-v2';
   try {
-    setCollapsed(localStorage.getItem(storageKey) === '1');
+    if (localStorage.getItem(migratedKey) === null) {
+      setCollapsed(true);
+      localStorage.setItem(migratedKey, '1');
+    } else {
+      setCollapsed(localStorage.getItem(storageKey) === '1');
+    }
   } catch (_) {
-    setCollapsed(false);
+    setCollapsed(true);
   }
 
   // 初期状態を描画してから transition を有効化（起動時のアニメーション/シフト防止）
@@ -325,9 +334,6 @@ function switchAudience(audience, options = {}) {
   state.audience = audience === 'singer' ? 'singer' : 'listener';
   state.singerMode = state.audience === 'singer';
   if (!state.singerMode) state.singerPreset = 'all';
-  $$('.audience-switch [data-audience]').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.audience === state.audience);
-  });
   document.body.dataset.audience = state.audience;
   updateMobileMenuLabel();
   if (state.audience === 'singer') {
@@ -345,7 +351,7 @@ function updateMobileMenuLabel() {
   const label = $('#mobile-menu-label');
   if (!label) return;
   const channel = $('#channel-switch [data-channel].active')?.textContent?.trim() || '茨むあん';
-  const audience = $('#audience-switch [data-audience].active')?.textContent?.trim() || 'リスナー';
+  const audience = state.audience === 'singer' ? '配信者' : 'リスナー';
   label.textContent = `${channel} / ${audience}`;
 }
 
@@ -785,13 +791,13 @@ $$('.ch-btn').forEach(btn => {
 
 window.addEventListener('popstate', applyUrlState);
 
-// Audience switch
-$$('[data-audience]').forEach(btn => {
-  btn.addEventListener('click', () => switchAudience(btn.dataset.audience));
-});
-
-// Global click → 曲名で詳細、アーティスト名で絞り込み（全ビュー共通）
+// 利用モード切替は全曲リスト内のボタン(data-audience-toggle)から委譲で受ける
 document.body.addEventListener('click', (e) => {
+  const audToggle = e.target.closest('[data-audience-toggle]');
+  if (audToggle) {
+    switchAudience(state.audience === 'singer' ? 'listener' : 'singer');
+    return;
+  }
   const artist = e.target.closest('[data-artist-search]');
   if (artist) {
     e.preventDefault();
@@ -967,7 +973,7 @@ document.addEventListener('keydown', (e) => {
 onRerenderNeeded(() => {
   if (!state.data) return;
   destroyAllCharts();
-  if (state.activeTab === 'dashboard' || state.activeTab === 'analytics') renderTab();
+  if (state.activeTab === 'dashboard') renderTab();
 });
 
 function startApp() {

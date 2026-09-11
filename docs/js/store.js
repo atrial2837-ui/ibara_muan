@@ -14,14 +14,16 @@
 
 // ─── URL直列化可能な状態 (SSoT = URL) ────────────────────────────────────────
 
-const VALID_TABS = new Set(['dashboard', 'ranking', 'songs', 'timeline', 'analytics', 'playlists']);
+const VALID_TABS = new Set(['dashboard', 'ranking', 'songs', 'timeline', 'playlists']);
+// 旧タブ(analytics)はダッシュボード内のセクションへ吸収済み。URL互換のため読み替えだけ残す。
+const LEGACY_TABS = new Set(['analytics']);
 const FAVORITES_KEY = 'ibara-favorites-v1';
 const VALID_CHANNELS = new Set(['main', 'all']);
 const VIDEO_ID_RE = /^[\w-]{11}$/;
 
 /**
  * @typedef {object} UrlState
- * @property {'dashboard'|'ranking'|'songs'|'timeline'|'analytics'} tab
+ * @property {'dashboard'|'ranking'|'songs'|'timeline'|'playlists'} tab
  * @property {'main'|'all'} channel
  * @property {string} q
  */
@@ -69,8 +71,9 @@ export function readUrlState() {
   const rawTab = params.get('tab');
   const rawChannel = params.get('ch');
   const rawV = params.get('v') || '';
+  const tab = LEGACY_TABS.has(rawTab) ? 'dashboard' : rawTab;
   return {
-    tab: VALID_TABS.has(rawTab) ? rawTab : 'dashboard',
+    tab: VALID_TABS.has(tab) ? tab : 'dashboard',
     channel: VALID_CHANNELS.has(rawChannel) ? rawChannel : 'main',
     q: params.get('q') || '',
     v: VIDEO_ID_RE.test(rawV) ? rawV : '',
@@ -80,6 +83,8 @@ export function readUrlState() {
 
 export function writeUrlState(next = {}, options = {}) {
   const merged = { ...readUrlState(), ...next };
+  // 旧タブはURL欄にも出さない（読み替えと対称にする）
+  if (LEGACY_TABS.has(merged.tab)) merged.tab = 'dashboard';
   const params = new URLSearchParams();
   if (merged.tab !== 'dashboard') params.set('tab', merged.tab);
   if (merged.channel !== 'main') params.set('ch', merged.channel);

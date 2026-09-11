@@ -1,4 +1,6 @@
-const VALID_TABS = new Set(['dashboard', 'ranking', 'songs', 'timeline', 'analytics', 'playlists']);
+const VALID_TABS = new Set(['dashboard', 'ranking', 'songs', 'timeline', 'playlists']);
+// 旧タブ(analytics)はダッシュボード内のセクションへ吸収済み。URL互換のため読み替えだけ残す。
+const LEGACY_TABS = new Set(['analytics']);
 const VALID_CHANNELS = new Set(['main', 'all']);
 const VIDEO_ID_RE = /^[\w-]{11}$/;
 const DEFAULTS = {
@@ -12,10 +14,11 @@ const DEFAULTS = {
 export function readUrlState() {
   const params = new URLSearchParams(window.location.search);
   const rawTab = params.get('tab');
+  const tab = LEGACY_TABS.has(rawTab) ? 'dashboard' : rawTab;
   const rawChannel = params.get('ch');
   const rawV = params.get('v') || '';
   return {
-    tab: VALID_TABS.has(rawTab) ? rawTab : DEFAULTS.tab,
+    tab: VALID_TABS.has(tab) ? tab : DEFAULTS.tab,
     channel: VALID_CHANNELS.has(rawChannel) ? rawChannel : DEFAULTS.channel,
     q: params.get('q') || DEFAULTS.q,
     v: VIDEO_ID_RE.test(rawV) ? rawV : DEFAULTS.v,
@@ -25,6 +28,8 @@ export function readUrlState() {
 
 export function writeUrlState(next = {}, options = {}) {
   const merged = { ...readUrlState(), ...next };
+  // 旧タブはURL欄にも出さない（読み替えと対称にする）
+  if (LEGACY_TABS.has(merged.tab)) merged.tab = DEFAULTS.tab;
   const params = new URLSearchParams();
   if (merged.tab !== DEFAULTS.tab) params.set('tab', merged.tab);
   if (merged.channel !== DEFAULTS.channel) params.set('ch', merged.channel);

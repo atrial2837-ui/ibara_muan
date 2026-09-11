@@ -1,4 +1,4 @@
-import{d as b}from"./chunk-FCOJKAWC.js";import{L as w,X as M,e as c,f as y,h as p,l as D}from"./chunk-W7UWNHP7.js";function v(){let{songs:t,streams:o=[]}=c.data,i=c.rankingPeriod||"all",r=y("#panel-ranking");if(!r)return;let s=i==="all"?null:N(o,i),l=s?j(t,s):[...t].sort((n,a)=>a.count-n.count||n.title.localeCompare(a.title,"ja")),e=c.rankingLimit,d=l.slice(0,e),u=!!c.channelData?.fullLoaded;r.innerHTML=`
+import{d as b}from"./chunk-FCOJKAWC.js";import{I as w,U as M,e as c,f as y,h as p,l as D}from"./chunk-W25M55W2.js";function v(){let{songs:t,streams:o=[]}=c.data,i=c.rankingPeriod||"all",r=y("#panel-ranking");if(!r)return;let s=i==="all"?null:N(o,i),l=s?j(t,s):[...t].sort((n,a)=>a.count-n.count||n.title.localeCompare(a.title,"ja")),e=c.rankingLimit,d=l.slice(0,e),u=!!c.channelData?.fullLoaded;r.innerHTML=`
     <div class="section-header">
       <h2>${M("rank")} \u6B4C\u5531\u56DE\u6570\u30E9\u30F3\u30AD\u30F3\u30B0</h2>
       <span class="count-pill">${t.length}\u66F2\u4E2D</span>

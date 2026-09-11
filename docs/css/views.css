@@ -12,12 +12,23 @@
 .dashboard-overview-grid {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: minmax(220px, 0.82fr) minmax(260px, 1fr) minmax(420px, 1.5fr);
-  grid-template-areas:
-    "activity top genre"
-    "monthly monthly heatmap";
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas: "monthly heatmap";
+  gap: 10px;
   align-items: stretch;
+  min-width: 0;
+}
+/* よく歌われた曲・TOP5・ジャンル分布の3列 */
+.dashboard-trio-grid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 10px;
+  align-items: stretch;
+  min-width: 0;
+}
+.dashboard-trio-grid > .card {
+  grid-column: span 4;
   min-width: 0;
 }
 .dashboard-card {
@@ -33,24 +44,14 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+  row-gap: 6px;
+  flex-wrap: wrap;
   line-height: 1.35;
   margin-bottom: 10px;
 }
 .dashboard-card .card-title .pill {
   flex: 0 0 auto;
   margin-left: auto;
-  white-space: nowrap;
-}
-.dashboard-metric-list {
-  display: grid;
-  gap: 8px;
-}
-.dashboard-activity-card .activity-row {
-  grid-template-columns: 48px minmax(0, 1fr) auto;
-}
-.dashboard-activity-card .activity-row strong {
-  color: var(--primary-strong);
-  font-feature-settings: var(--tnum);
   white-space: nowrap;
 }
 .dashboard-top-card .bar-list,
@@ -62,17 +63,98 @@
 .dashboard-card .bar-list[hidden] {
   display: none;
 }
-.dashboard-activity-card { grid-area: activity; }
-.dashboard-top-card { grid-area: top; }
-.dashboard-genre-card { grid-area: genre; }
 .dashboard-heatmap-card { grid-area: heatmap; }
 .dashboard-monthly-card { grid-area: monthly; }
 .dashboard-monthly-card {
-  padding-bottom: 14px;
+  padding-bottom: 12px;
 }
-/* リスト3枚（よく歌われた曲 / 久しぶり / 定番）を1行に */
-.dashboard-list-card { grid-column: span 4; }
+/* 月別とヒートマップの高さを揃える（ヒートマップ下の余白対策） */
+.dashboard-monthly-card .chart-wrap {
+  height: 150px;
+}
+.dashboard-heatmap-card {
+  display: flex;
+  flex-direction: column;
+}
+.dashboard-heatmap-card .heatmap-flex {
+  flex: 1 1 auto;
+  align-items: center;
+}
+.dashboard-heatmap-card .heatmap {
+  grid-template-rows: repeat(7, 14px);
+}
+.dashboard-heatmap-card .heatmap .heatmap-cell {
+  width: 14px;
+  height: 14px;
+}
+.dashboard-heatmap-card .heatmap-row-labels {
+  grid-template-rows: repeat(7, 14px);
+}
+.dashboard-heatmap-card .heatmap-row-labels > div {
+  line-height: 14px;
+}
+/* 直近の歌枠は全幅 */
 .dashboard-recent-card { grid-column: 1 / -1; }
+/* ダッシュボード内のアナリティクス統合セクション */
+.dashboard-analytics-section {
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin-top: 2px;
+  scroll-margin-top: 76px;
+}
+
+/* ── スライド式セグメント切替（今月/今年） ─────────────────── */
+.seg-control {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  flex: 0 0 auto;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px;
+  min-height: 28px;
+}
+.seg-thumb {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: calc(50% - 2px);
+  border-radius: 999px;
+  background: var(--primary-soft);
+  border: 1px solid var(--primary);
+  transition: transform 0.18s ease;
+  pointer-events: none;
+}
+.seg-control[data-active="year"] .seg-thumb {
+  transform: translateX(100%);
+}
+.seg-btn {
+  appearance: none;
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-mute);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  min-height: 22px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.seg-btn.is-active {
+  color: var(--primary-strong);
+}
+.seg-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
 @media (min-width: 760px) {
   .col-12 { grid-column: 1 / -1 !important; }
   .col-6 { grid-column: span 6 !important; }
@@ -94,14 +176,12 @@
   }
   .dashboard-overview-grid {
     grid-column: 1 / -1;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
-      "activity top"
-      "genre genre"
-      "heatmap heatmap"
-      "monthly monthly";
+      "monthly"
+      "heatmap";
   }
-  .dashboard-list-card,
+  .dashboard-trio-grid > .card,
   .dashboard-recent-card {
     grid-column: 1 / -1;
   }
@@ -117,104 +197,74 @@
   .dashboard-overview-grid {
     grid-template-columns: 1fr;
     grid-template-areas:
-      "activity"
-      "top"
-      "genre"
-      "heatmap"
-      "monthly";
+      "monthly"
+      "heatmap";
   }
 }
 
-.genre-meter {
+/* ジャンル分布ドーナツ（左：円内％＋中央合計／右：色付き2行リスト） */
+.genre-doughnut {
   display: grid;
-  gap: 10px;
-}
-.genre-meter-track {
-  display: flex;
-  width: 100%;
-  height: 14px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: var(--surface-3);
-  border: 1px solid var(--border);
-}
-.genre-meter-segment {
-  display: block;
-  min-width: 4px;
-}
-.genre-breakdown {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
-  gap: 6px 12px;
-}
-.genre-insights {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
   gap: 8px;
-  margin-top: 2px;
+  align-items: stretch;
 }
-.genre-insight {
-  min-width: 0;
-  padding: 9px 10px;
-  border: 1px solid var(--border-soft);
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--surface-2) 84%, var(--primary-soft));
+.genre-doughnut .chart-wrap.genre-chart {
+  height: 215px;
 }
-.genre-insight span {
-  display: block;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--ink-mute);
-  font-size: 10px;
-  line-height: 1.2;
-}
-.genre-insight strong {
-  display: block;
-  margin-top: 4px;
-  color: var(--primary-strong);
-  font-size: 18px;
-  line-height: 1;
-  font-feature-settings: var(--tnum);
-}
-.genre-insight small {
-  margin-left: 2px;
-  color: var(--ink-mute);
-  font-size: 10px;
-  font-weight: 700;
-}
-.genre-row {
+.genre-table {
   display: grid;
-  grid-template-columns: 10px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 7px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  align-content: start;
   min-width: 0;
-  font-size: 12px;
 }
-.genre-name {
+.genre-trow {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  gap: 1px 6px;
+  min-width: 0;
+  padding: 3px 8px 4px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--gc) 9%, var(--surface));
+}
+.genre-tdot {
+  grid-row: 1 / 3;
+  align-self: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--gc);
+}
+.genre-tname {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--ink-soft);
+  color: var(--ink);
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.3;
 }
-.genre-row strong {
-  color: var(--primary-strong);
+.genre-tvals {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+}
+.genre-tpct {
+  color: var(--gc);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
   font-feature-settings: var(--tnum);
 }
-.genre-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+.genre-tcount {
+  color: var(--ink-mute);
+  font-size: 10px;
+  white-space: nowrap;
+  font-feature-settings: var(--tnum);
 }
-.g0 { background: var(--primary); }
-.g1 { background: var(--accent); }
-.g2 { background: var(--gold); }
-.g3 { background: var(--primary-strong); }
-.g4 { background: var(--accent-strong); }
-.g5 { background: #8d86c9; }
-.g6 { background: #6fbfb0; }
-.g7 { background: #d49a6a; }
 
 
 /* Heatmap (calendar) */
@@ -298,6 +348,9 @@
   color: var(--ink-soft);
   text-align: right;
   padding-right: 4px;
+}
+.heatmap-row-labels > div {
+  line-height: 12px;
 }
 
 .heatmap-flex {
@@ -1182,15 +1235,6 @@ body[data-audience="listener"] [data-mobile-panel-toggle="setlist"] {
     font-size: 10px;
     padding: 1px 7px;
   }
-  .dashboard-activity-card .activity-row {
-    grid-template-columns: 44px minmax(0, 1fr) auto;
-  }
-  .genre-breakdown {
-    grid-template-columns: 1fr;
-  }
-  .genre-insights {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .podium {
     grid-template-columns: repeat(3, minmax(84px, 1fr));
     gap: 6px;
@@ -1271,13 +1315,21 @@ body[data-audience="listener"] [data-mobile-panel-toggle="setlist"] {
   .song-key-line {
     margin-top: 4px;
   }
-  body[data-audience="singer"] .song-meta-line,
-  body[data-audience="singer"] .song-key-line {
+  body[data-audience="singer"] .song-meta-line {
     display: flex;
     flex-wrap: nowrap;
     gap: 4px;
     min-height: 0;
     overflow: hidden;
+  }
+  /* キー行はツールチップがはみ出すため hidden にしない。
+     狭い画面では折り返して全ボタンを出す（省略しない）。 */
+  body[data-audience="singer"] .song-key-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    min-height: 0;
+    overflow: visible;
   }
   body[data-audience="singer"] .genre-badge,
   body[data-audience="singer"] .tag-badge,
@@ -2232,76 +2284,11 @@ body[data-audience="listener"] [data-mobile-panel-toggle="setlist"] {
   padding: 0 9px;
 }
 
-/* ── ダッシュボード: まとめカード（リキャップ） ── */
-.dashboard-recap-card {
-  grid-column: 1 / -1;
-}
-
-.dashboard-recap-card .card-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
+/* ── ダッシュボード: カード内切替トグル ── */
 .dashboard-recap-toggle {
   display: inline-flex;
   gap: 4px;
   flex: 0 0 auto;
-}
-
-.recap-period-label {
-  font-size: 12px;
-  color: var(--ink-mute);
-  margin-bottom: 10px;
-}
-
-.recap-tiles {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.recap-tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: var(--surface-2);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-sm);
-  padding: 12px 16px;
-  min-width: 80px;
-  text-align: center;
-  flex: 1 1 80px;
-}
-
-.recap-tile strong {
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--primary-strong);
-  line-height: 1.1;
-}
-
-.recap-tile span {
-  font-size: 10.5px;
-  color: var(--ink-mute);
-  margin-top: 3px;
-}
-
-.recap-top-song {
-  font-size: 13px;
-  color: var(--ink);
-  padding: 8px 10px;
-  background: var(--surface-2);
-  border-radius: var(--radius-sm);
-  border-left: 3px solid var(--primary);
-}
-
-.recap-sub {
-  color: var(--ink-mute);
-  font-size: 11px;
 }
 
 /* === Song Requests === */
