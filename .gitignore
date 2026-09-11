@@ -8,3 +8,6 @@ node_modules/
 
 # Local-only design / handoff notes (kept out of the public repo)
 /SoT/
+
+# Auto-update working files (candidates/scan results are uploaded as Actions artifacts)
+tmp/

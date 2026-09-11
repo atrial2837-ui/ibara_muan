@@ -8,7 +8,10 @@
     "build": "node build.mjs",
     "build:main": "node build.mjs main",
     "build:admin": "node build.mjs admin",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "auto-update:collect": "node tools/collect_new_videos.mjs",
+    "auto-update:scan": "node tools/scan_utawaku.mjs",
+    "auto-update:apply": "node tools/apply_scan_results.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"
