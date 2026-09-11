@@ -81,6 +81,45 @@ try {
   ok(`アイコン ${ (manifest.icons || []).length } 件 OK`);
 } catch (_) { /* 上の JSON チェックで報告済み */ }
 
+// ── 6. テーマ auto の取り違え ───────────────────────────────────────────────
+// auto は「既定はライト、OSがダークのときだけ dark 媒体クエリで上書き」が正。
+// dark と同じ規則に auto を並べると、OSがライトでもその要素だけ暗くなり、
+// ライトの画面に一部だけダークが混ざる（統計カードとヒートマップで実際に発生）。
+console.log('テーマ auto の指定:');
+{
+  const cssDir = join(DOCS, 'css');
+  let checked = 0;
+  for (const file of readdirSync(cssDir).filter((f) => f.endsWith('.css'))) {
+    const lines = readFileSync(join(cssDir, file), 'utf-8').split(/\r?\n/);
+    let depth = 0;
+    const media = []; // 開いている @media の条件と深さ
+    let selector = []; // 直前から続いているセレクタ行
+
+    lines.forEach((line, i) => {
+      const m = /@media\s*([^{]+)\{/.exec(line);
+      if (m) media.push({ cond: m[1].trim(), depth });
+
+      // セレクタは複数行に分かれるので、{ が来るまで貯めて 1 規則として見る
+      selector.push(line);
+      if (line.includes('{')) {
+        const rule = selector.join(' ');
+        const inDark = media.some((x) => /prefers-color-scheme:\s*dark/.test(x.cond));
+        if (!inDark && /\[data-theme=["']auto["']\]/.test(rule) && /\[data-theme=["']dark["']\]/.test(rule)) {
+          fail(`${file}:${i + 1} auto を dark と同じ規則に並べている（dark 媒体クエリへ移すこと）`);
+        }
+        selector = [];
+      }
+      if (line.includes('}')) selector = [];
+
+      depth += (line.match(/\{/g) || []).length;
+      depth -= (line.match(/\}/g) || []).length;
+      while (media.length && depth <= media[media.length - 1].depth) media.pop();
+    });
+    checked++;
+  }
+  ok(`${checked} 件の CSS を確認`);
+}
+
 // ── 結果 ────────────────────────────────────────────────────────────────────
 if (failures) {
   console.error(`\nNG: ${failures} 件の問題`);

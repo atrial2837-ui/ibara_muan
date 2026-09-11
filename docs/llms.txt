@@ -1,0 +1,22 @@
+# 茨むあん 歌唱データベース
+
+VSinger 茨むあんさんの歌枠で歌われた楽曲をまとめた、ファンメイドの歌唱データベースです。
+公式サイトではなく、有志が運営しています。
+
+## 収録している内容
+
+- 歌枠で歌われた楽曲の一覧と歌唱回数
+- 楽曲ごとの歌唱履歴（どの配信で、いつ歌われたか、配信内の開始時刻つき）
+- 配信（歌枠）ごとのセットリスト
+- アーティスト・ジャンル・キー（原キーとの上げ下げ）での絞り込み
+- 歌ってみた・オリジナル曲のMV一覧、自分で作るマイリスト
+
+## 主なページ
+
+- [トップ（ダッシュボード）](https://ibara-muan-songlist.pages.dev/): 総歌唱数・持ち曲数などの概要と、今月の活動
+- [全曲リスト](https://ibara-muan-songlist.pages.dev/?tab=songs): 収録している全楽曲の検索と絞り込み
+- [ランキング](https://ibara-muan-songlist.pages.dev/?tab=ranking): 歌唱回数の多い順
+- [配信タイムライン](https://ibara-muan-songlist.pages.dev/?tab=timeline): 歌枠を日付順に並べ、各枠のセットリストつき
+- [アナリティクス](https://ibara-muan-songlist.pages.dev/?tab=analytics): 月別の歌唱数・ジャンル分布などの傾向
+- [プレイリスト](https://ibara-muan-songlist.pages.dev/?tab=playlists): 歌ってみた・オリ曲とマイリスト
+- [曲一覧](https://ibara-muan-songlist.pages.dev/song/): 曲ごとの静的ページへの索引

@@ -3,6 +3,8 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, unlink
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { createHash } from 'crypto';
+import { generateSitemap } from './scripts/gen-sitemap.mjs';
+import { generateSongPages } from './scripts/gen-song-pages.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(__dirname, 'docs', 'dist');
@@ -139,6 +141,10 @@ async function main() {
   }
   cleanStaleChunks();
   stampAssetVersions();
+  const songPages = generateSongPages();
+  console.log(`generated docs/song/ (${songPages} song pages + index)`);
+  const urls = generateSitemap();
+  console.log(`generated docs/sitemap.xml (${urls} URLs)`);
 }
 
 main().catch((e) => {
