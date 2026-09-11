@@ -100,7 +100,7 @@ function deepMerge(a, b) {
   return out;
 }
 
-export function createChart(id, type, data, options = {}) {
+export function createChart(id, type, data, options = {}, plugins = []) {
   ensureChartJs()
     .then((ChartCtor) => {
       const canvas = document.getElementById(id);
@@ -112,7 +112,7 @@ export function createChart(id, type, data, options = {}) {
       const merged = deepMerge(defaults(), options);
       merged.responsive = true;
       merged.maintainAspectRatio = false;
-      const chart = new ChartCtor(ctx, { type, data, options: merged });
+      const chart = new ChartCtor(ctx, { type, data, options: merged, plugins });
       charts.set(id, chart);
       return chart;
     })
