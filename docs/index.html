@@ -14,46 +14,100 @@
 <meta property="og:title" content="茨むあん 歌唱データベース">
 <meta property="og:description" content="茨むあんさんの歌った曲リスト、ランキング、歌枠タイムライン、歌みた・オリ曲、プレイリスト、キー・ジャンル検索をまとめたファンメイドデータベース。">
 <meta property="og:url" content="https://ibara-muan-songlist.pages.dev/">
+<!-- og:image に SVG は使えない（X・Facebook・Discord など主要SNSが対応しておらず、
+     共有しても画像が出ない）。サイトアイコンの PNG 版を指定する。 -->
 <meta property="og:image" content="https://ibara-muan-songlist.pages.dev/assets/site-icon-512.png">
+<meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="512">
 <meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="茨むあん 歌唱データベースのアイコン">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="茨むあん 歌唱データベース">
 <meta name="twitter:description" content="茨むあんさんの歌った曲リスト、ランキング、歌枠タイムライン、歌みた・オリ曲、プレイリスト、キー・ジャンル検索をまとめたファンメイドデータベース。">
 <meta name="twitter:image" content="https://ibara-muan-songlist.pages.dev/assets/site-icon-512.png">
+<meta name="twitter:image:alt" content="茨むあん 歌唱データベースのアイコン">
+<!-- 構造化データ。ファンサイトである点を description に明記し、
+     about で対象の人物（公式リンクのみ）を指す。検索側にサイトの主題を伝えるため。 -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://ibara-muan-songlist.pages.dev/#website",
+      "url": "https://ibara-muan-songlist.pages.dev/",
+      "name": "茨むあん 歌唱データベース",
+      "description": "VSinger 茨むあんさんの歌枠で歌われた楽曲をまとめた、有志によるファンメイドの歌唱データベース。公式サイトではありません。",
+      "inLanguage": "ja",
+      "isAccessibleForFree": true,
+      "about": { "@id": "https://ibara-muan-songlist.pages.dev/#ibara" },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://ibara-muan-songlist.pages.dev/?tab=songs&q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://ibara-muan-songlist.pages.dev/#ibara",
+      "name": "茨むあん",
+      "alternateName": "Ibara Muan",
+      "url": "https://www.youtube.com/@ibaramuan",
+      "sameAs": [
+        "https://www.youtube.com/@ibaramuan",
+        "https://x.com/ibaramuan"
+      ]
+    },
+    {
+      "@type": "CollectionPage",
+      "@id": "https://ibara-muan-songlist.pages.dev/#collection",
+      "url": "https://ibara-muan-songlist.pages.dev/",
+      "name": "茨むあん 歌唱データベース",
+      "isPartOf": { "@id": "https://ibara-muan-songlist.pages.dev/#website" },
+      "about": { "@id": "https://ibara-muan-songlist.pages.dev/#ibara" },
+      "inLanguage": "ja"
+    }
+  ]
+}
+</script>
 <link rel="icon" type="image/svg+xml" href="assets/site-icon.svg">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/site-icon.svg">
 <link rel="preload" href="assets/site-icon.svg" as="image" fetchpriority="high">
-<link rel="preload" href="assets/fonts/noto-sans-jp-ibara-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/data/meta.json" as="fetch" type="application/json">
-<link rel="preload" href="/data/songs.json" as="fetch" type="application/json">
-<link rel="preload" href="/data/streams.json" as="fetch" type="application/json">
-<script type="importmap">
-{
-  "imports": {
-    "fuse": "https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.mjs"
-  }
-}
-</script>
-<link rel="modulepreload" href="dist/main.js?v=7d1deadab3">
-<link rel="preload" href="css/theme.css?v=7d1deadab3" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<!-- YouTube サムネ(i.ytimg.com)は全タブで即使うので preconnect で接続(DNS+TLS)を温める。
+     プレイヤー(youtube.com)はビュアーを開くまで使わないので dns-prefetch のみ。
+     同一ホストへの dns-prefetch は preconnect に含まれるため併記しない。 -->
+<link rel="preconnect" href="https://i.ytimg.com">
+<link rel="dns-prefetch" href="https://www.youtube.com">
+<!-- Chart.js は dashboard/analytics で遅延ロードする外部CDN。接続だけ温めておく。
+     以前は preload も併用していたが、70KB が初期表示中の帯域を奪って
+     モバイルの LCP を押し下げていたため外した（グラフは折り返しより下）。 -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preload" href="/data/meta.json" as="fetch" type="application/json" crossorigin>
+<link rel="preload" href="/data/songs.json" as="fetch" type="application/json" crossorigin fetchpriority="low">
+<link rel="preload" href="/data/streams.json" as="fetch" type="application/json" crossorigin fetchpriority="low">
+<link rel="modulepreload" href="dist/main.js?v=056ced16fc">
+<link rel="preload" href="dist/theme.css?v=056ced16fc" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <style>
-:root,:root[data-theme="light"],:root[data-theme="auto"]{color-scheme:light;--bg-1:#f0fbff;--bg-2:#c2ecff;--bg-radial-1:#fff;--bg-radial-2:#ffd6e7;--surface:#fff;--surface-2:#f6fbff;--surface-3:#ebf6fb;--surface-glass:rgba(255,255,255,.85);--border:#c2ecff;--border-soft:#e2f1f9;--border-strong:#9bdcf7;--ink:#1f4861;--ink-soft:#3f6f87;--ink-mute:#4f748b;--primary:#4ab2dc;--primary-strong:#1f789f;--primary-soft:#dff5ff;--accent:#ff9eb5;--accent-strong:#c85075;--accent-soft:#ffd6e7;--gold:#f4c44a;--silver:#b8c9d4;--bronze:#d49a6a;--green-bg:#d8f5e0;--green-text:#2e7044;--orange-bg:#fde7d8;--orange-text:#965123;--red:#e23939;--shadow-sm:0 2px 8px rgba(106,184,219,.15);--shadow:0 8px 24px rgba(106,184,219,.22);--shadow-lg:0 16px 40px rgba(106,184,219,.28);--radius-sm:12px;--radius:18px;--radius-lg:28px;--tnum:"tnum"}@media(prefers-color-scheme:dark){:root[data-theme="auto"]{color-scheme:dark;--bg-1:#11100e;--bg-2:#242017;--bg-radial-1:#2b2518;--bg-radial-2:#1f2b1d;--surface:#1b1915;--surface-2:#242117;--surface-3:#302a1d;--surface-glass:rgba(27,25,21,.88);--border:#4c4129;--border-soft:#332d20;--border-strong:#a9842d;--ink:#f4efe2;--ink-soft:#d4c7ad;--ink-mute:#a89b84;--primary:#d9ad3b;--primary-strong:#f0d27a;--primary-soft:#3a2f16;--accent:#78a064;--accent-strong:#b8d29b;--accent-soft:#26361f;--gold:#e0b23d;--silver:#c8c4b7;--bronze:#c39156;--green-bg:#1f3b22;--green-text:#96d18b;--orange-bg:#4c331d;--orange-text:#e3b178;--red:#f07171;--shadow-sm:0 2px 8px rgba(0,0,0,.4);--shadow:0 8px 24px rgba(0,0,0,.5);--shadow-lg:0 16px 40px rgba(0,0,0,.6)}}:root[data-theme="dark"]{color-scheme:dark;--bg-1:#11100e;--bg-2:#242017;--bg-radial-1:#2b2518;--bg-radial-2:#1f2b1d;--surface:#1b1915;--surface-2:#242117;--surface-3:#302a1d;--surface-glass:rgba(27,25,21,.88);--border:#4c4129;--border-soft:#332d20;--border-strong:#a9842d;--ink:#f4efe2;--ink-soft:#d4c7ad;--ink-mute:#a89b84;--primary:#d9ad3b;--primary-strong:#f0d27a;--primary-soft:#3a2f16;--accent:#78a064;--accent-strong:#b8d29b;--accent-soft:#26361f;--gold:#e0b23d;--silver:#c8c4b7;--bronze:#c39156;--green-bg:#1f3b22;--green-text:#96d18b;--orange-bg:#4c331d;--orange-text:#e3b178;--red:#f07171;--shadow-sm:0 2px 8px rgba(0,0,0,.4);--shadow:0 8px 24px rgba(0,0,0,.5);--shadow-lg:0 16px 40px rgba(0,0,0,.6)}*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:"Ibara Noto Sans JP","Noto Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN","BIZ UDPGothic","Yu Gothic","Meiryo",system-ui,sans-serif;background:radial-gradient(circle at 15% 5%,var(--bg-radial-1) 0%,transparent 38%),radial-gradient(circle at 85% 95%,var(--bg-radial-2) 0%,transparent 32%),linear-gradient(180deg,var(--bg-1) 0%,var(--bg-2) 100%);background-attachment:fixed;color:var(--ink);min-height:100vh;line-height:1.7;-webkit-font-smoothing:antialiased}a{color:var(--primary-strong);text-decoration:none}button,input,select,textarea{font-family:inherit;color:inherit}.container{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 20px}main.container{padding-top:28px;padding-bottom:80px}.topbar{position:sticky;top:0;z-index:50;background:var(--surface-glass);backdrop-filter:saturate(140%) blur(10px);-webkit-backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--border-soft)}.topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:12px;height:56px}.brand{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none}.brand-icon{width:28px;height:28px;flex:0 0 auto;border-radius:50%;box-shadow:var(--shadow-sm)}.brand-text{display:flex;flex-direction:column;line-height:1.15}.brand-title{font-size:15px;font-weight:700;letter-spacing:0}.brand-dim{color:var(--ink-mute);font-weight:500}.brand-sub{font-size:10.5px;color:var(--accent-strong);letter-spacing:.1em;font-weight:600}.topbar-actions{display:flex;align-items:center;gap:8px}.topbar-actions .topbar-official-links{margin-left:4px;padding-left:8px;border-left:1px solid var(--border-soft)}.mobile-menu-state,.mobile-menu-toggle{display:none}
-.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;background:var(--surface);border:2px solid var(--border);border-radius:50%;color:var(--ink-soft);cursor:pointer}.help-btn,.help-close{font-size:17px;font-weight:800;line-height:1}.channel-switch{display:inline-flex;background:var(--surface);border:2px solid var(--border);border-radius:999px;padding:3px;gap:2px;height:36px;overflow:hidden}.ch-btn{background:transparent;border:0;color:var(--ink-soft);padding:0 12px;border-radius:999px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit}.ch-btn.active{background:linear-gradient(135deg,var(--primary),var(--primary-strong));color:#fff;box-shadow:var(--shadow-sm)}.ch-btn[data-channel=all].active{background:linear-gradient(135deg,var(--accent),var(--accent-strong))}.ch-btn[data-channel=old].active{background:linear-gradient(135deg,var(--gold),#c8a02a)}.audience-switch .ch-btn[data-audience=singer].active{background:linear-gradient(135deg,var(--accent),var(--accent-strong))}.theme-toggle{display:inline-flex;align-items:center;gap:6px;height:36px;background:var(--surface);border:2px solid var(--border);border-radius:999px;color:var(--ink-soft);cursor:pointer;padding:0 14px;font-size:12px;font-weight:600}.theme-icon{font-size:14px}.theme-label{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-mute)}.hero{background:var(--surface);border-radius:var(--radius-lg);padding:36px 32px 28px;border:2px solid var(--border-soft);box-shadow:var(--shadow);position:relative;overflow:hidden}.hero:after{content:"";position:absolute;bottom:16px;right:22px;width:20px;height:20px;border-radius:50%;background:var(--primary-soft);opacity:.5}.hero-title{display:flex;align-items:center;justify-content:center;gap:10px;font-size:clamp(20px,3.5vw,28px);text-align:center;letter-spacing:.04em;color:var(--ink);margin-bottom:4px}.hero-title-icon{width:32px;height:32px;flex:0 0 auto;filter:drop-shadow(0 4px 10px rgba(55,166,217,.2))}.hero-sub{ text-align:center;color:var(--ink);font-size:12px;letter-spacing:.1em;margin-bottom:6px}.hero-description{max-width:760px;margin:0 auto 10px;color:var(--ink);font-size:12px;line-height:1.7;text-align:center}.hero-updated{text-align:center;color:var(--ink);font-size:12px;margin-bottom:22px}.hero-updated strong{color:var(--ink)}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.stat-card{background:linear-gradient(180deg,var(--surface-2),var(--surface-3));border:2px solid var(--border);border-radius:var(--radius);padding:16px 14px;text-align:center;min-height:88px}.stat-card.placeholder{opacity:.4}.tabs{display:flex;gap:6px;margin:26px 0 18px;flex-wrap:wrap;overflow-x:auto;padding-bottom:4px}.tab-btn{background:var(--surface);border:2px solid var(--border);color:var(--ink-soft);padding:9px 18px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}.tab-btn.active{background:linear-gradient(135deg,var(--primary),var(--primary-strong));border-color:var(--primary-strong);color:#fff;box-shadow:var(--shadow-sm)}.panels{min-height:720px}.panel{display:none}.panel.active{display:block}@media(max-width:700px){.brand-dim,.brand-sub,.theme-label{display:none}.mobile-menu-toggle{appearance:none;display:inline-flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:36px;padding:5px 12px;border:2px solid var(--border);border-radius:999px;background:var(--surface);color:var(--ink-soft);font-family:inherit;font-size:12px;font-weight:800;line-height:1.2;box-shadow:var(--shadow-sm);cursor:pointer}.topbar-actions{flex:1 1 100%;width:100%;display:none;gap:5px;flex-wrap:wrap;justify-content:flex-start;min-width:0;padding:8px;border:1px solid var(--border-soft);border-radius:18px;background:var(--surface-glass);box-shadow:var(--shadow-sm)}.topbar-actions.is-open,.mobile-menu-state:checked~.topbar-actions{display:grid!important;grid-template-columns:1fr auto auto auto;align-items:center;justify-content:end}.topbar-actions .channel-switch{grid-column:1/-1}.topbar-actions .audience-switch{grid-column:1/-1}.tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:var(--surface-glass);border:1px solid var(--border-soft);border-radius:20px;box-shadow:var(--shadow);gap:8px;margin:20px 0 16px;overflow:visible;padding:10px}.tab-btn{justify-content:center;min-width:0;padding:9px 10px;font-size:12px;overflow:hidden;text-overflow:ellipsis}.hero{padding:24px 18px 20px}.hero-title{font-size:19px;line-height:1.45;flex-wrap:wrap}.hero-title-icon{width:28px;height:28px}.stats-grid{grid-template-columns:repeat(2,1fr);gap:8px}.stat-card{padding:12px 8px;min-height:76px}}
+:root,:root[data-theme="light"],:root[data-theme="auto"]{color-scheme:light;--bg-1:#f7f4ec;--bg-2:#d8d5cd;--bg-radial-1:#fffaf0;--bg-radial-2:#efc34a;--surface:#fffdf8;--surface-2:#f5f1e8;--surface-3:#ece6d8;--surface-glass:rgba(255, 253, 248, 0.88);--border:#ded1b1;--border-soft:#ece2cf;--border-strong:#c9a75a;--ink:#191713;--ink-soft:#3f3a31;--ink-mute:#746b5e;--primary:#18150f;--primary-strong:#030302;--primary-soft:#f4e7c0;--accent:#e4b129;--accent-strong:#936715;--accent-soft:#fff0b9;--gold:#e0b23d;--silver:#b9b7ae;--bronze:#b98b52;--green-bg:#e2efe2;--green-text:#2f6938;--orange-bg:#f4dfc5;--orange-text:#8a5522;--red:#b33131;--shadow-sm:0 2px 8px rgba(94, 75, 38, 0.12);--shadow:0 8px 24px rgba(94, 75, 38, 0.18);--shadow-lg:0 16px 40px rgba(42, 34, 19, 0.22);--radius-sm:12px;--radius:18px;--radius-lg:28px;--tnum:"tnum"}@media(prefers-color-scheme:dark){:root[data-theme="auto"]{color-scheme:dark;--bg-1:#11100e;--bg-2:#242017;--bg-radial-1:#2b2518;--bg-radial-2:#1f2b1d;--surface:#1b1915;--surface-2:#242117;--surface-3:#302a1d;--surface-glass:rgba(27, 25, 21, 0.88);--border:#4c4129;--border-soft:#332d20;--border-strong:#a9842d;--ink:#f4efe2;--ink-soft:#d4c7ad;--ink-mute:#a89b84;--primary:#d9ad3b;--primary-strong:#f0d27a;--primary-soft:#3a2f16;--accent:#78a064;--accent-strong:#b8d29b;--accent-soft:#26361f;--gold:#e0b23d;--silver:#c8c4b7;--bronze:#c39156;--green-bg:#1f3b22;--green-text:#96d18b;--orange-bg:#4c331d;--orange-text:#e3b178;--red:#f07171;--shadow-sm:0 2px 8px rgba(0, 0, 0, 0.4);--shadow:0 8px 24px rgba(0, 0, 0, 0.5);--shadow-lg:0 16px 40px rgba(0,0,0,.6)}}:root[data-theme="dark"]{color-scheme:dark;--bg-1:#11100e;--bg-2:#242017;--bg-radial-1:#2b2518;--bg-radial-2:#1f2b1d;--surface:#1b1915;--surface-2:#242117;--surface-3:#302a1d;--surface-glass:rgba(27, 25, 21, 0.88);--border:#4c4129;--border-soft:#332d20;--border-strong:#a9842d;--ink:#f4efe2;--ink-soft:#d4c7ad;--ink-mute:#a89b84;--primary:#d9ad3b;--primary-strong:#f0d27a;--primary-soft:#3a2f16;--accent:#78a064;--accent-strong:#b8d29b;--accent-soft:#26361f;--gold:#e0b23d;--silver:#c8c4b7;--bronze:#c39156;--green-bg:#1f3b22;--green-text:#96d18b;--orange-bg:#4c331d;--orange-text:#e3b178;--red:#f07171;--shadow-sm:0 2px 8px rgba(0, 0, 0, 0.4);--shadow:0 8px 24px rgba(0, 0, 0, 0.5);--shadow-lg:0 16px 40px rgba(0,0,0,.6)}*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:"Noto Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN","BIZ UDPGothic","Yu Gothic","Meiryo",system-ui,sans-serif;background:radial-gradient(circle at 15% 5%,var(--bg-radial-1) 0%,transparent 38%),radial-gradient(circle at 85% 95%,var(--bg-radial-2) 0%,transparent 32%),linear-gradient(180deg,var(--bg-1) 0%,var(--bg-2) 100%);background-attachment:fixed;color:var(--ink);min-height:100vh;line-height:1.7;-webkit-font-smoothing:antialiased}a{color:var(--primary-strong);text-decoration:none}button,input,select,textarea{font-family:inherit;color:inherit}.container{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 20px}main.container{padding-top:28px;padding-bottom:80px}.topbar{position:sticky;top:0;z-index:50;background:var(--surface-glass);backdrop-filter:saturate(140%) blur(10px);-webkit-backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--border-soft)}.topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:12px;height:56px}.brand{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none}.brand-icon{width:28px;height:28px;flex:0 0 auto;border-radius:50%;box-shadow:var(--shadow-sm)}.brand-text{display:flex;flex-direction:column;line-height:1.15}.brand-title{font-size:15px;font-weight:700;letter-spacing:0}.brand-dim{color:var(--ink-mute);font-weight:500}.brand-sub{font-size:10.5px;color:var(--accent-strong);letter-spacing:.1em;font-weight:600}.topbar-actions{display:flex;align-items:center;gap:8px}.topbar-actions .topbar-official-links{margin-left:4px;padding-left:8px;border-left:1px solid var(--border-soft)}.mobile-menu-state,.mobile-menu-toggle{display:none}.mobile-tab-nav{display:none}.tab-group{display:contents}.topbar-search{display:inline-flex;align-items:center;gap:8px;flex:1 1 auto;min-width:140px;max-width:260px;height:36px;padding:0 12px 0 10px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:999px;color:var(--ink-mute);cursor:pointer;font-family:inherit;font-size:12.5px;white-space:nowrap;overflow:hidden}.topbar-search-icon{flex:0 0 15px}.topbar-search-text{flex:1 1 auto;text-align:left;overflow:hidden;text-overflow:ellipsis;font-size:12px}.topbar-search-kbd{flex:0 0 auto;font-size:10px;padding:1px 5px;border:1px solid var(--border);border-radius:4px;background:var(--surface-3);color:var(--ink-soft);font-family:inherit}.topbar-search-in-menu{display:none}@media(max-width:700px){.topbar-search{display:none}}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;background:var(--surface);border:2px solid var(--border);border-radius:50%;color:var(--ink-soft);cursor:pointer}.help-btn,.help-close{font-size:17px;font-weight:800;line-height:1}.channel-switch{display:inline-flex;background:var(--surface);border:2px solid var(--border);border-radius:999px;padding:3px;gap:2px;height:36px;overflow:hidden}.ch-btn{background:transparent;border:0;color:var(--ink-soft);padding:0 12px;border-radius:999px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit}.ch-btn.active{background:linear-gradient(135deg,var(--primary),var(--primary-strong));color:#fff;box-shadow:var(--shadow-sm)}.ch-btn[data-channel=all].active{background:linear-gradient(135deg,var(--accent),var(--accent-strong))}.ch-btn[data-channel=old].active{background:linear-gradient(135deg,var(--gold),#c8a02a)}.audience-switch .ch-btn[data-audience=singer].active{background:linear-gradient(135deg,var(--accent),var(--accent-strong))}.theme-toggle{display:inline-flex;align-items:center;gap:6px;height:36px;background:var(--surface);border:2px solid var(--border);border-radius:999px;color:var(--ink-soft);cursor:pointer;padding:0 14px;font-size:12px;font-weight:600}.theme-icon{font-size:14px}.theme-label{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-mute)}.hero{background:var(--surface);border-radius:var(--radius-lg);padding:36px 32px 28px;border:2px solid var(--border-soft);box-shadow:var(--shadow);position:relative;overflow:hidden}.hero:after{content:"";position:absolute;bottom:16px;right:22px;width:20px;height:20px;border-radius:50%;background:var(--primary-soft);opacity:.5}.hero-title{display:flex;align-items:center;justify-content:center;gap:10px;font-size:clamp(20px,3.5vw,28px);text-align:center;letter-spacing:.04em;color:var(--ink);margin-bottom:4px}.hero-title-icon{width:32px;height:32px;flex:0 0 auto;filter:drop-shadow(0 4px 10px rgba(55,166,217,.2))}.hero-sub{text-align:center;color:var(--ink);font-size:12px;letter-spacing:.1em;margin-bottom:6px}.hero-description{max-width:760px;margin:0 auto 10px;color:var(--ink);font-size:12px;line-height:1.7;text-align:center}.hero-updated{text-align:center;color:var(--ink);font-size:12px;margin-bottom:22px;min-height:22px}.hero-updated strong{color:var(--ink)}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.stat-card{background:linear-gradient(180deg,var(--surface-2),var(--surface-3));border:2px solid var(--border);border-radius:var(--radius);padding:16px 14px;text-align:center;min-height:88px}.stat-card.placeholder{opacity:.4}.tabs{display:flex;gap:6px;margin:26px 0 18px;flex-wrap:wrap;overflow-x:auto;padding-bottom:4px}.tab-btn{background:var(--surface);border:2px solid var(--border);color:var(--ink-soft);padding:9px 18px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}.tab-btn.active{background:linear-gradient(135deg,var(--primary),var(--primary-strong));border-color:var(--primary-strong);color:#fff;box-shadow:var(--shadow-sm)}.panels{min-height:720px}.panel{display:none}.panel.active{display:block}body[data-active-tab="dashboard"] .panels{min-height:1480px}@media(max-width:700px){body{overflow-x:hidden}.container{width:100%;padding:0 clamp(12px,3vw,20px)}.brand-dim,.brand-sub,.theme-label{display:none}.topbar-inner{align-items:flex-start;flex-wrap:wrap;height:auto;min-height:56px;padding-top:8px;padding-bottom:8px;gap:8px}.brand{flex:1 1 calc(100% - 46px);max-width:calc(100% - 46px);min-width:0}.brand-title{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mobile-menu-toggle{appearance:none;display:inline-flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:36px;padding:5px 12px;border:2px solid var(--border);border-radius:999px;background:var(--surface);color:var(--ink-soft);font-family:inherit;font-size:12px;font-weight:800;line-height:1.2;box-shadow:var(--shadow-sm);cursor:pointer;position:relative;z-index:2;touch-action:manipulation}.mobile-menu-state:checked+.mobile-menu-toggle,.mobile-menu-toggle[aria-expanded=true]{border-color:var(--primary-strong);color:var(--primary-strong);background:var(--primary-soft)}.mobile-menu-icon{font-size:14px;line-height:1}.topbar-actions{flex:1 1 100%;width:100%;display:none;gap:5px;flex-wrap:wrap;justify-content:flex-start;min-width:0;padding:8px;border:1px solid var(--border-soft);border-radius:18px;background:var(--surface-glass);box-shadow:var(--shadow-sm)}.topbar-actions.is-open,.mobile-menu-state:checked~.topbar-actions{display:grid!important;grid-template-columns:1fr auto auto auto;align-items:center;justify-content:end;position:relative;z-index:1}.topbar-actions .channel-switch{grid-column:1/-1}.topbar-actions .audience-switch{grid-column:1/-1}.topbar-actions .topbar-official-links{grid-column:1;display:grid;grid-template-columns:repeat(3,minmax(0,auto));gap:5px;justify-content:flex-start;align-self:center;padding-left:0;padding-top:0;border-left:0;border-top:0}.topbar-actions .topbar-official-label{grid-column:1/-1}.topbar-actions .theme-toggle,.topbar-actions .icon-btn{justify-self:end;width:36px;height:36px;min-width:36px;padding:0}.topbar-actions .theme-toggle{grid-column:2}.theme-toggle{width:36px;padding:0;justify-content:center}.tabs{display:none}.tab-btn{justify-content:center;min-width:0;padding:9px 10px;font-size:12px;overflow:hidden;text-overflow:ellipsis}.hero{padding:24px 18px 20px}.hero-title{font-size:19px;line-height:1.45;flex-wrap:wrap}.hero-title-icon{width:28px;height:28px}.stats-grid{grid-template-columns:repeat(2,1fr);gap:8px}.stat-card{padding:12px 8px;min-height:76px}}
+.tabs{display:inline-flex;align-items:center;gap:6px;max-width:100%;width:fit-content;margin:26px 0 18px;padding:6px;border:1px solid var(--border);border-radius:18px;background:color-mix(in srgb,var(--surface) 72%,var(--surface-3) 28%);box-shadow:var(--shadow-sm);overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tab-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:7px 15px;border:1px solid transparent;border-radius:999px;background:transparent;color:var(--ink-mute);font-size:12.5px;font-weight:800;cursor:pointer;white-space:nowrap}.tab-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;flex:0 0 18px;color:currentColor}.tab-icon svg{width:18px;height:18px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.tab-btn.active,.tab-btn[aria-selected=true]{background:color-mix(in srgb,var(--surface) 74%,var(--primary-soft) 26%);color:var(--primary-strong);border-color:color-mix(in srgb,var(--primary) 42%,var(--border));box-shadow:var(--shadow-sm),inset 0 0 0 1px color-mix(in srgb,var(--primary) 16%,transparent)}@media(max-width:700px){.tabs{display:none}.tab-btn{justify-content:center;min-width:0;padding:9px 10px;font-size:12px;overflow:hidden;text-overflow:ellipsis}}
 </style>
 <style>
-@font-face{font-family:"Ibara Noto Sans JP";font-style:normal;font-display:swap;font-weight:400;src:url("assets/fonts/noto-sans-jp-ibara-400.woff2") format("woff2")}:root,:root[data-theme="light"],:root[data-theme="auto"]{--bg-1:#f7f4ec;--bg-2:#d8d5cd;--surface:#fffdf8;--surface-2:#f5f1e8;--surface-3:#ece6d8;--surface-glass:rgba(255,253,248,.88);--border:#ded1b1;--border-soft:#ece2cf;--border-strong:#c9a75a;--ink:#191713;--ink-soft:#3f3a31;--ink-mute:#746b5e;--primary:#18150f;--primary-strong:#030302;--primary-soft:#f4e7c0;--accent:#e4b129;--accent-strong:#936715;--accent-soft:#fff0b9;--chart-primary:#f4c44a;--chart-primary-strong:#c88f14;--chart-primary-soft:#fff3c7;--chart-accent:#92bf67;--chart-accent-strong:#5f8f45;--chart-accent-soft:#e6f4d7;--gold:#e0b23d;--silver:#b9b7ae;--bronze:#b98b52;--green-bg:#e2efe2;--green-text:#2f6938;--orange-bg:#f4dfc5;--orange-text:#8a5522;--red:#b33131;--shadow-sm:0 2px 8px rgba(94,75,38,.12);--shadow:0 8px 24px rgba(94,75,38,.18);--shadow-lg:0 16px 40px rgba(42,34,19,.22)}body{background:linear-gradient(180deg,var(--bg-1) 0%,var(--bg-2) 100%);font-family:"Ibara Noto Sans JP","Noto Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN","BIZ UDPGothic","Yu Gothic","Meiryo",system-ui,sans-serif}.bubbles{display:none}.hero:after{background:var(--accent-soft)}.page-top-toast{min-width:82px;min-height:42px;padding:0 14px;border:2px solid var(--border-strong);border-radius:999px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;font-size:12px;font-weight:800;box-shadow:var(--shadow)}
+.tab-group{display:contents}@media (min-width:1021px){body{padding-left:var(--db-sidebar-expanded,248px)}.tabs{position:fixed;inset:0 auto 0 0;z-index:80;display:flex;flex-direction:column;align-items:stretch;width:var(--db-sidebar-current,248px);max-width:none;height:100vh;margin:0;padding:14px 12px 18px;gap:8px;overflow:visible;background:var(--surface,#fff);border:0;border-right:1px solid var(--border-soft,#e2f1f9);border-radius:0}.db-sidebar-head{display:flex;align-items:center;gap:10px;width:100%;min-height:42px;margin-bottom:8px}.db-sidebar-toggle{display:inline-grid;place-items:center;width:40px;height:40px;flex:0 0 40px}.db-sidebar-toggle svg{width:20px;height:20px}.db-sidebar-title{font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mute)}.tab-btn{justify-content:flex-start;width:100%;min-height:44px;padding:8px 14px;gap:12px}.tab-btn .tab-icon{width:22px;height:22px;flex:0 0 22px}.tab-btn .tab-icon svg{width:21px;height:21px}.db-sidebar-profile{position:relative;width:100%;margin-top:auto;padding-top:14px;border-top:1px solid var(--border-soft,#e2f1f9)}.db-profile-button{display:grid;grid-template-columns:40px minmax(0,1fr);align-items:center;gap:10px;width:100%;min-height:52px;padding:6px}body.sidebar-collapsed{padding-left:var(--db-sidebar-collapsed,80px)}.topbar{left:var(--db-sidebar-current,248px);width:auto}.container{max-width:none;width:100%;padding-inline:clamp(16px,1.6vw,32px)}main.container{margin:0}}
 </style>
-<link rel="preload" href="css/components.css?v=7d1deadab3" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<link rel="preload" href="css/views.css?v=7d1deadab3" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="css/theme.css?v=7d1deadab3"><link rel="stylesheet" href="css/components.css?v=7d1deadab3"><link rel="stylesheet" href="css/views.css?v=7d1deadab3"></noscript>
+<link rel="preload" href="dist/components.css?v=056ced16fc" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="dist/views.css?v=056ced16fc" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="dist/theme.css?v=056ced16fc"><link rel="stylesheet" href="dist/components.css?v=056ced16fc"><link rel="stylesheet" href="dist/views.css?v=056ced16fc"></noscript>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "name": "茨むあん 歌唱データベース",
-  "alternateName": "Ibara Muan Songlist",
+  "alternateName": "Ibara Songlist",
   "url": "https://ibara-muan-songlist.pages.dev/",
   "inLanguage": "ja",
   "applicationCategory": "EntertainmentApplication",
@@ -63,7 +117,7 @@
 }
 </script>
 </head>
-<body>
+<body data-active-tab="dashboard">
 
 <aside class="bubbles" aria-hidden="true">
   <span class="bubble b1"></span>
@@ -78,46 +132,40 @@
       <img class="brand-icon" src="assets/site-icon.svg" alt="" width="28" height="28">
       <span class="brand-text">
         <span class="brand-title">茨むあん <span class="brand-dim">Database</span></span>
-        <span class="brand-sub">v1 · Fan Edition</span>
+        <span class="brand-sub">Fanmade Database</span>
       </span>
     </a>
-    <button class="topbar-search-btn" id="topbar-search-btn" type="button" aria-label="サイト内検索（/ または Ctrl+K）">
-      <svg class="topbar-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <span class="topbar-search-placeholder">曲・配信・動画を検索…</span>
-      <kbd class="topbar-search-kbd">/</kbd>
+    <button class="topbar-search" id="topbar-search-btn" type="button" aria-label="サイト内検索（/ または Ctrl+K）">
+      <svg class="topbar-search-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span class="topbar-search-text">曲・配信を検索…</span>
+      <kbd class="topbar-search-kbd">/ Ctrl+K</kbd>
     </button>
     <input class="mobile-menu-state" id="mobile-menu-state" type="checkbox" aria-hidden="true">
-    <label class="mobile-menu-toggle" id="mobile-menu-toggle" for="mobile-menu-state" role="button" tabindex="0" aria-expanded="false" aria-controls="topbar-actions">
+    <!-- label に role="button" は付けられない（ARIA的に無効）ので button にする。
+         開閉状態は隣の checkbox が持ち、CSS はそちらを見ている。 -->
+    <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="topbar-actions">
       <span id="mobile-menu-label">茨むあん / リスナー</span>
-      <span class="mobile-menu-icon" aria-hidden="true">☰</span>
-    </label>
+      <span class="mobile-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></span>
+    </button>
     <div class="topbar-actions" id="topbar-actions">
-      <button class="topbar-search-menu-btn" id="topbar-search-menu-btn" type="button" aria-label="サイト内検索">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <span>曲・配信・動画を検索…</span>
-        <kbd>/</kbd>
+      <button class="topbar-search-in-menu" id="topbar-search-menu-btn" type="button" aria-label="サイト内検索（/ または Ctrl+K）">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span>曲・配信を検索…</span>
+        <kbd>/ Ctrl+K</kbd>
       </button>
-      <div class="channel-switch" id="channel-switch" role="group" aria-label="チャンネル切替">
-        <button class="ch-btn active" data-channel="main" type="button">茨むあん</button>
-      </div>
-      <div class="channel-switch audience-switch" id="audience-switch" role="group" aria-label="利用モード切替">
+<div class="channel-switch" id="channel-switch" role="group" aria-label="チャンネル切替">
+<button class="ch-btn active" data-channel="main" type="button">茨むあん</button>
+</div>
+      <div class="channel-switch audience-switch" id="audience-switch" role="group" aria-label="利用モード切替" data-tooltip="リスナー: 閲覧向け ／ 配信者: セトリ作成・キー確認向け">
         <button class="ch-btn active" data-audience="listener" type="button">リスナー</button>
         <button class="ch-btn"        data-audience="singer" type="button">配信者</button>
       </div>
-      <nav class="official-links topbar-official-links" aria-label="茨むあん 公式リンク">
-        <span class="topbar-official-label">Official</span>
-        <button class="official-link youtube" type="button" data-ch-modal="main" title="公式チャンネル情報">YouTube</button>
-        <a class="official-link x-link" href="https://x.com/ibaramuan" target="_blank" rel="noopener">X</a>
-      </nav>
-      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="テーマ切替">
-        <span class="theme-icon" id="theme-icon">🌗</span>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="テーマ切替" data-tooltip="テーマ切替">
+        <span class="theme-icon" id="theme-icon"></span>
         <span class="theme-label" id="theme-label">auto</span>
       </button>
-      <button class="icon-btn help-btn" id="help-btn" type="button" title="使い方" aria-label="使い方を表示">
-        ?
-      </button>
-      <button class="icon-btn" id="reload-btn" type="button" title="データを再取得" aria-label="再取得">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15.5-6.3L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16"/><path d="M3 21v-5h5"/></svg>
+      <button class="icon-btn help-btn" id="help-btn" type="button" data-tooltip="使い方" aria-label="使い方を表示">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.2 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 18h.01"/></svg>
       </button>
     </div>
   </div>
@@ -127,7 +175,8 @@
 
   <!-- Hero -->
   <section class="hero" id="hero">
-    <h1 id="page-title" class="hero-title"><img class="hero-title-icon" src="assets/hero-rose.svg" alt="" width="32" height="32" fetchpriority="high" decoding="sync">茨むあん 歌唱データベース</h1>
+    <div class="hero-ch-bg" id="hero-ch-bg" aria-hidden="true"></div>
+    <h1 id="page-title" class="hero-title"><img class="hero-title-icon" src="assets/site-icon.svg" alt="" width="32" height="32" fetchpriority="high" decoding="sync">茨むあん 歌唱データベース</h1>
     <p class="hero-sub">~ Singing Stream Analytics ~</p>
     <p class="hero-description">茨むあんさんの歌枠で歌われた楽曲や歌みた・オリ曲を、曲名・アーティスト・ランキング・配信タイムライン・プレイリストから探せる歌唱データベースサイトです。</p>
     <p class="hero-updated" id="updated-info">読み込み中…</p>
@@ -142,24 +191,68 @@
   </section>
 
   <!-- Tabs -->
-  <nav class="tabs" role="tablist" aria-label="セクション">
-    <button class="tab-btn active" data-tab="dashboard" role="tab">📊 ダッシュボード</button>
-    <button class="tab-btn" data-tab="ranking"   role="tab">🏆 ランキング</button>
-    <button class="tab-btn" data-tab="songs"     role="tab">🎵 全曲リスト</button>
-    <button class="tab-btn" data-tab="timeline"  role="tab">📅 タイムライン</button>
-    <button class="tab-btn" data-tab="analytics" role="tab">📈 アナリティクス</button>
-    <button class="tab-btn" data-tab="playlists" role="tab">📋 プレイリスト</button>
-  </nav>
+    <nav class="tabs" aria-label="セクション">
+      <div class="db-sidebar-head" aria-hidden="false">
+        <button class="db-sidebar-toggle" id="db-sidebar-toggle" type="button" aria-pressed="false" data-tooltip="メニューを折り畳む" aria-label="メニューを折り畳む">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg>
+        </button>
+        <span class="db-sidebar-title">Menu</span>
+      </div>
+      <div class="tab-group" role="tablist" aria-label="セクション切替">
+      <button class="tab-btn active" id="tab-dashboard" type="button" data-tab="dashboard" role="tab" aria-selected="true" aria-controls="panel-dashboard"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 13h5v7H4z"/><path d="M10 4h5v16h-5z"/><path d="M16 9h4v11h-4z"/></svg></span><span>ダッシュボード</span></button>
+      <button class="tab-btn" id="tab-ranking" type="button" data-tab="ranking" role="tab" aria-selected="false" aria-controls="panel-ranking"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 4h8v3a4 4 0 0 1-8 0z"/><path d="M6 5H3v2a4 4 0 0 0 4 4"/><path d="M18 5h3v2a4 4 0 0 1-4 4"/><path d="M12 11v5"/><path d="M8 20h8"/><path d="M9 16h6v4H9z"/></svg></span><span>ランキング</span></button>
+      <button class="tab-btn" id="tab-songs" type="button" data-tab="songs" role="tab" aria-selected="false" aria-controls="panel-songs"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg></span><span>全曲リスト</span></button>
+      <button class="tab-btn" id="tab-timeline" type="button" data-tab="timeline" role="tab" aria-selected="false" aria-controls="panel-timeline"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3v4"/><path d="M17 3v4"/><path d="M4 8h16"/><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 13h3"/><path d="M13 13h3"/><path d="M8 17h3"/></svg></span><span>タイムライン</span></button>
+      <button class="tab-btn" id="tab-analytics" type="button" data-tab="analytics" role="tab" aria-selected="false" aria-controls="panel-analytics"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M7 15l3-4 4 2 5-7"/><circle cx="7" cy="15" r="1"/><circle cx="10" cy="11" r="1"/><circle cx="14" cy="13" r="1"/><circle cx="19" cy="6" r="1"/></svg></span><span>アナリティクス</span></button>
+      <button class="tab-btn" id="tab-playlists" type="button" data-tab="playlists" role="tab" aria-selected="false" aria-controls="panel-playlists"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 6h10"/><path d="M5 11h10"/><path d="M5 16h7"/><path d="M18 8v10l3-2 3 2V8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1z"/></svg></span><span>プレイリスト</span></button>
+      </div>
+      <div class="db-sidebar-profile">
+        <button class="db-profile-button" id="db-profile-button" type="button" aria-expanded="false" aria-controls="db-profile-menu" aria-label="茨むあん Vsinger 関連リンク">
+          <img src="assets/avatar.jpg" alt="" width="40" height="40" loading="lazy">
+          <span class="db-profile-text">
+            <strong>茨むあん</strong>
+            <small>Vsinger</small>
+          </span>
+        </button>
+        <div class="db-profile-menu" id="db-profile-menu" hidden>
+          <button type="button" data-ch-modal="main">
+            <img src="assets/avatar.jpg" class="db-link-ch-icon" alt="" width="20" height="20" loading="lazy">
+            <span>メインチャンネル</span>
+          </button>
+          <a href="https://x.com/ibaramuan" target="_blank" rel="noopener">
+            <svg class="db-link-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            <span>X</span>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="mobile-tab-nav" id="mobile-tab-nav" aria-label="セクション移動">
+      <button class="mobile-tab-toggle" id="mobile-tab-toggle" type="button" aria-expanded="false" aria-controls="mobile-tab-panel">
+        <span class="mobile-tab-toggle-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></span>
+        <span class="mobile-tab-current" id="mobile-tab-current">ダッシュボード</span>
+      </button>
+      <div class="mobile-tab-panel" id="mobile-tab-panel" hidden>
+        <button class="mobile-tab-item is-active" type="button" data-mobile-tab="dashboard">ダッシュボード</button>
+        <button class="mobile-tab-item" type="button" data-mobile-tab="ranking">ランキング</button>
+        <button class="mobile-tab-item" type="button" data-mobile-tab="songs">全曲リスト</button>
+        <button class="mobile-tab-item" type="button" data-mobile-tab="timeline">タイムライン</button>
+        <button class="mobile-tab-item" type="button" data-mobile-tab="analytics">アナリティクス</button>
+        <button class="mobile-tab-item" type="button" data-mobile-tab="playlists">プレイリスト</button>
+        <!-- モバイルではサイドバー(.tabs)を隠すため、公式リンクへの導線をここに置く -->
+        <button class="mobile-tab-item mobile-tab-item--sub" type="button" data-ch-modal="all">茨むあん 公式リンク</button>
+      </div>
+    </div>
 
   <!-- Panels -->
   <div class="panels">
-    <section class="panel active" id="panel-dashboard" role="tabpanel"></section>
-    <section class="panel"        id="panel-ranking"   role="tabpanel"></section>
-    <section class="panel"        id="panel-songs"     role="tabpanel"></section>
-    <section class="panel"        id="panel-timeline"  role="tabpanel"></section>
-    <section class="panel"        id="panel-analytics" role="tabpanel"></section>
+    <section class="panel active" id="panel-dashboard" role="tabpanel" aria-labelledby="tab-dashboard"></section>
+    <section class="panel"        id="panel-ranking"   role="tabpanel" aria-labelledby="tab-ranking"></section>
+    <section class="panel"        id="panel-songs"     role="tabpanel" aria-labelledby="tab-songs"></section>
+    <section class="panel"        id="panel-timeline"  role="tabpanel" aria-labelledby="tab-timeline"></section>
+    <section class="panel"        id="panel-analytics" role="tabpanel" aria-labelledby="tab-analytics"></section>
     <section class="panel"        id="panel-player"    role="main" aria-label="配信プレイヤー"></section>
-    <section class="panel"        id="panel-playlists" role="tabpanel" aria-label="プレイリスト"></section>
+    <section class="panel"        id="panel-playlists" role="tabpanel" aria-labelledby="tab-playlists"></section>
   </div>
 
   <div id="loading" class="state-card" hidden>
@@ -167,7 +260,7 @@
     <div class="msg">スプレッドシートからデータを取得中…</div>
   </div>
   <div id="error" class="state-card" hidden>
-    <div class="msg">⚠️ データの取得に失敗しました</div>
+    <div class="msg">データの取得に失敗しました</div>
     <div class="err-detail" id="err-detail"></div>
     <button class="btn primary" id="retry-btn" type="button">再試行</button>
   </div>
@@ -176,7 +269,7 @@
 
 <footer class="site-footer">
   <p>
-    Made with <span class="heart">♡</span> for 茨むあん ファン &nbsp;·&nbsp;
+    Made with love for 茨むあん ファン &nbsp;·&nbsp;
     <a href="https://docs.google.com/spreadsheets/d/1supVLmIOoa3fdwvT_NHioLefjsa-ldQBQCMhZakKD-o/edit" target="_blank" rel="noopener">データソース</a> &nbsp;·&nbsp;
     <a href="https://forms.gle/8tvDXGxq8KdNJbf98" target="_blank" rel="noopener">お問い合わせ</a>
   </p>
@@ -188,15 +281,15 @@
       <div>
         <p class="help-kicker">Guide</p>
         <h2 id="help-title">使い方</h2>
-        <p class="help-lead">曲を探す、歌枠をたどる、歌みた・オリ曲を聴く、配信用の選曲を作るための歌唱データベースです。</p>
+        <p class="help-lead">茨むあんさんの歌枠・楽曲を探す、タイムラインをたどる、選曲を作るための歌唱データベースです。</p>
       </div>
-      <button class="icon-btn help-close" id="help-close" type="button" aria-label="閉じる">×</button>
+      <button class="icon-btn help-close" id="help-close" type="button" aria-label="閉じる"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button>
     </div>
     <div class="guide-flow" aria-label="基本の流れ">
       <div class="guide-step">
         <span>1</span>
-        <strong>モードを選ぶ</strong>
-        <p>リスナー向けと配信者向けの表示を切り替えます。</p>
+        <strong>範囲を選ぶ</strong>
+        <p>リスナー/配信者モードを切り替えて、見たいデータに絞ります。</p>
       </div>
       <div class="guide-step">
         <span>2</span>
@@ -205,86 +298,108 @@
       </div>
       <div class="guide-step">
         <span>3</span>
-        <strong>歌枠を見る</strong>
-        <p>タイムラインから歌枠を選んで、その場で動画を再生できます。</p>
-      </div>
-      <div class="guide-step">
-        <span>4</span>
-        <strong>保存・共有する</strong>
-        <p>プレイリストやセトリ共有で、見たい枠や選曲候補を残せます。</p>
+        <strong>歌枠をたどる</strong>
+        <p>タイムラインから月別に歌枠を確認・再生。セトリをコピーできます。</p>
       </div>
     </div>
     <div class="guide-sections">
       <section class="guide-section">
         <h3>データ範囲とモード</h3>
         <ul>
-          <li>ヘッダーの茨むあん表示は、このサイトの対象チャンネルです。</li>
-          <li>リスナーモードは閲覧向け、配信者モードは選曲・セトリ作成向けです。</li>
-          <li>Official の <strong>YouTube</strong> ボタンは公式チャンネルの紹介（説明・リンク集）を表示し、<strong>X</strong> は公式Xへの外部リンクです。</li>
-          <li>スマホではホーム画面に追加して、PWA風に開けます。</li>
+          <li>ヘッダーの <strong>リスナー/配信者</strong> で閲覧向け・選曲向けの表示を切り替えます。</li>
+          <li><strong>リスナーモード</strong> は閲覧向け、<strong>配信者モード</strong> は選曲・セトリ作成向けです。</li>
+          <li>サイドバー下のプロフィールアイコンから、公式チャンネルや X へのリンクが開きます。</li>
         </ul>
       </section>
       <section class="guide-section">
         <h3>曲を探す</h3>
         <ul>
           <li><kbd>/</kbd> または <kbd>Ctrl+K</kbd> でサイト内全検索を開き、曲・アーティスト・配信を横断検索できます。</li>
-          <li>全曲リストでは「チルな曲」「ボカロ 定番」などの自然語検索、ジャンル・タグ・並び替えで詳細に絞り込めます。</li>
-          <li>検索履歴・おすすめ・今日の一曲・お気に入りを使って、候補をすばやく戻せます。</li>
+          <li><strong>全曲リスト</strong> ではジャンル・タグ・キー・並び替えで詳細な絞り込みができます。</li>
           <li>曲を押すと <strong>歌唱回数・キー・初披露日・歌枠履歴</strong> を確認できます。</li>
+          <li><strong>ランキング</strong> では今月・先月・直近7日・月別の歌唱回数ランキングを表示します。前月比も確認できます。</li>
         </ul>
       </section>
       <section class="guide-section">
-        <h3>歌枠ビューワー</h3>
+        <h3>配信タイムライン</h3>
         <ul>
-          <li>タイムラインのサムネイルを押すと、その場で配信動画を再生できます。</li>
-          <li>セットリストの <strong>⏱ メモ</strong> で現在の再生位置をタイムスタンプ記録、バッジをタップするとその箇所へジャンプします。</li>
-          <li><strong>👥 バッジ</strong> はコミュニティが提案・審査済みのタイムスタンプです。「+ 提案」で自分のタイムスタンプを投稿できます。</li>
-          <li>プレイヤー下の <strong>連続再生</strong> をONにすると、動画終了後に自動で次の配信へ移動します。</li>
-          <li>戻るボタンを押すとミニプレイヤーで再生を継続。ダッシュボードの「続きから見る」からも再開できます。</li>
+          <li>配信日・曲数・枠番号などで並び替えができ、日付順のときは <strong>月別グループ</strong> で表示されます。</li>
+          <li><strong>月へ移動</strong> プルダウンで、指定した月のグループへスクロールできます。</li>
+          <li>各グループをクリックして展開すると、その月の歌枠一覧が表示されます。</li>
+          <li>コピーボタンでその枠のセトリをテキスト形式でクリップボードにコピーできます。</li>
+          <li>曲名を押すと全曲リストでその曲の詳細が開きます。</li>
         </ul>
       </section>
       <section class="guide-section">
-        <h3>歌みた・オリ曲</h3>
+        <h3>動画ビューワー（PC のみ）</h3>
         <ul>
-          <li>プレイリストタブ内の <strong>歌みた・オリ曲</strong> で、公開されている動画をまとめて視聴できます。</li>
-          <li>カテゴリは <strong>オリジナル曲・しゅがりり・カバー曲（歌みた）</strong> の3つ。グリッド/リスト/カテゴリ表示を切り替えられます。</li>
-          <li>再生すると画面下にミュージックプレイヤーが常駐し、他のタブを見ながら連続再生・シャッフルできます。</li>
-          <li>サイト内全検索（<kbd>/</kbd>）からも歌みた・オリ曲を横断検索できます。</li>
+          <li>タイムラインの ▶ ボタンや曲詳細の歌枠履歴から、その場で動画を再生できます。</li>
+          <li>操作バーで <strong>前へ / 再生・一時停止 / 次へ / 連続再生 / リピート / 栞（保存）</strong> が使えます。</li>
+          <li><kbd>Space</kbd> で再生・一時停止、<kbd>←</kbd> <kbd>→</kbd> で 10秒 巻き戻し・早送り。</li>
+          <li>歌枠ではセットリストの <strong>タイムスタンプ</strong> で再生位置を記録。<strong>共有バッジ</strong> はコミュニティ審査済みのタイムスタンプで、「+ 提案」から投稿できます。</li>
+          <li><strong>共有</strong> ボタンで現在位置付きリンクをコピー・SNS 共有できます。</li>
+          <li>戻るとミニプレイヤーで再生を継続。<strong>音楽プレイヤーで聴く</strong> で画面下バーへ移せます。</li>
         </ul>
       </section>
       <section class="guide-section">
-        <h3>プレイリスト</h3>
+        <h3>音楽プレイヤーバー</h3>
         <ul>
-          <li>プレイリストタブでマイリストを作成し、好きな歌枠を自由に追加・管理できます。</li>
-          <li>タイムラインの各歌枠の <strong>＋</strong> ボタンや、歌枠ビューワー下部からもプレイリストへ追加できます。</li>
-          <li>歌みた・オリ曲の音楽ライブラリも検索でき、プレイリストへ追加できます。</li>
-          <li>作ったプレイリストは共有リンクをコピーしたり、YouTubeで連続再生できます。</li>
+          <li>画面下のバーで <strong>前へ / 再生・一時停止 / 次へ / 連続再生 / リピート / シャッフル</strong> を操作できます。</li>
+          <li><strong>キューアイコン</strong> で次に流れる曲の一覧を開き、曲をタップして移動できます。</li>
+          <li>サムネ右上のボタンや <strong>動画で見る</strong> からいつでも動画ビューワーへ切り替えられます。</li>
         </ul>
       </section>
       <section class="guide-section">
-        <h3>ランキング・配信者モード</h3>
+        <h3>プレイリスト（マイリスト）</h3>
         <ul>
-          <li>ランキングは今月・先月・直近7日・月別に切り替えられ、前月比も確認できます。</li>
-          <li>ダッシュボードでは月別歌唱数、ジャンル分布、ヒートマップ、久しぶり候補を確認できます。</li>
-          <li>配信者モードでは曲検索からセトリへ追加し、ドラッグ並び替え・1曲コピー・共有リンク作成ができます。</li>
-          <li>データにない新しい曲も、曲名・アーティスト・キーを入力して一時的にセトリへ追加できます。</li>
+          <li>マイリストを作成し、歌枠と動画を混在させて追加・連続再生できます。</li>
+          <li>タイムライン・ビューワーの <strong>栞ボタン</strong> や、まとめて選択して一括追加できます。</li>
+          <li>行は <strong>ドラッグで並び替え</strong>。<strong>リンクを共有</strong> で他の人とリスト共有、<strong>YouTube で連続再生</strong> も可能です。</li>
+        </ul>
+      </section>
+      <section class="guide-section">
+        <h3>アナリティクス</h3>
+        <ul>
+          <li>持ち曲の累積成長グラフ・1枠あたりの曲数推移・曜日分布などをグラフで確認できます。</li>
+          <li>アーティスト別歌唱合計ランキング、久しぶりに歌われた曲、1回だけ歌われた曲の一覧も表示します。</li>
+        </ul>
+      </section>
+      <section class="guide-section">
+        <h3>曲リクエスト</h3>
+        <ul>
+          <li>「リクエスト」タブのフォームから歌ってほしい曲を送れます。曲名・アーティスト・URL などを入力して送信します。</li>
+          <li>同じ曲が <strong>「みんなのリクエスト」</strong> にすでにある場合は、重ねて送らずにその曲の <strong>「聴きたい」ボタン</strong> を押してください。投票数順に並びます。</li>
+          <li>「聴きたい」はもう一度押すと取り消せます（投票状態はこのブラウザに保存されます）。</li>
+          <li>リクエストを確認すると <strong>「歌える曲」</strong>（レパートリー入り）や <strong>「練習中」</strong> のバッジが付きます。バッジが無いものはまだ確認前です。</li>
+          <li>自分が送ったリクエストには <strong>「自分の投稿」</strong> バッジと取り消しボタン（×）が出ます。ほかの人が投票した後や、運営が対応を始めた後は取り消せません。</li>
+          <li>取り消し用のキーはこのブラウザにのみ保存されるため、ブラウザのデータを消したり別の端末から見たりすると自分では取り消せなくなります（その場合はお問い合わせください）。</li>
+        </ul>
+      </section>
+      <section class="guide-section">
+        <h3>配信者モード</h3>
+        <ul>
+          <li>ヘッダーの <strong>配信者</strong> ボタンで切り替えると、選曲・セトリ作成向けの機能が追加されます。</li>
+          <li>全曲リストで候補をセトリに追加して並び替え・コピーができます。</li>
+          <li>各曲の <strong>キー</strong> 情報をもとに、配信で使うキーを確認・設定できます。</li>
         </ul>
       </section>
       <section class="guide-section">
         <h3>キーボードショートカット</h3>
         <ul>
           <li><kbd>/</kbd> <kbd>Ctrl+K</kbd> — サイト内全検索を開く</li>
-          <li><kbd>T</kbd> — ダーク/ライトテーマ切替</li>
+          <li><kbd>T</kbd> — ダーク / ライトテーマ切替</li>
           <li><kbd>?</kbd> — このヘルプを開く</li>
           <li><kbd>Esc</kbd> — 検索・モーダルを閉じる</li>
+          <li><kbd>Space</kbd> — 動画ビューワーで 再生 / 一時停止</li>
+          <li><kbd>←</kbd> <kbd>→</kbd> — 動画ビューワーで 10秒 巻き戻し / 早送り</li>
         </ul>
       </section>
       <section class="guide-section">
         <h3>うまく表示されないとき</h3>
         <ul>
           <li>データ更新直後は数分待ってから再読み込みしてください。</li>
-          <li>古い表示が残る場合はブラウザのハードリロードを試してください。</li>
-          <li>曲名・キー・ジャンルの誤りや不具合はフッターの「お問い合わせ」から連絡できます。</li>
+          <li>古い表示が残る場合はブラウザのハードリロード（<kbd>Ctrl+Shift+R</kbd>）を試してください。</li>
+          <li>曲名やキーの誤り・不具合はフッターの「お問い合わせ」から連絡できます。</li>
         </ul>
       </section>
     </div>
@@ -293,10 +408,10 @@
 
 <div class="welcome-tip" id="welcome-tip" hidden>
   <div>
-    <strong>表示モードを選べます</strong>
-    <span>閲覧はリスナー、選曲やセトリ作成は配信者モード。プレイリストや続きから見る機能も使えます。</span>
+    <strong>まずは範囲とモードを選べます</strong>
+    <span>閲覧はリスナー、選曲やセトリ作成は配信者モード。詳しい使い方はヘッダーの「?」から見られます。</span>
   </div>
-  <button class="icon-btn help-close" id="welcome-close" type="button" aria-label="閉じる">×</button>
+  <button class="icon-btn help-close" id="welcome-close" type="button" aria-label="閉じる"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button>
 </div>
 
 <div class="modal-backdrop" id="ch-modal" hidden>
@@ -306,7 +421,7 @@
         <p class="help-kicker">Official Channel</p>
         <h2 id="ch-modal-title">公式チャンネル</h2>
       </div>
-      <button class="icon-btn help-close" id="ch-modal-close" type="button" aria-label="閉じる">×</button>
+      <button class="icon-btn help-close" id="ch-modal-close" type="button" aria-label="閉じる"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button>
     </div>
     <div id="ch-modal-body" class="ch-modal-body"></div>
   </section>
@@ -319,21 +434,31 @@
         <p class="help-kicker">Song Detail</p>
         <h2 id="song-modal-title">曲詳細</h2>
       </div>
-      <button class="icon-btn help-close" id="song-modal-close" type="button" aria-label="閉じる">×</button>
+      <button class="icon-btn help-close" id="song-modal-close" type="button" aria-label="閉じる"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button>
     </div>
     <div id="song-modal-body"></div>
   </section>
 </div>
 
 <button class="page-top-toast" id="page-top-toast" type="button" aria-label="ページ上部へ移動" hidden>
-  <span aria-hidden="true">↑ TOP</span>
+  <img data-src="assets/virtual-mikan-box-small.png" alt="" width="150" height="51" loading="lazy" decoding="async">
 </button>
 
 <!-- Dependencies -->
-<script type="module" src="dist/main.js?v=7d1deadab3"></script>
+<script type="module" src="dist/main.js?v=056ced16fc"></script>
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  // 既に Service Worker に制御されている＝再訪問。この状態で新しい SW が入ると、
+  // このページは古い SW の応答（＝古いデータ）を表示したままになる。
+  // 制御が切り替わった時点で一度だけ読み込み直し、更新を即座に反映させる。
+  var hadController = !!navigator.serviceWorker.controller;
+  var reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (!hadController || reloading) return;   // 初回インストール時は再読み込み不要
+    reloading = true;
+    location.reload();
+  });
+  navigator.serviceWorker.register('/sw.js').catch(function () {});
 }
 </script>
 

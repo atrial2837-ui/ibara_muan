@@ -1,6 +1,7 @@
 import { state } from '../store.js';
 import { $, escapeHtml, fmtDate, daysClass } from '../utils.js';
 import { RANKING_LIST_LIMIT } from '../config.js';
+import { icon } from '../icons.js';
 
 // ──────────────────────────────────────────────────────────────────────────────
 // メインレンダー
@@ -27,7 +28,7 @@ export function renderRanking() {
 
   panel.innerHTML = `
     <div class="section-header">
-      <h2>🏆 歌唱回数ランキング</h2>
+      <h2>${icon('rank')} 歌唱回数ランキング</h2>
       <span class="count-pill">${songs.length}曲中</span>
     </div>
     ${renderPeriodSelector(streams, period, streamsLoaded)}
@@ -50,10 +51,19 @@ export function renderRanking() {
     ` : ''}
   `;
 
+  // スライドトラック初期位置
+  syncPeriodTrack(panel);
+
   // 期間ボタン
   panel.addEventListener('click', (e) => {
     const periodBtn = e.target.closest('[data-ranking-period]');
     if (!periodBtn) return;
+    // トラックをアニメーション
+    const track = periodBtn.closest('.period-tabs')?.querySelector('.period-tab-track');
+    if (track) {
+      track.style.left  = periodBtn.offsetLeft + 'px';
+      track.style.width = periodBtn.offsetWidth + 'px';
+    }
     const newPeriod = periodBtn.dataset.rankingPeriod;
     if (newPeriod !== period) {
       state.rankingPeriod = newPeriod;
@@ -68,6 +78,29 @@ export function renderRanking() {
     monthSelect.addEventListener('change', (e) => {
       if (!e.target.value) return;
       state.rankingMonth = e.target.value;
+      state.rankingPeriod = 'month-select';
+      state.rankingLimit = RANKING_LIST_LIMIT;
+      renderRanking();
+    });
+  }
+
+  // 比較先セレクト（期間 vs 任意の月で自由に比較）
+  const compareSelect = document.getElementById('ranking-compare-select');
+  if (compareSelect) {
+    compareSelect.addEventListener('change', (e) => {
+      state.rankingCompareMonth = e.target.value;
+      renderRanking();
+    });
+  }
+
+  const swapCompare = document.getElementById('ranking-swap-compare');
+  if (swapCompare) {
+    swapCompare.addEventListener('click', () => {
+      const current = state.rankingMonth || '';
+      const compare = state.rankingCompareMonth || '';
+      if (!current || !compare) return;
+      state.rankingMonth = compare;
+      state.rankingCompareMonth = current;
       state.rankingPeriod = 'month-select';
       state.rankingLimit = RANKING_LIST_LIMIT;
       renderRanking();
@@ -99,14 +132,17 @@ function renderPeriodSelector(streams, currentPeriod, streamsLoaded) {
 
   return `
     <div class="ranking-period-selector">
-      ${periods.map(p => `
-        <button
-          class="period-btn${currentPeriod === p.key ? ' active' : ''}"
-          type="button"
-          data-ranking-period="${p.key}"
-          ${(!streamsLoaded && p.key !== 'all') ? 'disabled title="配信データ読み込み中"' : ''}
-        >${p.key === 'all' ? p.label : (streamsLoaded ? p.label : p.label + ' …')}</button>
-      `).join('')}
+      <div class="period-tabs" role="group" aria-label="表示期間">
+        <span class="period-tab-track" aria-hidden="true"></span>
+        ${periods.map(p => `
+          <button
+            class="period-btn${currentPeriod === p.key ? ' active' : ''}"
+            type="button"
+            data-ranking-period="${p.key}"
+            ${(!streamsLoaded && p.key !== 'all') ? 'disabled title="配信データ読み込み中"' : ''}
+          >${p.key === 'all' ? p.label : (streamsLoaded ? p.label : p.label + ' …')}</button>
+        `).join('')}
+      </div>
       ${months.length && streamsLoaded ? `
         <select id="ranking-month-select" class="select-input period-month-select" title="月を指定">
           <option value="">月を選択…</option>
@@ -117,8 +153,29 @@ function renderPeriodSelector(streams, currentPeriod, streamsLoaded) {
           }).join('')}
         </select>
       ` : ''}
+      ${currentPeriod !== 'all' && months.length && streamsLoaded ? `
+        <select id="ranking-compare-select" class="select-input period-month-select" title="増減（↑↓）の比較先を選ぶ">
+          <option value="">比較: 直前の期間（自動）</option>
+          ${months.map(m => {
+            const [y, mo] = m.split('-');
+            const label = `比較: ${y}年${Number(mo)}月`;
+            return `<option value="${m}"${(state.rankingCompareMonth || '') === m ? ' selected' : ''}>${label}</option>`;
+          }).join('')}
+        </select>
+        ${currentPeriod === 'month-select' && currentMonth && state.rankingCompareMonth ? `
+          <button id="ranking-swap-compare" class="period-btn ranking-swap-btn" type="button" title="表示月と比較月を入れ替える">↔ 入れ替え</button>
+        ` : ''}
+      ` : ''}
     </div>
   `;
+}
+
+function syncPeriodTrack(panel) {
+  const active = panel.querySelector('.period-tabs .period-btn.active');
+  const track  = panel.querySelector('.period-tab-track');
+  if (!active || !track) return;
+  track.style.left  = active.offsetLeft + 'px';
+  track.style.width = active.offsetWidth + 'px';
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -189,6 +246,17 @@ function computePeriodData(streams, period) {
     return null;
   }
 
+  // 比較先を自由に指定（未指定なら直前の期間と自動比較）
+  const cmp = state.rankingCompareMonth || '';
+  if (cmp) {
+    const [cy, cm] = cmp.split('-').map(Number);
+    if (cy && cm) {
+      prevStart = new Date(cy, cm - 1, 1);
+      prevEnd   = new Date(cy, cm, 0, 23, 59, 59);
+      prevLabel = `${cy}年${cm}月`;
+    }
+  }
+
   const counts     = _countInRange(streams, start, end);
   const prevCounts = _countInRange(streams, prevStart, prevEnd);
   const totalSongs = [...counts.values()].reduce((s, n) => s + n, 0);
@@ -239,14 +307,14 @@ function getAvailableMonths(streams) {
 // ──────────────────────────────────────────────────────────────────────────────
 
 function podiumCard(s, i) {
-  const medals = ['🥇', '🥈', '🥉'];
+  const medals = ['1', '2', '3'];
   return `
     <div class="podium-card rank-${i + 1}"
       data-songkey="${escapeHtml(s.key)}"
       data-songtitle="${escapeHtml(s.title)}"
       data-songartist="${escapeHtml(s.artist)}"
       title="クリックで配信タイムラインに絞り込み">
-      <div class="podium-medal">${medals[i]}</div>
+      <div class="podium-medal" aria-label="${i + 1}位"><span>${medals[i]}</span></div>
       <div class="song-title">${escapeHtml(s.title)}</div>
       <button class="song-artist artist-search-btn" type="button" data-artist-search="${escapeHtml(s.artist)}">${escapeHtml(s.artist)}</button>
       <div class="count-big">${s.count}<small>回</small></div>

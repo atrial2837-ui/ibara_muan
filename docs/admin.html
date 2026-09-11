@@ -6,10 +6,10 @@
 <title>歌枠管理｜茨むあん 歌唱データベース</title>
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="assets/site-icon.svg">
-<link rel="stylesheet" href="css/theme.css?v=ibara1">
-<link rel="stylesheet" href="css/components.css?v=ibara1">
-<link rel="stylesheet" href="css/views.css?v=ibara1">
-<link rel="stylesheet" href="css/admin.css?v=ibara1">
+<link rel="stylesheet" href="css/theme.css?v=f9b1a2701a">
+<link rel="stylesheet" href="css/components.css?v=f9b1a2701a">
+<link rel="stylesheet" href="css/views.css?v=f9b1a2701a">
+<link rel="stylesheet" href="css/admin.css?v=f9b1a2701a">
 </head>
 <body>
 <header class="topbar">
@@ -62,21 +62,157 @@
     <div id="preview-box"></div>
   </section>
 
-  <section class="admin-panel">
+  <section class="admin-panel" id="stream-edit-section">
     <div class="section-header">
-      <h2>歌枠の日付修正</h2>
-      <span class="badge" id="stream-list-count">—</span>
+      <h2>歌枠・セトリ編集</h2>
+      <span class="badge" id="stream-edit-badge">選択中なし</span>
     </div>
-    <p class="admin-note">登録済みの歌枠の配信日を修正できます。D1を直接更新するので、修正後は「静的データ生成」も実行してください。</p>
     <div class="admin-form-grid">
-      <label>チャンネル<select id="stream-list-channel"></select></label>
-      <label>表示件数<input id="stream-list-limit" type="number" min="1" max="500" value="50"></label>
+      <label>チャンネル<select id="edit-channel"></select></label>
+      <label>歌枠<select id="edit-stream"><option value="">先に読み込んでください</option></select></label>
     </div>
     <div class="admin-actions">
-      <button class="btn ghost" id="reload-streams" type="button">歌枠一覧を読み込む</button>
+      <button class="btn ghost" id="load-streams-btn" type="button">歌枠を読み込む</button>
+      <button class="btn primary" id="edit-open-btn" type="button">この枠を編集</button>
     </div>
-    <p class="admin-note" id="stream-list-status"></p>
-    <div id="stream-list-box"></div>
+    <p class="admin-note" id="stream-edit-status"></p>
+
+    <div id="stream-edit-form" style="display:none">
+      <hr style="margin:16px 0;border:none;border-top:1px solid var(--border)">
+      <h3 style="margin:0 0 12px;font-size:15px" id="stream-edit-heading">歌枠情報</h3>
+      <div class="admin-form-grid">
+        <label>配信日<input id="edit-streamed-on" type="date"></label>
+        <label>枠番号<input id="edit-source-index" type="number" min="1"></label>
+        <label>配信タイトル<input id="edit-stream-title" type="text"></label>
+        <label>URL<input id="edit-stream-url" type="url"></label>
+      </div>
+      <div class="admin-actions">
+        <button class="btn ghost" id="save-stream-info-btn" type="button">情報を保存</button>
+      </div>
+      <p class="admin-note" id="stream-info-status"></p>
+
+      <hr style="margin:16px 0;border:none;border-top:1px solid var(--border)">
+      <h3 style="margin:0 0 12px;font-size:15px">セトリ編集</h3>
+      <p class="admin-note" id="setlist-count">曲リスト</p>
+      <div id="setlist-rows-wrap"></div>
+      <div class="admin-actions">
+        <button class="btn ghost" id="add-setlist-row-btn" type="button">＋ 曲を追加</button>
+        <button class="btn ghost" id="toggle-setlist-text-btn" type="button" aria-expanded="false" aria-controls="setlist-text-box">テキストで一括編集</button>
+      </div>
+
+      <div id="setlist-text-box" hidden>
+        <label class="admin-field-full">曲リスト（1行に1曲）<textarea id="edit-songs-text" rows="12" placeholder="曲名 / アーティスト&#10;曲名 / アーティスト | +2 | アニソン"></textarea></label>
+        <div class="admin-actions">
+          <button class="btn ghost" id="apply-setlist-text-btn" type="button">テキストを反映</button>
+        </div>
+        <p class="admin-note">貼り付けで一括入力する場合はこちら。「テキストを反映」を押すと上の一覧に取り込みます。</p>
+      </div>
+
+      <div class="admin-actions">
+        <button class="btn ghost" id="preview-edit-stream-btn" type="button">プレビュー</button>
+        <button class="btn primary" id="save-setlist-btn" type="button">セトリを保存</button>
+      </div>
+      <p class="admin-note" id="setlist-status"></p>
+      <div id="edit-preview-box"></div>
+    </div>
+  </section>
+
+  <section class="admin-panel" id="marker-section">
+    <div class="section-header">
+      <h2>タイムスタンプ打刻</h2>
+      <span class="badge" id="marker-badge">選択中なし</span>
+    </div>
+    <p class="admin-note">
+      固定コメントが無い歌枠に時刻を付けるツールです。曲の<strong>開始</strong>と<strong>終了</strong>を打刻すると、
+      コメント用テキストは両方を、サイト（D1）へは<strong>開始だけ</strong>を保存します。
+    </p>
+    <div class="admin-form-grid">
+      <label>チャンネル<select id="marker-channel"></select></label>
+      <label>歌枠<select id="marker-stream"></select></label>
+    </div>
+    <label class="marker-toggle">
+      <input id="marker-unregistered-only" type="checkbox" checked>
+      まだ登録していない枠だけ表示する（外すと打ち直し用に全件出ます）
+    </label>
+    <div class="admin-actions">
+      <button class="btn ghost" id="marker-load-streams-btn" type="button">歌枠一覧を読み込む</button>
+      <button class="btn primary" id="marker-open-btn" type="button">この枠を開く</button>
+    </div>
+    <p class="admin-note" id="marker-status"></p>
+
+    <div id="marker-workspace" hidden>
+      <div class="marker-layout">
+        <div class="marker-player-col">
+          <div class="marker-player-frame"><div id="marker-player"></div></div>
+          <p class="admin-note marker-now">現在位置 <strong id="marker-current">0:00</strong> <span id="marker-duration"></span></p>
+          <div class="marker-keys">
+            <div><kbd>Space</kbd> 選択中の曲の開始を打刻</div>
+            <div><kbd>E</kbd> 選択中の曲の終了を打刻</div>
+            <div><kbd>←</kbd><kbd>→</kbd> 5秒　<kbd>Shift</kbd>+ 30秒　<kbd>Ctrl</kbd>+ 5分</div>
+            <div><kbd>↑</kbd><kbd>↓</kbd> 前/次の曲を選ぶ</div>
+            <div><kbd>N</kbd><kbd>P</kbd> 次/前のチャットの山へ　<kbd>J</kbd> 次の手がかりへ</div>
+            <div><kbd>Backspace</kbd> 対象の打刻を消す　<kbd>K</kbd> 再生/停止</div>
+          </div>
+          <label class="marker-toggle">
+            <input id="marker-auto-jump" type="checkbox" checked>
+            打刻したら次の手がかりへ自動で移動する
+          </label>
+          <div class="admin-actions">
+            <label class="marker-file-label">
+              チャットの山を読み込む
+              <input id="marker-anchor-file" type="file" accept=".json,application/json">
+            </label>
+          </div>
+          <p class="admin-note" id="marker-anchor-status">
+            <code>node tools/chat-spikes.mjs &lt;URL&gt; --songs N</code> の出力を読み込むと、拍手の山へ一気に飛べます。
+          </p>
+        </div>
+
+        <div class="marker-list-col">
+          <div class="marker-meta" id="marker-meta"></div>
+          <div id="marker-rows-wrap"></div>
+          <p class="admin-note" id="marker-issues"></p>
+          <div class="admin-actions">
+            <button class="btn primary" id="marker-save-btn" type="button">サイトに開始時刻を保存</button>
+            <button class="btn ghost" id="marker-clear-btn" type="button">全部消す</button>
+          </div>
+          <p class="admin-note" id="marker-save-status"></p>
+        </div>
+      </div>
+
+      <hr style="margin:18px 0;border:none;border-top:1px solid var(--border)">
+      <h3 style="margin:0 0 12px;font-size:15px">固定コメントから取り込む</h3>
+      <p class="admin-note">
+        すでにタイムスタンプ付きのセトリがある枠は、YouTube の固定コメントをそのまま貼り付けてください。
+        曲名で照合して開始時刻を割り当てます。「照合する」で結果を確かめてから打刻表へ反映できます。
+      </p>
+      <label class="admin-field-full">固定コメントを貼り付け<textarea id="marker-paste" rows="10" spellcheck="false"
+        placeholder="0:00 start&#10;15:04 夜に駆ける / YOASOBI 19:20&#10;19:20 花に亡霊 / ヨルシカ 23:41"></textarea></label>
+      <div class="admin-actions">
+        <button class="btn ghost" id="marker-paste-match-btn" type="button">照合する</button>
+        <button class="btn primary" id="marker-paste-apply-btn" type="button" disabled>打刻表に反映</button>
+      </div>
+      <p class="admin-note" id="marker-paste-status"></p>
+      <div id="marker-paste-preview"></div>
+
+      <hr style="margin:18px 0;border:none;border-top:1px solid var(--border)">
+      <h3 style="margin:0 0 12px;font-size:15px">コメント用テキスト</h3>
+      <div class="admin-form-grid">
+        <label>行の形式<select id="marker-template"></select></label>
+        <label>時刻の表記<select id="marker-time-format">
+          <option value="auto">自動（1時間未満は m:ss）</option>
+          <option value="hms">常に h:mm:ss</option>
+          <option value="ms">常に m:ss</option>
+        </select></label>
+      </div>
+      <label class="admin-field-full">末尾に足す行（任意）<input id="marker-footer" type="text" placeholder="#茨むあん #歌枠"></label>
+      <label class="admin-field-full">プレビュー（そのまま手直しできます）<textarea id="marker-comment" rows="14" spellcheck="false"></textarea></label>
+      <div class="admin-actions">
+        <button class="btn primary" id="marker-copy-btn" type="button">コピー</button>
+        <button class="btn ghost" id="marker-regen-btn" type="button">打刻から作り直す</button>
+      </div>
+      <p class="admin-note" id="marker-copy-status">手直しした内容はコピーにそのまま反映されます。「作り直す」を押すと打刻内容から再生成します。</p>
+    </div>
   </section>
 
   <section class="admin-panel">
@@ -195,6 +331,15 @@
       <h2>確認が必要な項目</h2>
       <span class="badge" id="issue-count">—</span>
     </div>
+    <p class="admin-note">
+      直さなくてよい指摘（同じ曲を2回歌った枠など）は「確認済み」にすると一覧から隠せます。
+      指摘の内容が変わったり、直って消えたりすると確認済みも解除されます。
+    </p>
+    <div class="issue-tools">
+      <label class="mv-toggle"><input id="issue-show-ignored" type="checkbox"> 確認済みも表示する</label>
+      <span class="admin-note" id="issue-ignored-count"></span>
+      <button class="btn ghost" id="issue-reset-btn" type="button">確認済みをすべて戻す</button>
+    </div>
     <div class="admin-table-wrap">
       <table class="admin-table">
         <thead>
@@ -202,13 +347,55 @@
             <th>種別</th>
             <th>場所</th>
             <th>内容</th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="quality-rows">
-          <tr><td colspan="3">読み込み中</td></tr>
+          <tr><td colspan="4">読み込み中</td></tr>
         </tbody>
       </table>
     </div>
+  </section>
+
+  <section class="admin-panel">
+    <div class="section-header">
+      <h2>歌みた・オリ曲 動画管理</h2>
+      <span class="badge" id="mv-count">—</span>
+    </div>
+    <p class="admin-note">サイトの「歌みた・オリ曲」タブに表示する動画を管理します。追加後、<strong>JSONダウンロード → <code>docs/data/music.json</code> に上書きしてコミット</strong>で反映されます。</p>
+    <div class="admin-form-grid">
+      <label>YouTube URL<input id="mv-url" type="url" placeholder="https://www.youtube.com/watch?v=..."></label>
+      <label>タイトル<input id="mv-title" type="text" placeholder="曲名"></label>
+      <label>種別<select id="mv-type">
+        <option value="original">オリジナル曲（個人）</option>
+        <option value="sugarily">しゅがりり</option>
+        <option value="character">キャラソン / 声優オリ曲</option>
+        <option value="cover">カバー曲（歌みた）</option>
+      </select></label>
+      <label>元アーティスト（カバーのみ）<input id="mv-artist" type="text" placeholder="例: YOASOBI"></label>
+      <label>キャラクター名 / 作品（声優オリ曲のみ）<input id="mv-character" type="text" placeholder="例: 七瀬つむぎ / アイドルマスター シャイニーカラーズ"></label>
+      <label>公開日<input id="mv-date" type="date"></label>
+      <label>ID（空なら自動）<input id="mv-id" type="text" placeholder="mv001"></label>
+    </div>
+    <div class="admin-actions">
+      <button class="btn primary" id="mv-add-btn" type="button">追加</button>
+      <button class="btn ghost" id="mv-download-btn" type="button">music.json をダウンロード</button>
+    </div>
+    <p class="admin-note" id="mv-status"></p>
+    <div id="mv-issues" hidden></div>
+
+    <div class="mv-list-tools">
+      <input id="mv-search" type="search" placeholder="タイトル・アーティスト・IDで絞り込み">
+      <select id="mv-filter-type">
+        <option value="">すべての種別</option>
+        <option value="original">オリジナル曲（個人）</option>
+        <option value="sugarily">しゅがりり</option>
+        <option value="character">キャラソン / 声優オリ曲</option>
+        <option value="cover">カバー曲（歌みた）</option>
+      </select>
+      <label class="mv-toggle"><input id="mv-show-thumbs" type="checkbox"> サムネを出す</label>
+    </div>
+    <div id="mv-list-wrap"></div>
   </section>
 
   <section class="admin-panel">
@@ -242,6 +429,6 @@
   </section>
 </main>
 
-<script type="module" src="js/admin.js?v=ibara1"></script>
+<script type="module" src="dist/admin.js?v=f9b1a2701a"></script>
 </body>
 </html>

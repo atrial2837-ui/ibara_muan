@@ -37,5 +37,7 @@ export function writeUrlState(next = {}, options = {}) {
   const url = search ? `${window.location.pathname}?${search}` : window.location.pathname;
   const method = options.replace ? 'replaceState' : 'pushState';
   window.history[method](null, '', url);
+  // title/description/canonical の更新は呼び出し側が多いので、ここから一度だけ知らせる。
+  window.dispatchEvent(new CustomEvent('urlstatechange', { detail: merged }));
   return merged;
 }

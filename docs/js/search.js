@@ -1,4 +1,4 @@
-import { normalize, parseQuery, matchReasons } from './domain-compat.js';
+import { parseQuery, matchReasons, applyFieldFilters, filterByTextIncludes } from './domain-compat.js';
 import { ensureSongsTags } from './tagging.js';
 
 const SEARCH_HISTORY_KEY = 'ibara-search-history-v1';
@@ -88,102 +88,6 @@ export function buildIndex(songs) {
   }
 }
 
-const FIELD_RE = /(?<key>title|artist|genre|tag|mood|season|key|count|last|days)\s*(?<op>:|<=|>=|=|<|>)\s*(?<val>"[^"]*"|\S+)/gi;
-
-function parseQueryLocal(raw) {
-  const filters = [];
-  let rest = raw;
-  rest = rest.replace(FIELD_RE, (m, key, op, val, ..._args) => {
-    let v = val;
-    if (v.startsWith('"') && v.endsWith('"')) v = v.slice(1, -1);
-    filters.push({ key: key.toLowerCase(), op: op || ':', val: v });
-    return ' ';
-  });
-  rest = rest.trim().replace(/\s+/g, ' ');
-  const tokens = rest ? rest.split(' ') : [];
-  return { tokens, filters };
-}
-
-function applyFieldFilters(songs, filters) {
-  return songs.filter(song => {
-    for (const f of filters) {
-      const v = f.val;
-      switch (f.key) {
-        case 'title': {
-          if (!normalize(song.title).toLowerCase().includes(normalize(v).toLowerCase())) return false;
-          break;
-        }
-        case 'artist': {
-          if (!normalize(song.artist).toLowerCase().includes(normalize(v).toLowerCase())) return false;
-          break;
-        }
-        case 'genre': {
-          if (!normalize(song.genreText || song.genre).toLowerCase().includes(normalize(v).toLowerCase())) return false;
-          break;
-        }
-        case 'key': {
-          if (!normalize(song.keyText).toLowerCase().split(/\s+/).includes(normalize(v).toLowerCase())) return false;
-          break;
-        }
-        case 'tag': {
-          if (!normalize(song.tagText).toLowerCase().includes(normalize(v).toLowerCase())) return false;
-          break;
-        }
-        case 'mood': {
-          if (!normalize(song.moodText).toLowerCase().includes(normalize(v).toLowerCase())) return false;
-          break;
-        }
-        case 'season': {
-          if (!normalize(song.seasonText).toLowerCase().includes(normalize(v).toLowerCase())) return false;
-          break;
-        }
-        case 'count': {
-          const n = parseFloat(v);
-          if (Number.isNaN(n)) return false;
-          if (!cmp(song.count, f.op, n)) return false;
-          break;
-        }
-        case 'days': {
-          const n = parseFloat(v);
-          if (Number.isNaN(n)) return false;
-          const d = song.daysSinceLast == null ? Infinity : song.daysSinceLast;
-          if (!cmp(d, f.op, n)) return false;
-          break;
-        }
-        case 'last': {
-          if (v === 'never' || v === 'untouched') {
-            if (song.lastSung) return false;
-          } else if (v === 'fresh') {
-            if (song.daysSinceLast == null || song.daysSinceLast > 30) return false;
-          } else if (v === 'stale') {
-            if (song.daysSinceLast == null || song.daysSinceLast < 180) return false;
-          } else {
-            const days = parseInt(String(v).replace(/d$/i, ''), 10);
-            if (!Number.isNaN(days)) {
-              const d = song.daysSinceLast == null ? Infinity : song.daysSinceLast;
-              if (!cmp(d, f.op === ':' ? '<=' : f.op, days)) return false;
-            }
-          }
-          break;
-        }
-      }
-    }
-    return true;
-  });
-}
-
-function cmp(a, op, b) {
-  switch (op) {
-    case '>':  return a >  b;
-    case '<':  return a <  b;
-    case '>=': return a >= b;
-    case '<=': return a <= b;
-    case '=':
-    case ':':  return a == b;
-  }
-  return true;
-}
-
 export function search(rawQuery, fallbackSongs) {
   const songs = songRef || fallbackSongs || [];
   const q = (rawQuery || '').trim();
@@ -199,21 +103,8 @@ export function search(rawQuery, fallbackSongs) {
         if (!fuse && songRef) fuse = new Fuse(songRef, fuseOptions);
       })
       .catch(() => {});
-    const needle = normalize(phrase).toLowerCase();
-    return {
-      results: pool.filter((song) => [
-        song.title,
-        song.artist,
-        song.genreText || song.genre,
-        song.tagText,
-        song.moodText,
-        song.seasonText,
-        song.keyText,
-        song.moodTagText || '',
-        song.singerTagText || '',
-      ].some((value) => normalize(value).toLowerCase().includes(needle))),
-      tokens,
-    };
+    // fuse.js 読み込み前の一時フォールバック（ドメインの単純テキスト一致）
+    return { results: filterByTextIncludes(pool, phrase), tokens };
   }
   const fuseLocal = (pool === songs && fuse)
     ? fuse

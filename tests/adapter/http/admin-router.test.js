@@ -4,9 +4,12 @@ import assert from 'node:assert/strict';
 import { buildAdminRouter } from '../../../src/adapter/http/admin-router.js';
 import { jsonResponse } from '../../../src/adapter/http/json-presenter.js';
 import {
+  InMemoryArtistRepository,
   InMemoryChannelRepository,
+  InMemorySongChannelStatsRepository,
   InMemorySongRepository,
   InMemoryStreamRepository,
+  InMemoryStreamSongRepository,
   FakeClock,
 } from '../../../src/infra/in-memory/index.js';
 
@@ -157,5 +160,142 @@ describe('buildAdminRouter', () => {
     const body = await response.json();
     assert.equal(body.ok, true);
     assert.equal(body.db, true);
+  });
+});
+
+describe('buildAdminRouter 歌枠・セトリ編集と打刻ツール', () => {
+  function setupEditRouter() {
+    const channels = new InMemoryChannelRepository([
+      { id: 1, code: 'main', name: '茨むあん', sort_order: 1, created_at: '2026-01-01T00:00:00.000Z' },
+    ]);
+    const streams = new InMemoryStreamRepository();
+    const streamSongs = new InMemoryStreamSongRepository();
+    const songs = new InMemorySongRepository();
+    const artists = new InMemoryArtistRepository();
+    const stats = new InMemorySongChannelStatsRepository();
+    const timestamps = {
+      calls: [],
+      async getApproved() {
+        return [{ songIndex: 0, timeSeconds: 10 }];
+      },
+      async countApprovedByChannel() {
+        return [{ streamIndex: 7, count: 3 }];
+      },
+      async replaceApproved(channelCode, streamIndex, items) {
+        this.calls.push({ channelCode, streamIndex, items });
+        return items.length;
+      },
+    };
+    const router = buildAdminRouter({
+      pathPrefix: '/api',
+      getDeps: () => ({
+        channels, streams, streamSongs, songs, artists, stats, timestamps,
+        clock: new FakeClock(new Date('2026-08-02T00:00:00.000Z')),
+      }),
+      getAdminToken: () => null,
+      authStrict: false,
+      staticDataHandler: async () => jsonResponse({ ok: true }),
+    });
+    return { router, streams, streamSongs, timestamps };
+  }
+
+  async function seedStream(streams) {
+    const { id } = await streams.insert({
+      channelId: 1, sourceIndex: 7, streamedOn: '2026-08-02', title: '枠',
+      url: 'https://example.com/s', urlKey: 'https://example.com/s', songCount: 1,
+      createdAt: '2026-08-02T00:00:00.000Z',
+    });
+    return id;
+  }
+
+  it('GET /streams/:id/songs でセトリテキストを返す', async () => {
+    const { router, streams, streamSongs } = setupEditRouter();
+    const id = await seedStream(streams);
+    await streamSongs.insertBatch([{
+      streamId: id, songId: null, position: 1, rawText: 'レオ / 優里',
+      titleSnapshot: 'レオ', artistSnapshot: '優里', songKeySnapshot: 'key',
+      createdAt: '2026-08-02T00:00:00.000Z',
+    }]);
+
+    const response = await router.dispatch(
+      new Request(`http://localhost/api/streams/${id}/songs`, { method: 'GET' }), {},
+    );
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.songsText, 'レオ / 優里');
+  });
+
+  it('POST /streams/:id でメタ情報を更新する', async () => {
+    const { router, streams } = setupEditRouter();
+    const id = await seedStream(streams);
+
+    const response = await router.dispatch(
+      new Request(`http://localhost/api/streams/${id}`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ title: '新タイトル' }),
+      }),
+      {},
+    );
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).ok, true);
+    assert.equal((await streams.findById(id)).title, '新タイトル');
+  });
+
+  it('POST /streams/:id/setlist でセトリを置き換える', async () => {
+    const { router, streams, streamSongs } = setupEditRouter();
+    const id = await seedStream(streams);
+
+    const response = await router.dispatch(
+      new Request(`http://localhost/api/streams/${id}/setlist`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ songsText: 'レオ / 優里\nダーリン / 須田景凪' }),
+      }),
+      {},
+    );
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { streamId: id, count: 2 });
+    assert.equal((await streamSongs.findByStreamId(id)).length, 2);
+  });
+
+  it('POST /timestamps/bulk で承認済みを保存する', async () => {
+    const { router, timestamps } = setupEditRouter();
+
+    const response = await router.dispatch(
+      new Request('http://localhost/api/timestamps/bulk', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          channelCode: 'main', streamIndex: 7,
+          items: [{ songIndex: 0, timeSeconds: 5 }],
+        }),
+      }),
+      {},
+    );
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { ok: true, count: 1 });
+    assert.equal(timestamps.calls.length, 1);
+    assert.equal(timestamps.calls[0].channelCode, 'main');
+  });
+
+  it('GET /timestamps/coverage で枠別件数を返す', async () => {
+    const { router } = setupEditRouter();
+
+    const response = await router.dispatch(
+      new Request('http://localhost/api/timestamps/coverage?channelCode=main', { method: 'GET' }), {},
+    );
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { coverage: { 7: 3 } });
+  });
+
+  it('GET /timestamps/approved で承認済みを返す', async () => {
+    const { router } = setupEditRouter();
+
+    const response = await router.dispatch(
+      new Request('http://localhost/api/timestamps/approved?channelCode=main&streamIndex=7', { method: 'GET' }), {},
+    );
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { items: [{ songIndex: 0, timeSeconds: 10 }] });
   });
 });

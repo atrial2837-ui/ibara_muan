@@ -16,10 +16,11 @@ export {
   buildMonthly, isoDate, heatLevel, buildHeatmap,
 } from '../../src/domain/analytics/dashboard.js';
 export {
-  inferStatsTags, inferGenreMoodTags, inferGenreTags, inferSeasonTags,
-  inferMoodTags, inferCompositeTags, inferCompoundTags, inferAllTags,
+  inferStatsTags, inferGenreMoodTags, inferSeasonTags,
+  inferMoodTags, inferCompositeTags, inferAllTags,
   singerTags, trendLabel,
 } from '../../src/domain/analytics/tagging.js';
+export { inferGenreMoodTags as inferGenreTags, inferCompositeTags as inferCompoundTags } from '../../src/domain/analytics/tagging.js';
 export {
   compareNumeric, applyFieldFilters, applyGenreFilter, applyTagFilter,
   applySingerMode, filterByTextIncludes, toTimestamp,
@@ -27,3 +28,5 @@ export {
 export { sortSongs } from '../../src/domain/search/sort.js';
 export { matchReasons } from '../../src/domain/search/match.js';
 export { parseQuery } from '../../src/domain/search/query-parser.js';
+export { collectDatasetIssues } from '../../src/domain/analytics/data-quality.js';
+export { setlistBalance } from '../../src/domain/setlist/setlist-analysis.js';

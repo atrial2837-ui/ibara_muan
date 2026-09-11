@@ -9,7 +9,8 @@
  */
 
 import { $, escapeHtml, youtubeVideoId, youtubeThumb } from './utils.js';
-import { VOLUME_STORAGE_KEY } from './config.js';
+import { icon } from './icons.js';
+import { openStreamViewer, openMusicQueueInViewer, closeStreamMiniPlayer, registerMusicBridge, _loadYtApi } from './player/stream-player.js';
 
 /* ── 状態 ────────────────────────────────────────────────────────────────── */
 
@@ -20,16 +21,18 @@ let _external = null;
 let _progIv   = null;
 let _continuous = true;
 let _repeatOne = false;
+let _repeatAll = localStorage.getItem('ibaraRepeatAll') === '1';
 let _seenEnded = false;
 let _shuffle  = localStorage.getItem('ibaraShuffle') === '1';
+let _queuePopupOpen = false;
 
 let _ytReady = false;
 const _ytQ   = [];
-let _apiLoader = null;
+let _apiLoader = _loadYtApi;
 
-const _storedVol = () => Math.max(0, Math.min(100, parseInt(localStorage.getItem(VOLUME_STORAGE_KEY) ?? '100') || 100));
-const _saveVol   = v  => localStorage.setItem(VOLUME_STORAGE_KEY, String(v));
-const _volIcon   = v  => v === 0 ? '🔇' : v < 50 ? '🔉' : '🔊';
+const _storedVol = () => Math.max(0, Math.min(100, parseInt(localStorage.getItem('ibaraVol') ?? '100') || 100));
+const _saveVol   = v  => localStorage.setItem('ibaraVol', String(v));
+const _volIcon   = () => icon('volume');
 
 /* ── YT API 連携 ─────────────────────────────────────────────────────────── */
 
@@ -39,8 +42,7 @@ export function notifyYtReady() {
   _ytQ.splice(0).forEach(fn => fn());
 }
 
-/** main.js から _loadYtApi を注入する（循環 import 回避） */
-export function setApiLoader(fn) { _apiLoader = fn; }
+// YT API ローダーはプレイヤーサブシステムのものを直接利用する
 
 function _onYtReady(fn) {
   if (_ytReady && window.YT?.Player) { fn(); return; }
@@ -72,37 +74,49 @@ export function initMusicPlayer() {
         <span class="mbar-type-badge" id="mbar-type-badge"></span>
       </div>
       <div class="mbar-controls">
-        <button class="mbar-mode-btn is-on" id="mbar-continuous" type="button" aria-pressed="true" title="連続再生">∞</button>
-        <button class="mbar-ctrl-btn" id="mbar-prev" type="button" aria-label="前の曲">
+        <button class="mbar-mode-btn is-on" id="mbar-continuous" type="button" aria-pressed="true" data-tooltip="連続再生" data-tooltip-pos="top">${icon('infinity')}</button>
+        <button class="mbar-ctrl-btn" id="mbar-prev" type="button" aria-label="前の曲" data-tooltip="前の曲" data-tooltip-pos="top">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
           </svg>
         </button>
-        <button class="mbar-play-btn" id="mbar-play" type="button" data-playing="0" aria-label="再生/停止"></button>
-        <button class="mbar-ctrl-btn" id="mbar-next" type="button" aria-label="次の曲">
+        <button class="mbar-play-btn" id="mbar-play" type="button" data-playing="0" aria-label="再生/停止" data-tooltip="再生 / 一時停止" data-tooltip-pos="top"></button>
+        <button class="mbar-ctrl-btn" id="mbar-next" type="button" aria-label="次の曲" data-tooltip="次の曲" data-tooltip-pos="top">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             <path d="M6 18l8.5-6L6 6v12zM16 6h2v12h-2z"/>
           </svg>
         </button>
-        <button class="mbar-mode-btn" id="mbar-repeat" type="button" aria-pressed="false" title="1曲リピート">↻</button>
-        <button class="mbar-mode-btn${_shuffle ? ' is-on' : ''}" id="mbar-shuffle" type="button" aria-pressed="${_shuffle ? 'true' : 'false'}" title="シャッフル再生">
+        <button class="mbar-mode-btn" id="mbar-repeat" type="button" aria-pressed="false" data-tooltip="1曲リピート" data-tooltip-pos="top">${icon('repeatOne')}</button>
+        <button class="mbar-mode-btn${_shuffle ? ' is-on' : ''}" id="mbar-shuffle" type="button" aria-pressed="${_shuffle ? 'true' : 'false'}" data-tooltip="シャッフル再生" data-tooltip-pos="top">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
             <path d="M10.59 9.17 5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
+          </svg>
+        </button>
+        <button class="mbar-mode-btn${_repeatAll ? ' is-on' : ''}" id="mbar-repeat-all" type="button" aria-pressed="${_repeatAll ? 'true' : 'false'}" data-tooltip="全体リピート（ON: 最後の曲が終わったら先頭へ戻る）" data-tooltip-pos="top">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
+          </svg>
+        </button>
+        <button class="mbar-mode-btn mbar-queue-btn" id="mbar-queue-btn" type="button" data-tooltip="再生キュー（次に流れる曲）" data-tooltip-pos="top" aria-label="再生キュー">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"/>
           </svg>
         </button>
       </div>
       <div class="mbar-end">
         <div class="mbar-volume">
-          <button class="vol-btn" id="mbar-vol-btn" type="button" aria-label="音量">🔊</button>
+          <button class="vol-btn" id="mbar-vol-btn" type="button" aria-label="音量">${icon('volume')}</button>
           <input class="vol-slider" id="mbar-vol-slider" type="range" min="0" max="100" value="100" aria-label="音量">
         </div>
-        <button class="mbar-expand-btn" id="mbar-expand" type="button" title="動画で見る" aria-label="動画で見る">
+        <button class="mbar-expand-btn" id="mbar-expand" type="button" data-tooltip="現在位置から動画ビューワーで見る" data-tooltip-pos="top" aria-label="現在位置から動画ビューワーで見る">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v12H4V6zm5.5 3.5 5 3-5 3v-6z"/></svg>
+          <span>動画で見る</span>
         </button>
         <span class="mbar-queue-info" id="mbar-queue-info"></span>
-        <button class="mbar-close-btn" id="mbar-close" type="button" aria-label="閉じる">✕</button>
+        <button class="mbar-close-btn" id="mbar-close" type="button" aria-label="閉じる" data-tooltip="閉じる" data-tooltip-pos="top">${icon('close')}</button>
       </div>
-    </div>`;
+    </div>
+    <div class="mbar-queue-popup" id="mbar-queue-popup" hidden></div>`;
   document.body.appendChild(bar);
 
   $('#mbar-play').addEventListener('click', _togglePlay);
@@ -116,6 +130,11 @@ export function initMusicPlayer() {
     e.currentTarget.setAttribute('aria-pressed', _shuffle ? 'true' : 'false');
     e.currentTarget.classList.toggle('is-on', _shuffle);
   });
+  $('#mbar-repeat-all').addEventListener('click', _toggleRepeatAll);
+  $('#mbar-queue-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    _toggleQueuePopup();
+  });
   $('#mbar-close').addEventListener('click', closeMusicPlayer);
 
   const volSlider = $('#mbar-vol-slider');
@@ -124,12 +143,12 @@ export function initMusicPlayer() {
     const v0 = _storedVol();
     volSlider.value = v0;
     volSlider.style.setProperty('--pct', `${v0}%`);
-    if (volBtn) volBtn.textContent = _volIcon(v0);
+    if (volBtn) volBtn.innerHTML = _volIcon(v0);
     volSlider.addEventListener('input', e => {
       const v = parseInt(e.target.value);
       e.target.style.setProperty('--pct', `${v}%`);
       _saveVol(v);
-      if (volBtn) volBtn.textContent = _volIcon(v);
+      if (volBtn) volBtn.innerHTML = _volIcon(v);
       const player = _player();
       if (player) try { player.setVolume(v); } catch (_) {}
     });
@@ -143,7 +162,7 @@ export function initMusicPlayer() {
       if (cur > 0) _preMute = cur;
       volSlider.value = newV;
       volSlider.style.setProperty('--pct', `${newV}%`);
-      volBtn.textContent = _volIcon(newV);
+      volBtn.innerHTML = _volIcon(newV);
       const player = _player();
       if (player) try { player.setVolume(newV); } catch (_) {}
     });
@@ -159,10 +178,13 @@ export function initMusicPlayer() {
       restoreExternalPlayer();
       return;
     }
+    const queue = _queue.slice();
+    const idx = _qIdx;
+    if (openMusicQueueInViewer(queue, idx, t)) return;
+    releaseMusicPlayerVideo({ hideBar: true });
     // 歌枠由来のトラックは元の配信オブジェクトでストリームビューワーを開く
     const target = video._stream || { url: video.url, title: video.title, isMv: true };
-    releaseMusicPlayerVideo({ hideBar: true });
-    window.__openStreamViewer?.(target, t);
+    openStreamViewer(target, t);
   };
   $('#mbar-expand').addEventListener('click', _openInViewer);
   $('#mbar-thumb-overlay').addEventListener('click', _openInViewer);
@@ -182,18 +204,41 @@ export function initMusicPlayer() {
   // Esc キーで閉じる（ビューワー表示中は Esc をビューワー側に譲る）
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
+    if (_queuePopupOpen) {
+      e.stopPropagation();
+      _closeQueuePopup();
+      return;
+    }
     const sv = document.getElementById('stream-viewer');
     if (sv && !sv.hidden) return;
     if (!$('#music-bar')?.hidden) closeMusicPlayer();
+  });
+
+  // バー外クリックでキューポップアップを閉じる。
+  // 行クリック直後は再描画で元ノードが切り離され contains 判定が外れるため、
+  // closest でポップアップ内クリック（切り離し済み含む）を先に除外する
+  document.addEventListener('click', (e) => {
+    if (!_queuePopupOpen) return;
+    if (e.target.closest?.('#mbar-queue-popup, #mbar-queue-btn, .mbar-qp-row')) return;
+    const popup = $('#mbar-queue-popup');
+    if (popup && !popup.contains(e.target)) {
+      _closeQueuePopup();
+    }
   });
 }
 
 /* ── 公開 API ─────────────────────────────────────────────────────────────── */
 
-export function playMusicQueue(videos, startIdx = 0) {
+export function playMusicQueue(videos, startIdx = 0, options = {}) {
   if (!videos?.length) return;
+  // バー再生を始めるので、表示中の配信ミニプレイヤーは閉じる（二重表示防止）
+  try { closeStreamMiniPlayer(); } catch (_) {}
   _queue = videos.slice();
   _qIdx  = Math.max(0, Math.min(startIdx, _queue.length - 1));
+  if (options.shuffle != null) {
+    _shuffle = !!options.shuffle;
+    try { localStorage.setItem('ibaraShuffle', _shuffle ? '1' : '0'); } catch (_) {}
+  }
   _loadTrack(_qIdx);
 }
 
@@ -393,7 +438,7 @@ function _loadTrack(idx, startAt = 0) {
             const s = $('#mbar-vol-slider');
             if (s) { s.value = v; s.style.setProperty('--pct', `${v}%`); }
             const b = $('#mbar-vol-btn');
-            if (b) b.textContent = _volIcon(v);
+            if (b) b.innerHTML = _volIcon(v);
             _startProg();
           },
           onStateChange: (ev) => {
@@ -424,11 +469,12 @@ function _updateBarInfo(video) {
   if (sub) {
     if (video.sub)                       sub.textContent = video.sub;
     else if (video.type === 'cover')     sub.textContent = video.originalArtist || 'カバー曲';
-    else if (video.type === 'sugarily')  sub.textContent = 'しゅがりり';
+    else if (video.type === 'office')    sub.textContent = 'Re:AcT';
+    else if (video.type === 'character') sub.textContent = video.character || 'キャラソン';
     else                                 sub.textContent = '茨むあんオリジナル';
   }
   if (badge) {
-    const labels = { original: 'オリジナル', sugarily: 'しゅがりり', cover: 'カバー', stream: '歌枠' };
+    const labels = { original: 'オリジナル', office: 'Re:AcT', character: 'キャラ', cover: 'カバー', stream: '歌枠' };
     badge.textContent = labels[video.type] || 'オリジナル';
     badge.dataset.type = video.type;
   }
@@ -436,6 +482,7 @@ function _updateBarInfo(video) {
   if (prev) prev.disabled = _queue.length <= 1;
   if (next) next.disabled = _queue.length <= 1;
   _syncModeButtons();
+  if (_queuePopupOpen) _renderQueuePopup();
 }
 
 function _showBar() {
@@ -503,8 +550,26 @@ function _handleEnded() {
     try { player.seekTo(0, true); player.playVideo(); } catch (_) {}
     return;
   }
-  if (_continuous && _queue.length > 1) {
+  // シャッフル ON 時は終端の概念がないので repeatAll の影響なし
+  if (_shuffle && _queue.length > 1) {
     playNext();
+    return;
+  }
+  const isLast = _qIdx >= _queue.length - 1;
+  if (_continuous && _queue.length > 1) {
+    if (isLast) {
+      // キューの末尾
+      if (_repeatAll) {
+        // 先頭に戻って再生
+        _qIdx = 0;
+        _loadTrack(_qIdx);
+      } else {
+        // 停止
+        $('#mbar-play')?.setAttribute('data-playing', '0');
+      }
+    } else {
+      playNext();
+    }
   } else {
     $('#mbar-play')?.setAttribute('data-playing', '0');
   }
@@ -520,6 +585,12 @@ function _toggleRepeat() {
   _syncModeButtons();
 }
 
+function _toggleRepeatAll() {
+  _repeatAll = !_repeatAll;
+  try { localStorage.setItem('ibaraRepeatAll', _repeatAll ? '1' : '0'); } catch (_) {}
+  _syncModeButtons();
+}
+
 function _syncModeButtons() {
   const cont = $('#mbar-continuous');
   if (cont) {
@@ -530,6 +601,85 @@ function _syncModeButtons() {
   if (rep) {
     rep.classList.toggle('is-on', _repeatOne);
     rep.setAttribute('aria-pressed', _repeatOne ? 'true' : 'false');
+  }
+  const repAll = $('#mbar-repeat-all');
+  if (repAll) {
+    repAll.classList.toggle('is-on', _repeatAll);
+    repAll.setAttribute('aria-pressed', _repeatAll ? 'true' : 'false');
+  }
+  const shuffle = $('#mbar-shuffle');
+  if (shuffle) {
+    shuffle.classList.toggle('is-on', _shuffle);
+    shuffle.setAttribute('aria-pressed', _shuffle ? 'true' : 'false');
+  }
+}
+
+/* ── キューポップアップ ─────────────────────────────────────────────────── */
+
+function _mvBadgeLabel(type) {
+  const labels = { original: 'オリジナル', office: 'Re:AcT', character: 'キャラ', cover: 'カバー', stream: '歌枠' };
+  return labels[type] || 'オリジナル';
+}
+
+function _renderQueuePopup() {
+  const popup = $('#mbar-queue-popup');
+  if (!popup) return;
+  if (!_queue.length) {
+    popup.innerHTML = '<div class="mbar-qp-empty">キューは空です</div>';
+    return;
+  }
+  popup.innerHTML = _queue.map((v, i) => {
+    const isCurrent = i === _qIdx;
+    const label = _mvBadgeLabel(v.type);
+    return `<button class="mbar-qp-row${isCurrent ? ' is-current' : ''}" type="button" data-qp-idx="${i}">
+      <span class="mbar-qp-num">${i + 1}</span>
+      <span class="mbar-qp-title">${escapeHtml(v.title || '—')}</span>
+      <span class="mbar-qp-badge" data-type="${escapeHtml(v.type || '')}">${escapeHtml(label)}</span>
+    </button>`;
+  }).join('');
+
+  // 現在再生中の行へスクロール
+  const currentRow = popup.querySelector('.is-current');
+  if (currentRow) {
+    requestAnimationFrame(() => {
+      currentRow.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    });
+  }
+}
+
+function _openQueuePopup() {
+  const popup = $('#mbar-queue-popup');
+  if (!popup) return;
+  _queuePopupOpen = true;
+  popup.hidden = false;
+  // イベントリスナーを都度付け直さないよう、onclick で上書き
+  popup.onclick = (e) => {
+    const row = e.target.closest('[data-qp-idx]');
+    if (!row) return;
+    const idx = parseInt(row.dataset.qpIdx, 10);
+    if (!isNaN(idx)) {
+      _qIdx = idx;
+      _loadTrack(idx);
+    }
+  };
+  _renderQueuePopup();
+  const btn = $('#mbar-queue-btn');
+  if (btn) btn.classList.add('is-on');
+}
+
+function _closeQueuePopup() {
+  const popup = $('#mbar-queue-popup');
+  if (popup) popup.hidden = true;
+  _queuePopupOpen = false;
+  const btn = $('#mbar-queue-btn');
+  if (btn) btn.classList.remove('is-on');
+}
+
+function _toggleQueuePopup() {
+  if (_queuePopupOpen) {
+    _closeQueuePopup();
+  } else {
+    _openQueuePopup();
   }
 }
 
@@ -543,5 +693,12 @@ function _syncPlayButton() {
   } catch (_) {}
 }
 
-window.__takeOverMusicPlayerVideo = takeOverMusicPlayerVideo;
-window.__restoreMusicExternalPlayer = restoreExternalPlayer;
+// 音楽バー⇔ビューワーの引き継ぎ連携をブリッジ登録(window.__* 廃止)
+registerMusicBridge({
+  takeOverVideo: takeOverMusicPlayerVideo,
+  restoreExternalPlayer,
+  releaseVideo: releaseMusicPlayerVideo,
+  pause: pauseMusicPlayer,
+  playVideo: playMusicBarVideo,
+  adoptExternalPlayer,
+});

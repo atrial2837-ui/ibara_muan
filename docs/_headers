@@ -2,7 +2,11 @@
   X-Robots-Tag: index, follow
 
 /data/*
-  Cache-Control: public, max-age=300, stale-while-revalidate=86400
+  Cache-Control: no-cache
+
+# 中身は Markdown だが拡張子が .txt なので、型を明示しておく
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
 
 /admin.html
   X-Robots-Tag: noindex, nofollow

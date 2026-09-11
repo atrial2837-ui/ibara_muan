@@ -1,14 +1,29 @@
 {
   "name": "茨むあん 歌唱データベース",
   "short_name": "茨むあんDB",
-  "description": "茨むあんさんの歌った曲リスト・ランキング・歌枠タイムライン・歌みた/オリ曲・プレイリストをまとめたファンメイドデータベース",
+  "description": "茨むあんさんの歌った曲リスト、ランキング、歌枠タイムライン、歌みた・オリ曲、プレイリスト",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f7f4ec",
   "theme_color": "#e4b129",
-  "lang": "ja",
   "icons": [
-    { "src": "assets/site-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "assets/site-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    {
+      "src": "assets/site-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/site-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/site-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
   ]
 }

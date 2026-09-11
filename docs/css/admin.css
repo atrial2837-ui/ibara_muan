@@ -100,6 +100,110 @@
   padding: 7px 9px !important;
 }
 
+/* ── キーピッカーウィジェット ───────────────────────── */
+.key-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-width: 120px;
+}
+
+.key-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 4px 2px 8px;
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.key-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--ink-mute);
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+}
+
+.key-chip-remove:hover {
+  background: var(--border);
+  color: var(--ink);
+}
+
+.key-add-btn {
+  background: var(--surface-2);
+  border: 1px dashed var(--border-strong);
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-size: 11.5px;
+  cursor: pointer;
+  color: var(--ink-mute);
+  white-space: nowrap;
+}
+
+.key-add-btn:hover {
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+  border-style: solid;
+  border-color: var(--primary);
+}
+
+.key-add-menu {
+  display: none;
+  position: fixed;
+  z-index: 200;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 6px;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 180px;
+}
+
+.key-add-menu.is-open {
+  display: flex;
+}
+
+.key-add-menu button {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--ink);
+  font-family: inherit;
+}
+
+.key-add-menu button:hover {
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+  border-color: var(--primary);
+}
+
+.key-add-menu button.is-selected {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary-strong);
+}
+
 .admin-table {
   width: 100%;
   border-collapse: collapse;
@@ -117,6 +221,381 @@
 .admin-table th {
   color: var(--ink-mute);
   font-weight: 700;
+}
+
+/* ─── セトリ行編集 ─────────────────────────────────────────────────────── */
+
+.setlist-table td {
+  padding: 6px 6px;
+  vertical-align: middle;
+}
+
+/* 曲名・アーティストを広く、キー・ジャンルは狭くする */
+.setlist-table th:nth-child(3),
+.setlist-table th:nth-child(4) {
+  min-width: 180px;
+}
+
+.setlist-table input {
+  padding: 7px 9px;
+  font-size: 13px;
+}
+
+.setlist-handle {
+  width: 1px;
+  padding-right: 0 !important;
+  color: var(--ink-mute);
+  cursor: grab;
+  user-select: none;
+}
+
+.setlist-pos {
+  width: 1px;
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+  text-align: right !important;
+}
+
+.setlist-ops {
+  width: 1px;
+  white-space: nowrap;
+}
+
+.setlist-ops .btn {
+  padding: 5px 9px;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.setlist-ops .btn[disabled] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.setlist-remove:hover:not([disabled]) {
+  border-color: var(--danger, #d9534f);
+  color: var(--danger, #d9534f);
+}
+
+.setlist-table tr[draggable='true']:hover {
+  background: var(--surface-2);
+}
+
+/* ドロップ先の行に上端ラインを出して挿入位置を示す */
+.setlist-table tr.is-drop-target td {
+  box-shadow: inset 0 2px 0 0 var(--primary);
+}
+
+/* ─── タイムスタンプ打刻 ─────────────────────────────────────────────── */
+
+.marker-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 14px;
+  align-items: start;
+}
+
+/* プレイヤーはスクロールしても見えるよう追従させる */
+.marker-player-col {
+  position: sticky;
+  top: 12px;
+}
+
+.marker-player-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #000;
+}
+
+.marker-player-frame iframe,
+.marker-player-frame > div {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.marker-now {
+  margin: 10px 0 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.marker-now strong {
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.marker-keys {
+  display: grid;
+  gap: 5px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--ink-mute);
+  font-size: 12px;
+}
+
+.marker-keys kbd {
+  display: inline-block;
+  min-width: 18px;
+  margin-right: 3px;
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: ui-monospace, "Cascadia Mono", monospace;
+  font-size: 11px;
+  text-align: center;
+}
+
+.marker-toggle {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+  color: var(--ink-mute);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.marker-file-label {
+  display: grid;
+  gap: 6px;
+  color: var(--ink-mute);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.marker-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.marker-meta-item {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--ink-mute);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.marker-meta-item .marker-time {
+  width: 88px;
+}
+
+.marker-table td {
+  padding: 6px;
+  vertical-align: middle;
+}
+
+.marker-table tr {
+  cursor: pointer;
+}
+
+/* 打刻対象の行を目立たせる（キー操作の当たり先） */
+.marker-table tr.is-target td {
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.marker-table tr.is-target .marker-pos {
+  color: var(--primary);
+  font-weight: 900;
+}
+
+.marker-pos {
+  width: 1px;
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+  text-align: right !important;
+}
+
+.marker-song {
+  white-space: normal !important;
+  min-width: 160px;
+}
+
+.marker-title {
+  font-weight: 700;
+}
+
+.marker-artist {
+  color: var(--ink-mute);
+  font-size: 12px;
+}
+
+.marker-time {
+  width: 92px;
+  padding: 6px 8px !important;
+  font-family: ui-monospace, "Cascadia Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.marker-time.is-invalid {
+  border-color: var(--danger, #d9534f) !important;
+}
+
+.marker-ops {
+  width: 1px;
+  white-space: nowrap;
+}
+
+.marker-ops .btn {
+  padding: 4px 8px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+#marker-issues.is-warn {
+  color: var(--danger, #d9534f);
+  font-weight: 700;
+}
+
+/* ─── 確認が必要な項目: 確認済みの付け外し ───────────────────────────────── */
+
+.issue-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
+}
+
+.issue-tools .btn { padding: 4px 10px; font-size: 12px; }
+.issue-ack { padding: 3px 9px; font-size: 11.5px; white-space: nowrap; }
+
+/* 確認済みは残っていることが分かる程度に落とす（見えなくはしない） */
+#quality-rows tr.is-ignored td { opacity: 0.5; }
+
+/* ─── 歌みた・オリ曲: 1行ずつのコンパクトな一覧 ─────────────────────────── */
+
+.mv-list-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 8px;
+}
+
+.mv-list-tools input[type="search"] { flex: 1 1 220px; min-width: 0; }
+.mv-list-tools select { flex: 0 1 200px; }
+
+.mv-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--ink-mute);
+  white-space: nowrap;
+}
+
+/* 件数が増えてもパネルが伸び続けないよう、一覧側だけをスクロールさせる */
+.mv-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 420px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.mv-row {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) max-content max-content;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 13px;
+}
+
+.mv-list.has-thumbs .mv-row { grid-template-columns: 64px max-content minmax(0, 1fr) max-content max-content; }
+.mv-row:last-child { border-bottom: 0; }
+.mv-row:nth-child(even) { background: var(--surface-2); }
+
+.mv-thumb { border-radius: 4px; object-fit: cover; }
+
+.mv-type {
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--ink-mute);
+  white-space: nowrap;
+}
+
+.mv-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mv-title small { color: var(--ink-mute); }
+
+.mv-date {
+  font-size: 11.5px;
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.mv-del { padding: 3px 9px; font-size: 11.5px; }
+
+/* 重複などの指摘。errors があるうちは「このまま追加」を出さない */
+.mv-issue-box {
+  margin: 10px 0;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.mv-issue-box.is-error { border-color: var(--danger, #d9534f); }
+.mv-issue-box ul { margin: 0; padding-left: 18px; font-size: 13px; }
+.mv-issue-box li.is-error { color: var(--danger, #d9534f); font-weight: 700; }
+.mv-issue-box .admin-actions { margin-top: 10px; }
+
+/* 固定コメントの照合プレビュー: 時刻が前後している行を目立たせる */
+#marker-paste-preview tr.is-warn {
+  background: color-mix(in srgb, var(--danger, #d9534f) 12%, transparent);
+}
+
+#marker-paste {
+  min-height: 180px;
+  font-family: ui-monospace, "Cascadia Mono", monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+#marker-paste-preview {
+  margin-top: 10px;
+}
+
+#marker-comment {
+  min-height: 260px;
+  font-family: ui-monospace, "Cascadia Mono", monospace;
+  font-size: 13px;
+}
+
+@media (max-width: 1000px) {
+  .marker-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .marker-player-col {
+    position: static;
+  }
 }
 
 .admin-status-list {

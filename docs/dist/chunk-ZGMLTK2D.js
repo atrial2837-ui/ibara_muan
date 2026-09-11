@@ -1,0 +1,1 @@
+function e(){try{return JSON.parse(localStorage.getItem("ibara-playlists")||"null")||[]}catch{return[]}}function r(t){try{localStorage.setItem("ibara-playlists",JSON.stringify(t))}catch{}}function s(t){return e().some(a=>a.streams.includes(t))}export{e as a,r as b,s as c};
