@@ -365,6 +365,20 @@ function initManagement() {
       $('#static-status').textContent = error.message || String(error);
     }
   });
+
+  $('#trigger-auto-update')?.addEventListener('click', async () => {
+    const mode = $('#auto-update-mode')?.value || 'scan-only';
+    const minTimestamps = Number($('#auto-update-min')?.value) || 8;
+    const label = mode === 'full' ? '自動適用あり' : '試運転(D1に触れない)';
+    if (!confirm(`YouTube自動更新を開始します(${label})。よろしいですか？`)) return;
+    $('#auto-update-status').textContent = 'GitHub Actionsを起動中...';
+    try {
+      const data = await adminApi('auto-update/trigger', { mode, min_timestamps: minTimestamps });
+      $('#auto-update-status').textContent = `起動しました: ${data.owner}/${data.repo} / ${data.workflow} (mode=${data.mode})\nGitHub Actions完了後、結果はIssueとArtifactsで確認できます。`;
+    } catch (error) {
+      $('#auto-update-status').textContent = error.message || String(error);
+    }
+  });
 }
 
 /* ── コミュニティタイムスタンプ審査 ──────────────────────────────────────── */
