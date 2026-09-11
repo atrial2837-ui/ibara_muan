@@ -13,6 +13,8 @@ import { FetchGitHubActionsGateway } from '../github/fetch-github-actions-gatewa
 import { SystemClock } from '../clock/system-clock.js';
 import { createD1WorkerDeps } from './d1-worker-deps.js';
 import { triggerStaticBuild } from '../../usecase/trigger-static-build.js';
+import { triggerAutoUpdate } from '../../usecase/trigger-auto-update.js';
+import { readJsonBody } from '../../adapter/http/read-json-body.js';
 
 /**
  * @param {object} env
@@ -36,6 +38,25 @@ export function createPagesAdminRouter(env) {
           workflow: e.GITHUB_STATIC_WORKFLOW || 'update-static-data.yml',
           ref: e.GITHUB_STATIC_REF || 'main',
           environment: e.GITHUB_STATIC_ENV || 'production',
+        },
+      );
+      return jsonResponse(result);
+    },
+    autoUpdateHandler: async (ctx) => {
+      const e = ctx.env;
+      const body = (await readJsonBody(ctx.request)) || {};
+      const github = new FetchGitHubActionsGateway({ token: e.GITHUB_ACTIONS_TOKEN || '' });
+      const clock = new SystemClock();
+      const result = await triggerAutoUpdate(
+        { github, clock },
+        {
+          owner: e.GITHUB_OWNER || 'atrial2837-ui',
+          repo: e.GITHUB_REPO || 'ibara_muan',
+          workflow: e.GITHUB_AUTO_UPDATE_WORKFLOW || 'auto-update.yml',
+          ref: e.GITHUB_STATIC_REF || 'main',
+          environment: e.GITHUB_STATIC_ENV || 'production',
+          mode: body.mode || 'full',
+          minTimestamps: body.min_timestamps ?? body.minTimestamps,
         },
       );
       return jsonResponse(result);
