@@ -2,37 +2,37 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://ibara-muan-songlist.pages.dev/</loc>
-    <lastmod>2026-09-11</lastmod>
+    <lastmod>2026-09-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://ibara-muan-songlist.pages.dev/?tab=ranking</loc>
-    <lastmod>2026-09-11</lastmod>
+    <lastmod>2026-09-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://ibara-muan-songlist.pages.dev/?tab=songs</loc>
-    <lastmod>2026-09-11</lastmod>
+    <lastmod>2026-09-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://ibara-muan-songlist.pages.dev/?tab=timeline</loc>
-    <lastmod>2026-09-11</lastmod>
+    <lastmod>2026-09-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://ibara-muan-songlist.pages.dev/?tab=playlists</loc>
-    <lastmod>2026-09-11</lastmod>
+    <lastmod>2026-09-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://ibara-muan-songlist.pages.dev/song/</loc>
-    <lastmod>2026-09-11</lastmod>
+    <lastmod>2026-09-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -6771,6 +6771,144 @@
   <url>
     <loc>https://ibara-muan-songlist.pages.dev/song/%E3%82%A8%E3%82%A4%E3%83%AA%E3%82%A2%E3%83%B3%E3%82%A8%E3%82%A4%E3%83%AA%E3%82%A2%E3%83%B3-remix-ver-%E3%83%8A%E3%83%A6%E3%82%BF%E3%83%B3%E6%98%9F%E4%BA%BA</loc>
     <lastmod>2026-09-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/%E3%81%8A%E3%82%84%E3%81%99%E3%81%BF%E6%B3%A3%E3%81%8D%E5%A3%B0%E3%80%81%E3%81%95%E3%82%88%E3%81%AA%E3%82%89%E6%AD%8C%E5%A7%AB-%E3%82%AF%E3%83%AA%E3%83%BC%E3%83%97%E3%83%8F%E3%82%A4%E3%83%97-867daf</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/%E6%9C%88%E5%85%89-%E9%AC%BC%E6%9D%9F%E3%81%A1%E3%81%B2%E3%82%8D-1eb829</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/%E3%82%84%E3%81%95%E3%81%97%E3%81%95%E3%81%A7%E6%BA%A2%E3%82%8C%E3%82%8B%E3%82%88%E3%81%86%E3%81%AB-juju-b7f9ca</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/jane-doe-%E7%B1%B3%E6%B4%A5%E7%8E%84%E5%B8%AB-%E5%AE%87%E5%A4%9A%E7%94%B0%E3%83%92%E3%82%AB%E3%83%AB-929462</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/%E3%81%82%E3%81%AA%E3%81%9F%E3%81%8C%E3%81%84%E3%82%8B%E3%81%93%E3%81%A8%E3%81%A7-uru-7309d5</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/%E3%82%B7%E3%83%B3%E3%83%87%E3%83%AC%E3%83%A9%E3%83%9C%E3%83%BC%E3%82%A4-saucy-dog-ecf291</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/10%E6%9C%88%E7%84%A1%E5%8F%A3%E3%81%AA%E5%90%9B%E3%82%92%E5%BF%98%E3%82%8C%E3%82%8B-%E3%81%82%E3%81%9F%E3%82%89%E3%82%88-8963ea</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/%E3%83%AC%E3%82%A4%E3%83%B3-%E3%82%B7%E3%83%89-7a962a</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/%E6%9C%88%E5%85%89%E8%8A%B1-janne-da-arc-337d1f</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/%E3%83%A2%E3%82%B6%E3%82%A4%E3%82%AF%E3%82%AB%E3%82%B1%E3%83%A9-sunset-swish-76803b</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/%E7%9C%9F%E3%81%A3%E8%B5%A4%E3%81%AA%E7%A9%BA%E3%82%92%E8%A6%8B%E3%81%9F%E3%81%A0%E3%82%8D%E3%81%86%E3%81%8B-bump-of-chicken-65034a</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/%E3%82%AB%E3%83%96%E3%83%88%E3%83%A0%E3%82%B7-aiko-85e75c</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/kisshug-aiko-8fe8e7</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/pretender-official%E9%AB%AD%E7%94%B7dism-8375df</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/citrus-da-ice-522189</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/%E3%83%A1%E3%83%88%E3%83%AD%E3%83%8E%E3%83%BC%E3%83%A0-%E7%B1%B3%E6%B4%A5%E7%8E%84%E5%B8%AB-e9ccbc</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/%E3%83%99%E3%83%86%E3%83%AB%E3%82%AE%E3%82%A6%E3%82%B9-%E5%84%AA%E9%87%8C-c5e806</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/%E3%81%A1%E3%81%A3%E3%81%BD%E3%81%91%E3%81%AA%E6%84%9B%E3%81%AE%E3%81%86%E3%81%9F-%E5%A4%A7%E5%8E%9F%E6%AB%BB%E5%AD%90-as-%E5%B0%8F%E6%9E%9D%E7%90%86%E5%AD%90</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/yell-%E3%81%84%E3%81%8D%E3%82%82%E3%81%AE%E3%81%8C%E3%81%8B%E3%82%8A-d913c2</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/me-me-she-radwimps-8cc9c3</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/song/%E3%81%9F%E3%81%B6%E3%82%93-yoasobi-1e8996</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/?v=rWYCm3EctbM</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ibara-muan-songlist.pages.dev/?v=OXfB3g7dnpU</loc>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
